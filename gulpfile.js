@@ -4,19 +4,19 @@ var gulp = require('gulp'),
     karma = require('karma').server,
     runner = require('karma').runner;
 
-var projectFiles = [ 'src/**/*.js', 'test/**/*.js' ],
+var projectFiles = [ 'algorithm/src/**/*.js', 'algorithm/test/**/*.js' ],
 
     // The order of files here it the order in which they will be merged into
     // one file.
     sourceFiles = [
-      'src/Utils.js',
-      'src/IndexingArray.js',
-      'src/FindHotspots.js'
+      'algorithm/src/Utils.js',
+      'algorithm/src/IndexingArray.js',
+      'algorithm/src/FindHotspots.js'
     ];
 
 
 gulp.task('jshint', function() {
-   return gulp.src('src/**/*.js')
+   return gulp.src('algorithm/src/**/*.js')
       .pipe(jshint())
       .pipe(jshint.reporter('jshint-stylish'));
 });

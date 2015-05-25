@@ -16,7 +16,7 @@ module.exports = function(config) {
     // list of files / patterns to load in the browser
     files: [
       'build/fasta.js',
-      'test/**/*.js'
+      'algorithm/test/**/*.js'
     ],
 
 

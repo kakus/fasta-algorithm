@@ -18,10 +18,10 @@ var fasta;
 // Find all tuples/fragments (unique combination of symbols) of length ktup in given
 // sequence, also store offset of appearance of tuple in sequence.
 //
-// This object is a map where key[String] is the tuple, and value [Array<number>] is
+// This object is a map where key <String> is the tuple, and value <Array<number>> is
 // array of offsets where this tuple appears.
 // @example
-//    var array = new IndexingArray('ABA', 2");
+//    var array = new IndexingArray('ABA', 2);
 //    array['AB']; // will return [0]
 function IndexingArray(sequence, ktup)
 {
