@@ -11,6 +11,6 @@ gulp.task('build-view', function() {
 
 gulp.task('live-view', function () {
     watch(gulpVariables.sourceFiles, function() {
-        gulp.start('build');
+        gulp.start('build-view');
     });
 });

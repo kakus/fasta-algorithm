@@ -8,7 +8,7 @@
             scope: false,
             link: link,
             replace: true,
-            templateUrl: 'shared/fasta-diagonals-table.html'
+            templateUrl: 'view/shared/fasta-diagonals-table.html'
         };
 
         function link(scope, element) {

@@ -11,7 +11,7 @@
                 nextUrl: '@'
             },
             link: link,
-            templateUrl: 'shared/navigationFooter/fasta-navigation-footer.html'
+            templateUrl: 'view/shared/navigationFooter/fasta-navigation-footer.html'
         };
 
         function link() {

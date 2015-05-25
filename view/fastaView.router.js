@@ -7,22 +7,22 @@
 
         $routeProvider.
             when('/home', {
-                templateUrl: 'home/home.html'
+                templateUrl: 'view/home/home.html'
             }).
             when('/config', {
-                templateUrl: 'configStep/config-panel.html',
+                templateUrl: 'view/configStep/config-panel.html',
                 controller: 'ConfigController'
             }).
             when('/first_stage', {
-                templateUrl: 'firstStage/first-panel.html',
+                templateUrl: 'view/firstStage/first-panel.html',
                 controller: 'FirstController'
             }).
             when('/second_stage', {
-                templateUrl: 'secondStage/second-panel.html',
+                templateUrl: 'view/secondStage/second-panel.html',
                 controller: 'SecondController'
             }).
             when('/third_stage', {
-                templateUrl: 'thirdStage/third-panel.html',
+                templateUrl: 'view/thirdStage/third-panel.html',
                 controller: 'ThirdController'
             }).
             otherwise({
