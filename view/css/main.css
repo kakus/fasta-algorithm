@@ -1,0 +1,33 @@
+.panel{
+    margin: 10px;
+}
+
+.container-overflow{
+    overflow: auto;
+}
+
+/* TABLE */
+
+table {
+    table-layout: fixed;
+}
+
+td, th{
+    text-align:center; 
+    vertical-align:middle;
+}
+
+/* HIGHLIGHT */
+
+.highlight-on-hover:hover{
+    color: #DDD;
+    cursor: pointer;
+}
+
+.highlight{
+    color: #DDD;
+}
+
+.diagonal-highlight{
+    background-color: #FFFCD7;
+}

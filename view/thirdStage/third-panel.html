@@ -1,0 +1,22 @@
+<div class="panel panel-default">
+    <div class="panel-heading">Stage 3</div>
+    <div class="panel-body">
+        <div class="input-group">
+            <span class="input-group-addon">
+                <input type="radio" name="substitutionMat" ng-model="substitutionMat" value="BLOSSUM" checked/>
+            </span>
+            <input type="text" value="BLOSSUM" class="form-control" disabled>
+        </div><!-- /input-group -->
+        <br>
+        <div class="input-group">
+            <span class="input-group-addon">
+                <input type="radio" name="substitutionMat" ng-model="substitutionMat" value="PAM"/>
+            </span>
+            <input type="text" class="form-control" value="PAM" disabled>
+        </div><!-- /input-group -->
+        <br>
+        <div fasta-diagonals-table></div>
+    </div>
+</div>
+
+<div fasta-navigation-footer previous-url="#/second_stage" next-url="#/third_stage"></div>

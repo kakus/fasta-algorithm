@@ -1,63 +1,20 @@
 var gulp = require('gulp'),
-    jshint = require('gulp-jshint'),
     concat = require('gulp-concat'),
-    karma = require('karma').server,
-    runner = require('karma').runner;
+    viewVariables = require('./view/gulpVariables'),
+    algorithmVariables = require('./algorithm/gulpVariables');
 
-var projectFiles = [ 'algorithm/src/**/*.js', 'algorithm/test/**/*.js' ],
-
-    // The order of files here it the order in which they will be merged into
-    // one file.
-    sourceFiles = [
-      'algorithm/src/Utils.js',
-      'algorithm/src/IndexingArray.js',
-      'algorithm/src/FindHotspots.js'
-    ];
-
-
-gulp.task('jshint', function() {
-   return gulp.src('algorithm/src/**/*.js')
-      .pipe(jshint())
-      .pipe(jshint.reporter('jshint-stylish'));
+gulp.task('build-all', function() {
+   gulp.run('build-fasta', 'build-fasta-view');
 });
 
-gulp.task('build', function() {
-   return gulp.src(sourceFiles)
-      .pipe(concat('fasta.js'))
-      .pipe(gulp.dest('build'));
+gulp.task('build-fasta-view', function() {
+    return gulp.src(viewVariables.sourceFiles.map(function(a) {return 'view/' + a}))
+        .pipe(concat(viewVariables.fileName))
+        .pipe(gulp.dest('./build'));
 });
 
-gulp.task('test', ['build'], function(done) {
-   karma.start({
-      configFile: __dirname + '/karma.conf.js',
-   }, function() { done() });
-});
-
-gulp.task('start-test-server', function(done) {
-   karma.start({
-      configFile: __dirname + '/karma.conf.js',
-      singleRun: false
-   }, function() { done() });
-});
-
-gulp.task('run-tests', ['build'], function(done) {
-   runner.run({port: 9876}, function() { done() });
-});
-
-gulp.task('watch', function() {
-   gulp.watch(projectFiles, ['jshint', 'build', 'run-tests']);
-});
-
-gulp.task('default', function() {
-   with (console) {
-      log("usage: gulp [build | test | start-test-server | watch]");
-      log("");
-      log("          build             - builds library and puts output in build folder.\n");
-      log("          test              - run test once.\n");
-      log("          watch             - watch src files and test files, so when");
-      log("                              they change, lint them and run test.");
-      log("                              Before you WATCH start test server.\n");
-      log("          start-test-server - start test server so when you change");
-      log("                              something the test will be executed.");
-   }
+gulp.task('build-fasta', function() {
+    return gulp.src(algorithmVariables.sourceFiles.map(function(a) {return 'algorithm/' + a}))
+        .pipe(concat(algorithmVariables.fileName))
+        .pipe(gulp.dest('./build'));
 });
