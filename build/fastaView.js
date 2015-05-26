@@ -56,8 +56,8 @@ function Diagonal(startPoint, endPoint, score ){
     function configurationService() {
         return {
             // default values
-            baseSequence: "MYBASESEQUENCE",
-            querySequence: "MYQUERYSEQUENCE",
+            baseSequence: "AACACTTTTCAAT",
+            querySequence: "ACTTATCA",
             kTup: 2
         };
     }
@@ -295,10 +295,10 @@ function makeRemoveClassHandler(regex) {
             $scope.stepData.kTup = ConfigurationService.kTup;
             $scope.stepData.baseSequence = ConfigurationService.baseSequence;
             $scope.stepData.querySequence = ConfigurationService.querySequence;
-            FirstDataService.getBaseSequenceIndices().then(function(data) {
+            FirstDataService.getSequenceIndices($scope.stepData.baseSequence, $scope.stepData.kTup).then(function(data) {
                 $scope.stepData.baseSequenceIndices = data;
             });
-            FirstDataService.getQuerySequenceIndices().then(function(data) {
+            FirstDataService.getSequenceIndices($scope.stepData.querySequence, $scope.stepData.kTup).then(function(data) {
                 $scope.stepData.querySequenceIndices = data;
             });
 
@@ -346,26 +346,16 @@ function makeRemoveClassHandler(regex) {
         };
 
         return {
-            getBaseSequenceIndices: getBaseSequenceIndices,
-            getQuerySequenceIndices: getQuerySequenceIndices,
+            getSequenceIndices: getSequenceIndices,
             getHotSpots: getHotSpots
         };
 
-        function getBaseSequenceIndices(sequence) {
+        function getSequenceIndices(sequence, ktup) {
             var deferred = $q.defer();
 
             $timeout(function() {
-                deferred.resolve(baseSequence);
-            });
-
-            return deferred.promise;
-        }
-
-        function getQuerySequenceIndices(sequence) {
-            var deferred = $q.defer();
-
-            $timeout(function() {
-                deferred.resolve(querySequence);
+                var indices = new fasta.IndexingArray(sequence, ktup);
+                deferred.resolve(indices);
             });
 
             return deferred.promise;

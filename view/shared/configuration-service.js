@@ -6,8 +6,8 @@
     function configurationService() {
         return {
             // default values
-            baseSequence: "MYBASESEQUENCE",
-            querySequence: "MYQUERYSEQUENCE",
+            baseSequence: "AACACTTTTCAAT",
+            querySequence: "ACTTATCA",
             kTup: 2
         };
     }

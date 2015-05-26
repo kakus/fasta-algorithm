@@ -35,26 +35,16 @@
         };
 
         return {
-            getBaseSequenceIndices: getBaseSequenceIndices,
-            getQuerySequenceIndices: getQuerySequenceIndices,
+            getSequenceIndices: getSequenceIndices,
             getHotSpots: getHotSpots
         };
 
-        function getBaseSequenceIndices(sequence) {
+        function getSequenceIndices(sequence, ktup) {
             var deferred = $q.defer();
 
             $timeout(function() {
-                deferred.resolve(baseSequence);
-            });
-
-            return deferred.promise;
-        }
-
-        function getQuerySequenceIndices(sequence) {
-            var deferred = $q.defer();
-
-            $timeout(function() {
-                deferred.resolve(querySequence);
+                var indices = new fasta.IndexingArray(sequence, ktup);
+                deferred.resolve(indices);
             });
 
             return deferred.promise;

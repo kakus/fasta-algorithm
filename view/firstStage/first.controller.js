@@ -16,10 +16,10 @@
             $scope.stepData.kTup = ConfigurationService.kTup;
             $scope.stepData.baseSequence = ConfigurationService.baseSequence;
             $scope.stepData.querySequence = ConfigurationService.querySequence;
-            FirstDataService.getBaseSequenceIndices().then(function(data) {
+            FirstDataService.getSequenceIndices($scope.stepData.baseSequence, $scope.stepData.kTup).then(function(data) {
                 $scope.stepData.baseSequenceIndices = data;
             });
-            FirstDataService.getQuerySequenceIndices().then(function(data) {
+            FirstDataService.getSequenceIndices($scope.stepData.querySequence, $scope.stepData.kTup).then(function(data) {
                 $scope.stepData.querySequenceIndices = data;
             });
 
