@@ -1,5 +1,6 @@
 exports.sourceFiles = [
     'src/Utils.js',
+    'src/HotSpot.js',
     'src/IndexingArray.js',
     'src/FindHotspots.js'
 ];

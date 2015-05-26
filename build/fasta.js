@@ -11,6 +11,11 @@ Array.prototype.pushUnique = function(element)
    }
 };
 
+function HotSpot(difference, startIndices) {
+    this.difference = difference;
+    this.startIndices = startIndices;
+}
+
 var fasta;
 (function(fasta) {
 
@@ -69,12 +74,12 @@ var fasta;
 
                     var exampleOffset = example[tuple];
                     for (var j = 0; j < exampleOffset.length; j++) {
-
+                        var hotSpot = new HotSpot(exampleOffset[j] - queryOffset[i],
+                            {query: queryOffset[i], base: exampleOffset[j]});
                         if (!hotspots[tuple]) {
-                            hotspots[tuple] = {differences: [], startIndices: []};
+                            hotspots[tuple] = [];
                         }
-                        hotspots[tuple].differences.pushUnique(exampleOffset[j] - queryOffset[i]);
-                        hotspots[tuple].startIndices.push({query: queryOffset[i], base: exampleOffset[j]})
+                        hotspots[tuple].pushUnique(hotSpot);
                     }
 
                 }
