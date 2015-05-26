@@ -280,14 +280,15 @@ function makeRemoveClassHandler(regex) {
 (function () {
     angular
         .module('fastaView')
-        .controller('FirstController', ['$scope', 'ConfigurationService', 'FirstDataService', FirstController]);
+        .controller('FirstController', ['$scope', '$q', 'ConfigurationService', 'FirstDataService', FirstController]);
 
-    function FirstController($scope, ConfigurationService, FirstDataService) {
+    function FirstController($scope, $q, ConfigurationService, FirstDataService) {
 
         initialize();
 
         function initialize() {
             initializeScopeVariables();
+            getStageData();
         }
 
         function initializeScopeVariables() {
@@ -295,15 +296,24 @@ function makeRemoveClassHandler(regex) {
             $scope.stepData.kTup = ConfigurationService.kTup;
             $scope.stepData.baseSequence = ConfigurationService.baseSequence;
             $scope.stepData.querySequence = ConfigurationService.querySequence;
-            FirstDataService.getSequenceIndices($scope.stepData.baseSequence, $scope.stepData.kTup).then(function(data) {
+        }
+
+        function getStageData() {
+            var sequencePromise, basePromise;
+            sequencePromise = FirstDataService.getSequenceIndices($scope.stepData.baseSequence, $scope.stepData.kTup);
+            sequencePromise.then(function(data) {
                 $scope.stepData.baseSequenceIndices = data;
             });
-            FirstDataService.getSequenceIndices($scope.stepData.querySequence, $scope.stepData.kTup).then(function(data) {
+
+            basePromise = FirstDataService.getSequenceIndices($scope.stepData.querySequence, $scope.stepData.kTup);
+            basePromise.then(function(data) {
                 $scope.stepData.querySequenceIndices = data;
             });
 
-            FirstDataService.getHotSpots().then(function(data) {
-                $scope.stepData.hotSpots = data;
+            $q.all([sequencePromise, basePromise]).then(function() {
+                FirstDataService.getHotSpots($scope.stepData.baseSequenceIndices, $scope.stepData.querySequenceIndices).then(function (data) {
+                    $scope.stepData.hotSpots = data;
+                });
             });
         }
     }
@@ -361,11 +371,11 @@ function makeRemoveClassHandler(regex) {
             return deferred.promise;
         }
 
-        function getHotSpots(baseSequence, querySequence) {
+        function getHotSpots(baseIndices, queryIndices) {
             var deferred = $q.defer();
 
             $timeout(function() {
-                deferred.resolve(hotSpots);
+                deferred.resolve(fasta.findHotspots(queryIndices, baseIndices));
             });
 
             return deferred.promise;

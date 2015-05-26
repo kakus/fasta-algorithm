@@ -19,7 +19,7 @@ var fasta;
 
                     var exampleOffset = example[tuple];
                     for (var j = 0; j < exampleOffset.length; j++) {
-                        var hotSpot = new HotSpot(exampleOffset[j] - queryOffset[i],
+                        var hotSpot = new fasta.HotSpot(exampleOffset[j] - queryOffset[i],
                             {query: queryOffset[i], base: exampleOffset[j]});
                         if (!hotspots[tuple]) {
                             hotspots[tuple] = [];

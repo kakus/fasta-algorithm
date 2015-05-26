@@ -52,10 +52,10 @@ describe("Find Hotspots", function () {
         expect(Object.keys(result).length).toEqual(2);
 
         expect(result['AB'].length).toEqual(1);
-        expect(result['AB'][0]).toEqual(new HotSpot(1, {query: 0, base: 1}));
+        expect(result['AB'][0]).toEqual(new fasta.HotSpot(1, {query: 0, base: 1}));
 
         expect(result['BA'].length).toEqual(1);
-        expect(result['BA'][0]).toEqual(new HotSpot(-1, {query: 1, base: 0}));
+        expect(result['BA'][0]).toEqual(new fasta.HotSpot(-1, {query: 1, base: 0}));
     });
 
     it("should return multiple hotspots for same sequences", function () {
@@ -67,10 +67,10 @@ describe("Find Hotspots", function () {
         expect(Object.keys(result).length).toEqual(2);
 
         expect(result['AB'].length).toEqual(1);
-        expect(result['AB'][0]).toEqual(new HotSpot(0, {query: 0, base: 0}));
+        expect(result['AB'][0]).toEqual(new fasta.HotSpot(0, {query: 0, base: 0}));
 
         expect(result['BA'].length).toEqual(1);
-        expect(result['BA'][0]).toEqual(new HotSpot(0, {query: 1, base: 1}));
+        expect(result['BA'][0]).toEqual(new fasta.HotSpot(0, {query: 1, base: 1}));
     });
 
     it("should return zero hotspots", function () {
@@ -91,8 +91,8 @@ describe("Find Hotspots", function () {
         expect(Object.keys(result).length).toEqual(1);
 
         expect(result['AB'].length).toEqual(2);
-        expect(result['AB'][0]).toEqual(new HotSpot(0, {query: 0, base: 0}));
-        expect(result['AB'][1]).toEqual(new HotSpot(-2, {query: 2, base: 0}));
+        expect(result['AB'][0]).toEqual(new fasta.HotSpot(0, {query: 0, base: 0}));
+        expect(result['AB'][1]).toEqual(new fasta.HotSpot(-2, {query: 2, base: 0}));
     });
 
     it("should return multiple hotspots for multiple subsequences", function () {
@@ -102,10 +102,10 @@ describe("Find Hotspots", function () {
         var result = fasta.findHotspots(query, source);
 
         expect(result['AB'].length).toEqual(2);
-        expect(result['AB'][0]).toEqual(new HotSpot(0, {query: 0, base: 0}));
-        expect(result['AB'][1]).toEqual(new HotSpot(-2, {query: 2, base: 0}));
+        expect(result['AB'][0]).toEqual(new fasta.HotSpot(0, {query: 0, base: 0}));
+        expect(result['AB'][1]).toEqual(new fasta.HotSpot(-2, {query: 2, base: 0}));
 
         expect(result['BA'].length).toEqual(1);
-        expect(result['BA'][0]).toEqual(new HotSpot(0, {query: 1, base: 1}));
+        expect(result['BA'][0]).toEqual(new fasta.HotSpot(0, {query: 1, base: 1}));
     });
 });

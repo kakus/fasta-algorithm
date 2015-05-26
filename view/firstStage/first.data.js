@@ -50,11 +50,11 @@
             return deferred.promise;
         }
 
-        function getHotSpots(baseSequence, querySequence) {
+        function getHotSpots(baseIndices, queryIndices) {
             var deferred = $q.defer();
 
             $timeout(function() {
-                deferred.resolve(hotSpots);
+                deferred.resolve(fasta.findHotspots(queryIndices, baseIndices));
             });
 
             return deferred.promise;
