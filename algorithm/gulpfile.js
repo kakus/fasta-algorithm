@@ -1,6 +1,7 @@
 var gulp = require('gulp'),
     jshint = require('gulp-jshint'),
     concat = require('gulp-concat'),
+    watch = require('gulp-watch'),
     karma = require('karma').server,
     runner = require('karma').runner,
     gulpVariables = require('./gulpVariables');
@@ -41,7 +42,9 @@ gulp.task('run-tests', ['build'], function (done) {
 });
 
 gulp.task('watch', function () {
-    gulp.watch(gulpVariables.projectFiles, ['jshint', 'build', 'run-tests']);
+    watch(gulpVariables.projectFiles, function() {
+        gulp.start(['jshint', 'build', 'run-tests']);
+    });
 });
 
 gulp.task('default', function () {

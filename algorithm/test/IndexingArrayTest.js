@@ -1,7 +1,7 @@
 describe("Indexing Array", function() {
 
    it("should throw Error when sequence length is less than ktup", function() {
-      var makeStep = function() { new fasta.IndexingArray("123", 6); }
+      var makeStep = function() { new fasta.IndexingArray("123", 6); };
       expect(makeStep).toThrow();
    });
 
