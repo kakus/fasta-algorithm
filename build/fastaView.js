@@ -65,9 +65,9 @@ function Diagonal(startPoint, endPoint, score ){
 (function () {
     angular
         .module('fastaView')
-        .directive('fastaDiagonalsTable', ['$timeout', diagonalsTable]);
+        .directive('fastaDiagonalsTable', [diagonalsTable]);
 
-    function diagonalsTable($timeout) {
+    function diagonalsTable() {
         return {
             scope: false,
             link: link,
@@ -89,17 +89,6 @@ function Diagonal(startPoint, endPoint, score ){
                 scope.eraseDiagonal = eraseDiagonal;
                 scope.clearDiagonalsTable = clearDiagonalsTable;
             }
-
-            //$timeout(function () {
-            //    drawDiagonalsTable(scope.stepData.diagonals);
-            //});
-
-            //var callback = scope.$watch('stepData.diagonals', function() {
-            //    if (scope.stepData.diagonals) {
-            //        callback();
-            //        drawDiagonalsTable(scope.stepData.diagonals);
-            //    }
-            //});
 
             function drawDiagonalsTable(diagonals) {
                 for (var i = 0; i < diagonals.length; ++i) {
@@ -132,16 +121,17 @@ function Diagonal(startPoint, endPoint, score ){
                 });
             }
 
-            function clearDiagonalsTable(tableId) {
-                $.each($('#diagonals-table [class*="diagonal"]'), function () {
-                    $(this).empty();
-                    $(this).removeAttr("title");
-                    $(this).removeClass(makeRemoveClassHandler(/^diagonal/));
-                    $(this).off('mouseenter mouseleave');
-                });
+            function clearDiagonalsTable() {
+                var cells =  element.find('[class*="diagonal-"]');
+                for (var i = 0; i < cells.length; i++) {
+                    var cell = angular.element(cells[i]);
+                    cell.empty();
+                    cell.removeAttr("title");
+                    cell.tooltip('destroy');
+                    cell.removeClass(makeRemoveClassHandler(/^diagonal/));
+                    cell.off('mouseenter mouseleave');
+                }
             }
-
-
 
             function eraseDiagonal(tableId, diagonal) {
                 var diagonalClassName = "diagonal-" + diagonal.startPoint[0] + "-" + diagonal.startPoint[1]; //name is necessary to group cells in one diagonal - by css class
@@ -395,6 +385,7 @@ function makeRemoveClassHandler(regex) {
 
         function initialize() {
             initializeScopeVariables();
+            initializeScopeFunctions();
         }
 
         function initializeScopeVariables() {
@@ -402,6 +393,13 @@ function makeRemoveClassHandler(regex) {
             $scope.stepData.kTup = ConfigurationService.kTup;
             $scope.stepData.baseSequence = ConfigurationService.baseSequence;
             $scope.stepData.querySequence = ConfigurationService.querySequence;
+
+            $scope.stepData.scoreMatrix = {
+                A: {A:1, C:-1, G:-1, T:-1},
+                C: {A:-1, C:1, G:-1, T:-1},
+                G: {A:-1, C:-1, G:1, T:-1},
+                T: {A:-1, C:-1, G:-1, T:1}
+            };
 
             //TODO: param for max gap
             SecondDataService.getDiagonals(ConfigurationService.hotSpots, $scope.stepData.kTup, 0).then(function (diagonals) {
@@ -418,30 +416,57 @@ function makeRemoveClassHandler(regex) {
                 })
             });
         }
+
+        function initializeScopeFunctions() {
+            $scope.score = score;
+        }
+
+        function score() {
+            SecondDataService.score($scope.stepData.diagonals, $scope.stepData.scoreMatrix,
+                $scope.stepData.baseSequence, $scope.stepData.querySequence).then(function(scored) {
+                    console.log('ha');
+                    $scope.stepData.diagonals = scored;
+                    $scope.clearDiagonalsTable();
+                    $scope.drawDiagonalsTable($scope.stepData.diagonals);
+                });
+        }
     }
 })();
 
-(function(){
+(function () {
     angular
-    .module('fastaView')
-    .factory('SecondDataService', ['$q', '$timeout', SecondDataService]);
+        .module('fastaView')
+        .factory('SecondDataService', ['$q', '$timeout', SecondDataService]);
 
-function SecondDataService($q, $timeout){
+    function SecondDataService($q, $timeout) {
 
-    return {
-        getDiagonals: getDiagonals
-    };
+        return {
+            getDiagonals: getDiagonals,
+            score: score
+        };
 
-    function getDiagonals(hotSpots, ktup, maxGapLength) {
-        var deferred = $q.defer();
+        function getDiagonals(hotSpots, ktup, maxGapLength) {
+            var deferred = $q.defer();
 
-        $timeout(function() {
-            deferred.resolve(fasta.findDiagonals(hotSpots, ktup, maxGapLength));
-        });
+            $timeout(function () {
+                deferred.resolve(fasta.findDiagonals(hotSpots, ktup, maxGapLength));
+            });
 
-        return deferred.promise;
+            return deferred.promise;
+        }
+
+        function score(diagonals, scoreMatrix, baseSequence, querySequence) {
+            var deferred = $q.defer();
+
+            console.log(scoreMatrix);
+
+            $timeout(function () {
+                deferred.resolve(fasta.scoreDiagonals(diagonals, scoreMatrix, baseSequence, querySequence));
+            });
+
+            return deferred.promise;
+        }
     }
-}
 })();
 
 (function () {

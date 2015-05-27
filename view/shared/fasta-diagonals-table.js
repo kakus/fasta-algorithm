@@ -1,9 +1,9 @@
 (function () {
     angular
         .module('fastaView')
-        .directive('fastaDiagonalsTable', ['$timeout', diagonalsTable]);
+        .directive('fastaDiagonalsTable', [diagonalsTable]);
 
-    function diagonalsTable($timeout) {
+    function diagonalsTable() {
         return {
             scope: false,
             link: link,
@@ -25,17 +25,6 @@
                 scope.eraseDiagonal = eraseDiagonal;
                 scope.clearDiagonalsTable = clearDiagonalsTable;
             }
-
-            //$timeout(function () {
-            //    drawDiagonalsTable(scope.stepData.diagonals);
-            //});
-
-            //var callback = scope.$watch('stepData.diagonals', function() {
-            //    if (scope.stepData.diagonals) {
-            //        callback();
-            //        drawDiagonalsTable(scope.stepData.diagonals);
-            //    }
-            //});
 
             function drawDiagonalsTable(diagonals) {
                 for (var i = 0; i < diagonals.length; ++i) {
@@ -68,16 +57,17 @@
                 });
             }
 
-            function clearDiagonalsTable(tableId) {
-                $.each($('#diagonals-table [class*="diagonal"]'), function () {
-                    $(this).empty();
-                    $(this).removeAttr("title");
-                    $(this).removeClass(makeRemoveClassHandler(/^diagonal/));
-                    $(this).off('mouseenter mouseleave');
-                });
+            function clearDiagonalsTable() {
+                var cells =  element.find('[class*="diagonal-"]');
+                for (var i = 0; i < cells.length; i++) {
+                    var cell = angular.element(cells[i]);
+                    cell.empty();
+                    cell.removeAttr("title");
+                    cell.tooltip('destroy');
+                    cell.removeClass(makeRemoveClassHandler(/^diagonal/));
+                    cell.off('mouseenter mouseleave');
+                }
             }
-
-
 
             function eraseDiagonal(tableId, diagonal) {
                 var diagonalClassName = "diagonal-" + diagonal.startPoint[0] + "-" + diagonal.startPoint[1]; //name is necessary to group cells in one diagonal - by css class

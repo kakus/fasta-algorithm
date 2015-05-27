@@ -9,6 +9,7 @@
 
         function initialize() {
             initializeScopeVariables();
+            initializeScopeFunctions();
         }
 
         function initializeScopeVariables() {
@@ -16,6 +17,13 @@
             $scope.stepData.kTup = ConfigurationService.kTup;
             $scope.stepData.baseSequence = ConfigurationService.baseSequence;
             $scope.stepData.querySequence = ConfigurationService.querySequence;
+
+            $scope.stepData.scoreMatrix = {
+                A: {A:1, C:-1, G:-1, T:-1},
+                C: {A:-1, C:1, G:-1, T:-1},
+                G: {A:-1, C:-1, G:1, T:-1},
+                T: {A:-1, C:-1, G:-1, T:1}
+            };
 
             //TODO: param for max gap
             SecondDataService.getDiagonals(ConfigurationService.hotSpots, $scope.stepData.kTup, 0).then(function (diagonals) {
@@ -31,6 +39,20 @@
                     }
                 })
             });
+        }
+
+        function initializeScopeFunctions() {
+            $scope.score = score;
+        }
+
+        function score() {
+            SecondDataService.score($scope.stepData.diagonals, $scope.stepData.scoreMatrix,
+                $scope.stepData.baseSequence, $scope.stepData.querySequence).then(function(scored) {
+                    console.log('ha');
+                    $scope.stepData.diagonals = scored;
+                    $scope.clearDiagonalsTable();
+                    $scope.drawDiagonalsTable($scope.stepData.diagonals);
+                });
         }
     }
 })();

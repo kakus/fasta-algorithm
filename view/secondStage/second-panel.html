@@ -1,6 +1,22 @@
 <div class="panel panel-default">
-    {{substitutionMat}}
     <div class="panel-heading">Stage 2</div>
+    <table id="dscoring-matrix" class="">
+        <thead>
+        <tr class="success">
+            <th> # </th>
+            <th ng-repeat="(symbol, values) in stepData.scoreMatrix track by $index">{{symbol}}</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr ng-repeat="(symbol, values) in stepData.scoreMatrix track by $index">
+            <td ><b> {{symbol}} </b></td>
+            <td ng-repeat="(key, scoreValue) in values track by $index" data-container="body">
+                <input type="number" ng-model="stepData.scoreMatrix[symbol][key]">
+            </td>
+        </tr>
+        </tbody>
+    </table>
+    <a class="btn btn-default" ng-click="score()">Recalculate score</a>
     <div class="panel-body">
         <div class="container-overflow">
             <div fasta-diagonals-table></div>
