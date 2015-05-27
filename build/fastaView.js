@@ -312,6 +312,7 @@ function makeRemoveClassHandler(regex) {
 
             $q.all([sequencePromise, basePromise]).then(function() {
                 FirstDataService.getHotSpots($scope.stepData.baseSequenceIndices, $scope.stepData.querySequenceIndices).then(function (data) {
+                    ConfigurationService.hotSpots = data;
                     $scope.stepData.hotSpots = data;
                 });
             });
@@ -401,13 +402,14 @@ function makeRemoveClassHandler(regex) {
             $scope.stepData.kTup = ConfigurationService.kTup;
             $scope.stepData.baseSequence = ConfigurationService.baseSequence;
             $scope.stepData.querySequence = ConfigurationService.querySequence;
-            SecondDataService.getDiagonals().then(function (diagonals) {
+
+            //TODO: param for max gap
+            SecondDataService.getDiagonals(ConfigurationService.hotSpots, $scope.stepData.kTup, 0).then(function (diagonals) {
                 $scope.stepData.diagonals = diagonals;
 
-                //TODO: move to directive? one downside - naming of variables has to be specified
-                var callback = $scope.$watch('drawDiagonalsTable', function () {
+                var removeWatch = $scope.$watch('drawDiagonalsTable', function () {
                     if ($scope.drawDiagonalsTable) {
-                        callback();
+                        removeWatch();
                         $timeout(function () {
                             $scope.drawDiagonalsTable($scope.stepData.diagonals);
                         });
@@ -416,10 +418,6 @@ function makeRemoveClassHandler(regex) {
                 })
             });
         }
-
-        //angular.element(document).ready(function () {
-        //    $scope.drawDiagonalsTable('diagonals-table', $scope.stepData.diagonals);
-        //});
     }
 })();
 
@@ -430,24 +428,15 @@ function makeRemoveClassHandler(regex) {
 
 function SecondDataService($q, $timeout){
 
-    var diagonals = [
-        new Diagonal([0,0], [4,4], 5),
-        new Diagonal([2,4], [4,6], 12),
-        new Diagonal([5,7], [7,9], -7),
-        new Diagonal([8,18], [12,22], 2),
-        new Diagonal([1,22], [4,26], 92),
-        new Diagonal([4,17], [6,19], 110)
-    ];
-
     return {
         getDiagonals: getDiagonals
     };
 
-    function getDiagonals(hotSpots) {
+    function getDiagonals(hotSpots, ktup, maxGapLength) {
         var deferred = $q.defer();
 
         $timeout(function() {
-            deferred.resolve(diagonals);
+            deferred.resolve(fasta.findDiagonals(hotSpots, ktup, maxGapLength));
         });
 
         return deferred.promise;

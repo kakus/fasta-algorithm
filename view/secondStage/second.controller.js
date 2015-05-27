@@ -16,13 +16,14 @@
             $scope.stepData.kTup = ConfigurationService.kTup;
             $scope.stepData.baseSequence = ConfigurationService.baseSequence;
             $scope.stepData.querySequence = ConfigurationService.querySequence;
-            SecondDataService.getDiagonals().then(function (diagonals) {
+
+            //TODO: param for max gap
+            SecondDataService.getDiagonals(ConfigurationService.hotSpots, $scope.stepData.kTup, 0).then(function (diagonals) {
                 $scope.stepData.diagonals = diagonals;
 
-                //TODO: move to directive? one downside - naming of variables has to be specified
-                var callback = $scope.$watch('drawDiagonalsTable', function () {
+                var removeWatch = $scope.$watch('drawDiagonalsTable', function () {
                     if ($scope.drawDiagonalsTable) {
-                        callback();
+                        removeWatch();
                         $timeout(function () {
                             $scope.drawDiagonalsTable($scope.stepData.diagonals);
                         });
@@ -31,9 +32,5 @@
                 })
             });
         }
-
-        //angular.element(document).ready(function () {
-        //    $scope.drawDiagonalsTable('diagonals-table', $scope.stepData.diagonals);
-        //});
     }
 })();

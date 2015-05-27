@@ -33,6 +33,7 @@
 
             $q.all([sequencePromise, basePromise]).then(function() {
                 FirstDataService.getHotSpots($scope.stepData.baseSequenceIndices, $scope.stepData.querySequenceIndices).then(function (data) {
+                    ConfigurationService.hotSpots = data;
                     $scope.stepData.hotSpots = data;
                 });
             });

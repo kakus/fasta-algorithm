@@ -2,13 +2,13 @@
     <thead>
     <tr class="success">
         <th> # </th>
-        <th ng-repeat="value in stepData.baseSequence track by $index">{{value}}</th>
+        <th ng-repeat="value in stepData.querySequence track by $index">{{value}}</th>
     </tr>
     </thead>
     <tbody>
-    <tr ng-repeat="(key,value) in stepData.querySequence track by $index">
+    <tr ng-repeat="(key,value) in stepData.baseSequence track by $index">
         <td class="success"><b> {{value}} </b></td>
-        <td ng-repeat="(key2,value2) in stepData.baseSequence track by $index" name="{{key}}_{{key2}}" data-container="body"></td>
+        <td ng-repeat="(key2,value2) in stepData.querySequence track by $index" name="{{key}}_{{key2}}" data-container="body"></td>
     </tr>
     </tbody>
 </table>
