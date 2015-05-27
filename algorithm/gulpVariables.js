@@ -1,7 +1,7 @@
 exports.sourceFiles = [
     'src/Utils.js',
-    'src/models/*.js',
-    'src/functions/*.js'
+    'src/models/**/*.js',
+    'src/functions/**/*.js'
 ];
 
 exports.fileName = 'fasta.js';
