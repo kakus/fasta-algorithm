@@ -12,23 +12,12 @@ Array.prototype.pushUnique = function(element)
 };
 
 var fasta;
-(function(fasta) {
-
-    function HotSpot(difference, startIndices) {
-        this.difference = difference;
-        this.startIndices = startIndices;
-    }
-
-fasta.HotSpot = HotSpot;
-})(fasta = fasta || {});
-
-var fasta;
 (function (fasta) {
 
-    function Diagonal(startPoint, endPoint) {
+    function Diagonal(startPoint, endPoint, score) {
         this.startPoint = startPoint; // [int x, int y]
         this.endPoint = endPoint; // [int x, int y]
-        this.score = undefined;
+        this.score = score;
     }
 
     fasta.Diagonal = Diagonal;
@@ -37,77 +26,12 @@ var fasta;
 var fasta;
 (function(fasta) {
 
-// First step in FASTA algorithm.
-// Find all tuples/fragments (unique combination of symbols) of length ktup in given
-// sequence, also store offset of appearance of tuple in sequence.
-//
-// This object is a map where key <String> is the tuple, and value <Array<number>> is
-// array of offsets where this tuple appears.
-// @example
-//    var array = new IndexingArray('ABA', 2);
-//    array['AB']; // will return [0]
-function IndexingArray(sequence, ktup)
-{
-   checkNotNull(sequence);
-   checkNotNull(ktup);
-
-   if (sequence.length < ktup) {
-      throw new Error("ktup must be greater or equal to sequence length");
-   }
-
-   for(var i = 0; i <= sequence.length - ktup; ++i) {
-
-      var tuple = sequence.substring(i, i + ktup);
-
-      if (this[tuple]) {
-         this[tuple].push(i);
-      }
-      else {
-         this[tuple] = [i];
-      }
-   }
-}
-
-fasta.IndexingArray = IndexingArray;
-})(fasta = fasta || {});
-
-var fasta;
-(function (fasta) {
-
-// Calucalte diffrence of indexes in same tulples in query and example.
-//
-// @param example the IndexingArray of sequence from database
-// @param query the IndexingArray of query sequence
-// @return IndexingArray with hotspots
-    function findHotspots(query, example) {
-        checkNotNull(query);
-        checkNotNull(example);
-        var hotspots = {};
-
-        for (var tuple in query) {
-            if (example[tuple]) {
-
-                var queryOffset = query[tuple];
-                for (var i = 0; i < queryOffset.length; i++) {
-
-                    var exampleOffset = example[tuple];
-                    for (var j = 0; j < exampleOffset.length; j++) {
-                        var hotSpot = new fasta.HotSpot(exampleOffset[j] - queryOffset[i],
-                            {query: queryOffset[i], base: exampleOffset[j]});
-                        if (!hotspots[tuple]) {
-                            hotspots[tuple] = [];
-                        }
-                        hotspots[tuple].pushUnique(hotSpot);
-                    }
-
-                }
-
-            }
-        }
-        return hotspots;
+    function HotSpot(difference, startIndices) {
+        this.difference = difference;
+        this.startIndices = startIndices;
     }
 
-    fasta.findHotspots = findHotspots;
+fasta.HotSpot = HotSpot;
 })(fasta = fasta || {});
 
 var fasta;
@@ -206,4 +130,117 @@ var fasta;
     }
 
     fasta.findDiagonals = findDiagonals;
+})(fasta = fasta || {});
+
+var fasta;
+(function (fasta) {
+
+// Calucalte diffrence of indexes in same tulples in query and example.
+//
+// @param example the IndexingArray of sequence from database
+// @param query the IndexingArray of query sequence
+// @return IndexingArray with hotspots
+    function findHotspots(query, example) {
+        checkNotNull(query);
+        checkNotNull(example);
+        var hotspots = {};
+
+        for (var tuple in query) {
+            if (example[tuple]) {
+
+                var queryOffset = query[tuple];
+                for (var i = 0; i < queryOffset.length; i++) {
+
+                    var exampleOffset = example[tuple];
+                    for (var j = 0; j < exampleOffset.length; j++) {
+                        var hotSpot = new fasta.HotSpot(exampleOffset[j] - queryOffset[i],
+                            {query: queryOffset[i], base: exampleOffset[j]});
+                        if (!hotspots[tuple]) {
+                            hotspots[tuple] = [];
+                        }
+                        hotspots[tuple].pushUnique(hotSpot);
+                    }
+
+                }
+
+            }
+        }
+        return hotspots;
+    }
+
+    fasta.findHotspots = findHotspots;
+})(fasta = fasta || {});
+
+var fasta;
+(function(fasta) {
+
+// First step in FASTA algorithm.
+// Find all tuples/fragments (unique combination of symbols) of length ktup in given
+// sequence, also store offset of appearance of tuple in sequence.
+//
+// This object is a map where key <String> is the tuple, and value <Array<number>> is
+// array of offsets where this tuple appears.
+// @example
+//    var array = new IndexingArray('ABA', 2);
+//    array['AB']; // will return [0]
+function IndexingArray(sequence, ktup)
+{
+   checkNotNull(sequence);
+   checkNotNull(ktup);
+
+   if (sequence.length < ktup) {
+      throw new Error("ktup must be greater or equal to sequence length");
+   }
+
+   for(var i = 0; i <= sequence.length - ktup; ++i) {
+
+      var tuple = sequence.substring(i, i + ktup);
+
+      if (this[tuple]) {
+         this[tuple].push(i);
+      }
+      else {
+         this[tuple] = [i];
+      }
+   }
+}
+
+fasta.IndexingArray = IndexingArray;
+})(fasta = fasta || {});
+
+var fasta;
+(function (fasta) {
+
+    /**
+     * Scores given array of diagonals. Returns same array as input, but with scored diagonals.
+     * WARNING: Objects in original array will be modified by setting score!
+     *
+     * @param diagonals
+     * @param scoreMatrix
+     * @param baseSequence
+     * @param querySequence
+     * @returns {*}
+     */
+    function scoreDiagonals(diagonals, scoreMatrix, baseSequence, querySequence) {
+        var diagonal,
+            querySubsequence,
+            baseSubsequence,
+            score;
+        for (var i = 0; i < diagonals.length; i++) {
+            score = 0;
+            diagonal = diagonals[i];
+            baseSubsequence = baseSequence.substring(diagonal.startPoint[0], diagonal.endPoint[0] + 1);
+            querySubsequence = querySequence.substring(diagonal.startPoint[1], diagonal.endPoint[1] + 1);
+
+            //TODO: move to diagonal object?
+            for (var j = 0; j < baseSubsequence.length; j++) {
+                score += scoreMatrix[baseSubsequence[j]][querySubsequence[j]];
+            }
+
+            diagonal.score = score;
+        }
+        return diagonals;
+    }
+
+    fasta.scoreDiagonals = scoreDiagonals;
 })(fasta = fasta || {});

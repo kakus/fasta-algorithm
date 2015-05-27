@@ -1,10 +1,7 @@
 exports.sourceFiles = [
     'src/Utils.js',
-    'src/HotSpot.js',
-    'src/Diagonal.js',
-    'src/IndexingArray.js',
-    'src/FindHotspots.js',
-    'src/FindDiagonals.js'
+    'src/models/*.js',
+    'src/functions/*.js'
 ];
 
 exports.fileName = 'fasta.js';
