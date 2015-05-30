@@ -12,7 +12,7 @@ var fasta;
 
             partialDiagonals = generateJoinedDiagonals(diagonalsOnLine.sort(compareDiagonals), maxGapLength);
 
-            diagonals.push.apply(diagonals, partialDiagonals);
+            diagonals = diagonals.concat(partialDiagonals);
         }
 
         return diagonals;
