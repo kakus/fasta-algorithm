@@ -1,6 +1,7 @@
 body {
     height: 100%;
     padding-top: 50px;
+    padding-bottom: 50px;
 }
 
 .panel{
@@ -9,6 +10,12 @@ body {
 
 .container-overflow{
     overflow: auto;
+}
+
+.steps-footer {
+    background-color: #e7e7e7;
+    border-top: solid 1px #ccc;
+    padding: 5px;
 }
 
 /* TABLE */
