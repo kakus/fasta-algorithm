@@ -47,7 +47,7 @@
                 <tr ng-repeat="(symbol, values) in configData.scoreMatrix track by $index">
                     <td><b> {{symbol}} </b></td>
                     <td ng-repeat="(key, scoreValue) in values track by $index" data-container="body">
-                        <input type="number" ng-model="configData.scoreMatrix[symbol][key]">
+                        <input type="number" class="text-center" ng-model="configData.scoreMatrix[symbol][key]">
                     </td>
                 </tr>
                 </tbody>

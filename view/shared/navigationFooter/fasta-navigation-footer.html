@@ -2,14 +2,14 @@
     <div class="row text-center col-md-12">
         <div class="pull-left">
             <a class="btn btn-danger" href="{{previousUrl}}">Previous Stage</a>
-                <a class="btn btn-primary " ng-disabled="firstStep()" ng-click="previousStep()">Previous Step</a>
+                <a class="btn btn-primary " ng-disabled="isFirstStep()" ng-click="previousStep()">Previous Step</a>
             </div>
 
         <span class="text-center">Step {{currentStep}}: {{description}}</span>
 
         <div class="pull-right">
-            <a class="btn btn-primary " ng-disabled="lastStep()" ng-click="nextStep()">Next Step</a>
-            <a class="btn btn-primary " href="{{nextUrl}}">Next Stage</a>
+            <a class="btn btn-primary " ng-disabled="isLastStep()" ng-click="nextStep()">Next Step</a>
+            <a class="btn btn-primary " ng-click="nextStage()">Next Stage</a>
         </div>
     </div>
 </div>

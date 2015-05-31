@@ -1,80 +1,97 @@
 <div class="panel panel-default">
-    <div class="panel-heading">Stage 1</div>
+    <div class="panel-heading text-center"><b>Stage 1: Initialization - calculating Indexing Arrays and finding Hot
+        Spots</b></div>
     <div class="panel-body">
         <div class="container-overflow">
 
             <!-- BASE SEQUENCE -->
-            <div>
-                <p id="baseSequence-p">{{stepData.baseSequence}}</p>
 
-                <table class="table table-bordered">
-                    <thead>
-                    <tr class="success">
-                        <th ng-repeat="(key,value) in stepData.baseSequenceIndices">{{::key}}</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr>
-                        <td ng-repeat="value in stepData.baseSequenceIndices">
-                            <p class="highlight-on-hover"
-                               fasta-highlight paragraph-id="baseSequence-p" content="stepData.baseSequence"
-                               start-index="element" length="stepData.kTup"
-                               ng-repeat="element in value">
-                                {{::element}}
-                            </p>
-                        </td>
-                    </tr>
-                    </tbody>
-                </table>
+            <div ng-show="stepData.baseSequenceIndices">
+                <label>Base sequence - Indexing Array:</label>
+
+                <p>Base Sequence: <span id="baseSequence-p">{{stepData.baseSequence}}</span></p>
+
+                <div class="scroll-table">
+                    <table class="table table-bordered ">
+                        <thead>
+                        <tr class="success">
+                            <th ng-repeat="(key,value) in stepData.baseSequenceIndices">
+                                {{::key}}
+                            </th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td ng-repeat="value in stepData.baseSequenceIndices">
+                                <p class="highlight-on-hover"
+                                   fasta-highlight paragraph-id="baseSequence-p" content="stepData.baseSequence"
+                                   start-index="element" length="stepData.kTup"
+                                   ng-repeat="element in value">
+                                    {{::element}}
+                                </p>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
             <!-- BASE SEQUENCE -->
 
             <!-- WANTED SEQUENCE -->
-            <div>
-                <p id="querySequence-p"> {{::stepData.querySequence}} </p>
-                <table class="table table-bordered">
-                    <thead>
-                    <tr class="info">
-                        <th ng-repeat="(key,value) in stepData.querySequenceIndices">{{::key}}</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr>
-                        <td ng-repeat="value in stepData.querySequenceIndices">
-                            <p class="highlight-on-hover"
-                               fasta-highlight paragraph-id="querySequence-p" content="stepData.querySequence"
-                               start-index="element" length="stepData.kTup"
-                               ng-repeat="element in value">
-                                {{element}}
-                            </p>
-                        </td>
-                    </tr>
-                    </tbody>
-                </table>
+            <div ng-show="stepData.querySequenceIndices">
+                <label>Query sequence - Indexing Array:</label>
+
+                <p>Query Sequence: <span id="querySequence-p"> {{::stepData.querySequence}} </span></p>
+
+                <div class="scroll-table">
+                    <table class="table table-bordered">
+                        <thead>
+                        <tr class="info">
+                            <th ng-repeat="(key,value) in stepData.querySequenceIndices">{{::key}}</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td ng-repeat="value in stepData.querySequenceIndices">
+                                <p class="highlight-on-hover"
+                                   fasta-highlight paragraph-id="querySequence-p" content="stepData.querySequence"
+                                   start-index="element" length="stepData.kTup"
+                                   ng-repeat="element in value">
+                                    {{element}}
+                                </p>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
             <!-- WANTED SEQUENCE -->
 
             <!-- HOT SPOTS -->
-            <div>
-                <p> HOT SPOTS </p>
-                <table class="table table-bordered">
-                    <thead>
-                    <tr class="warning">
-                        <th ng-repeat="(key,value) in stepData.hotSpots">{{::key}}</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr>
-                        <td ng-repeat="value in stepData.hotSpots">
-                            <p ng-repeat="element in value">{{::element.difference}}</p>
-                        </td>
-                    </tr>
-                    </tbody>
-                </table>
+            <div ng-show="stepData.hotSpots">
+                <label>Hot Spots:</label>
+
+                <div class="scroll-table">
+                    <table class="table table-bordered">
+                        <thead>
+                        <tr class="warning">
+                            <th ng-repeat="(key,value) in stepData.hotSpots">{{::key}}</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td ng-repeat="value in stepData.hotSpots">
+                                <p ng-repeat="element in value">{{::element.difference}}</p>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
         <!-- HOT SPOTS -->
     </div>
 </div>
 
-<div fasta-navigation-footer previous-url="#/config" next-url="#/second_stage" config="stepData.stepByStepConfig"></div>
+<div fasta-navigation-footer previous-url="/config" next-url="/second_stage" last-step="stepData.lastStep"
+     save-step="saveLastStep(lastStep)" config="stepData.stepByStepConfig"></div>

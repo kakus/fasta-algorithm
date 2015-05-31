@@ -11,7 +11,7 @@
 
         function initialize() {
             initializeScopeVariables();
-            getStageData();
+            initializeScopeFunctions();
         }
 
         function initializeScopeVariables() {
@@ -19,6 +19,10 @@
             $scope.stepData.kTup = ConfigurationService.kTup;
             $scope.stepData.baseSequence = ConfigurationService.baseSequence;
             $scope.stepData.querySequence = ConfigurationService.querySequence;
+            $scope.stepData.baseSequenceIndices = FirstDataService.baseSequenceIndices;
+            $scope.stepData.lastStep = FirstDataService.lastStep || 0;
+            $scope.stepData.querySequenceIndices = FirstDataService.querySequenceIndices;
+            $scope.stepData.hotSpots = ConfigurationService.hotSpots;
 
             $scope.stepData.stepByStepConfig = [
                 {description: 'Stage 1 - beginning'},
@@ -36,8 +40,8 @@
             ];
         }
 
-        function getStageData() {
-
+        function initializeScopeFunctions() {
+            $scope.saveLastStep = saveLastStep;
         }
 
         function baseIndicesStep() {
@@ -45,6 +49,7 @@
                 basePromise = FirstDataService.getSequenceIndices($scope.stepData.baseSequence, $scope.stepData.kTup);
             }
             basePromise.then(function (data) {
+                FirstDataService.baseSequenceIndices = data;
                 $scope.stepData.baseSequenceIndices = data;
             });
         }
@@ -54,6 +59,7 @@
                 sequencePromise = FirstDataService.getSequenceIndices($scope.stepData.querySequence, $scope.stepData.kTup);
             }
             sequencePromise.then(function (data) {
+                FirstDataService.querySequenceIndices = data;
                 $scope.stepData.querySequenceIndices = data;
             });
         }
@@ -68,16 +74,20 @@
         }
 
         function reverseBaseIndices() {
-            $scope.stepData.baseSequenceIndices = [];
+            $scope.stepData.baseSequenceIndices = undefined;
         }
 
         function reverseQueryIndices() {
-            $scope.stepData.querySequenceIndices = [];
+            $scope.stepData.querySequenceIndices = undefined;
         }
 
         function reverseHotSpots() {
-            ConfigurationService.hotSpots = [];
-            $scope.stepData.hotSpots = [];
+            ConfigurationService.hotSpots = undefined;
+            $scope.stepData.hotSpots = undefined;
+        }
+
+        function saveLastStep(lastStep) {
+            FirstDataService.lastStep = lastStep;
         }
     }
 })

@@ -54,11 +54,21 @@ function Diagonal(startPoint, endPoint, score ){
         .factory('ConfigurationService', configurationService);
 
     function configurationService() {
+
+        var scoreMatrix = {
+            A: {A:1, C:-1, G:-1, T:-1},
+            C: {A:-1, C:1, G:-1, T:-1},
+            G: {A:-1, C:-1, G:1, T:-1},
+            T: {A:-1, C:-1, G:-1, T:1}
+        };
+
         return {
             // default values
-            baseSequence: "AACACTTTTCAAT",
+            baseSequence: "AACACTTTTCA",
             querySequence: "ACTTATCA",
-            kTup: 2
+            kTup: 2,
+            scoreMatrix: scoreMatrix,
+            gapPenalty: -5
         };
     }
 })();
@@ -209,24 +219,135 @@ function makeRemoveClassHandler(regex) {
 (function () {
     angular.
         module('fastaView').
-        directive('fastaNavigationFooter', [navigationFooter]);
+        directive('fastaMenu', ['$location', menu]);
 
-    function navigationFooter() {
+    function menu($location) {
+        return {
+            restrict: 'A',
+            link: link,
+            templateUrl: 'view/shared/menu/fasta-menu.html'
+        };
+
+        function link(scope) {
+            initialize();
+
+            function initialize() {
+                initializeScopeFunctions();
+            }
+
+            function initializeScopeFunctions() {
+                scope.menuSelected = menuSelected;
+            }
+
+            function menuSelected(selected) {
+                return $location.path() === selected;
+            }
+        }
+    }
+})();
+
+(function () {
+    angular.
+        module('fastaView').
+        directive('fastaSequenceValidator', [sequenceValidator]);
+
+    function sequenceValidator() {
+        return {
+            restrict: 'A',
+            link: link
+        };
+
+        function link(scope, element, attrs) {
+            var possibleCharacters = attrs.fastaSequenceValidator || ['A', 'C', 'T', 'G'];
+
+            initialize();
+
+            function initialize() {
+                element.on('keypress', function(event) {
+                    var pressed = String.fromCharCode(event.which);
+                    if (possibleCharacters.indexOf(pressed) === -1) {
+                        event.preventDefault();
+                    }
+                });
+            }
+        }
+    }
+})();
+(function () {
+    angular.
+        module('fastaView').
+        directive('fastaNavigationFooter', ['$location', navigationFooter]);
+
+    function navigationFooter($location) {
         return {
             restrict: 'A',
             scope: {
                 previousUrl: '@',
-                nextUrl: '@'
+                nextUrl: '@',
+                lastStep: '=',
+                saveStep: '&',
+                config: '='
             },
             link: link,
             templateUrl: 'view/shared/navigationFooter/fasta-navigation-footer.html'
         };
 
-        function link() {
+        function link(scope) {
             initialize();
 
             function initialize() {
+                initializeScopeVariables();
+                initializeScopeFunctions();
+            }
 
+            function initializeScopeVariables() {
+                console.log(scope);
+                scope.currentStep = scope.lastStep;
+                scope.description = scope.config[scope.currentStep].description;
+            }
+
+            function initializeScopeFunctions() {
+                scope.nextStep = nextStep;
+                scope.previousStep = previousStep;
+                scope.isLastStep = isLastStep;
+                scope.isFirstStep = isFirstStep;
+
+                scope.nextStage = nextStage;
+            }
+
+            function nextStep() {
+                ++scope.currentStep;
+                scope.description = scope.config[scope.currentStep].description;
+                scope.config[scope.currentStep].action();
+            }
+
+            function previousStep() {
+                scope.config[scope.currentStep].reverse();
+                --scope.currentStep;
+                scope.description = scope.config[scope.currentStep].description;
+            }
+
+            function isLastStep() {
+                return scope.currentStep === scope.config.length - 1;
+            }
+
+            function isFirstStep() {
+                return scope.currentStep === 0;
+            }
+
+            function nextStage() {
+                if (isLastStep()) {
+                    scope.saveStep({lastStep: scope.currentStep});
+                    $location.url(scope.nextUrl);
+                } else {
+                    finishStage();
+                }
+            }
+
+            function finishStage() {
+                while(!isLastStep()) {
+                    nextStep();
+                }
             }
         }
     }
@@ -252,17 +373,20 @@ function makeRemoveClassHandler(regex) {
             $scope.configData.baseSequence = ConfigurationService.baseSequence;
             $scope.configData.querySequence = ConfigurationService.querySequence;
             $scope.configData.kTup = ConfigurationService.kTup;
+            $scope.configData.scoreMatrix = ConfigurationService.scoreMatrix;
+            $scope.configData.gapPenalty = ConfigurationService.gapPenalty;
         }
 
         function initializeScopeFunctions() {
             $scope.save = save;
         }
 
-        //TODO: instead of saving - bind already to ConfigurationService
         function save(){
             ConfigurationService.baseSequence = $scope.configData.baseSequence;
             ConfigurationService.querySequence = $scope.configData.querySequence;
             ConfigurationService.kTup = $scope.configData.kTup;
+            ConfigurationService.scoreMatrix = $scope.configData.scoreMatrix;
+            ConfigurationService.gapPenalty = $scope.configData.gapPenalty;
         }
     }
 })();
@@ -274,11 +398,13 @@ function makeRemoveClassHandler(regex) {
 
     function FirstController($scope, $q, ConfigurationService, FirstDataService) {
 
+        var sequencePromise, basePromise;
+
         initialize();
 
         function initialize() {
             initializeScopeVariables();
-            getStageData();
+            initializeScopeFunctions();
         }
 
         function initializeScopeVariables() {
@@ -286,29 +412,79 @@ function makeRemoveClassHandler(regex) {
             $scope.stepData.kTup = ConfigurationService.kTup;
             $scope.stepData.baseSequence = ConfigurationService.baseSequence;
             $scope.stepData.querySequence = ConfigurationService.querySequence;
+            $scope.stepData.baseSequenceIndices = FirstDataService.baseSequenceIndices;
+            $scope.stepData.lastStep = FirstDataService.lastStep || 0;
+            $scope.stepData.querySequenceIndices = FirstDataService.querySequenceIndices;
+            $scope.stepData.hotSpots = ConfigurationService.hotSpots;
+
+            $scope.stepData.stepByStepConfig = [
+                {description: 'Stage 1 - beginning'},
+                {
+                    description: "calculating indices for base sequence",
+                    action: baseIndicesStep,
+                    reverse: reverseBaseIndices
+                },
+                {
+                    description: "calculating indices for query sequence",
+                    action: queryIndicesStep,
+                    reverse: reverseQueryIndices
+                },
+                {description: "calculating hot spots", action: hotSpotsStep, reverse: reverseHotSpots}
+            ];
         }
 
-        function getStageData() {
-            var sequencePromise, basePromise;
-            sequencePromise = FirstDataService.getSequenceIndices($scope.stepData.baseSequence, $scope.stepData.kTup);
-            sequencePromise.then(function(data) {
+        function initializeScopeFunctions() {
+            $scope.saveLastStep = saveLastStep;
+        }
+
+        function baseIndicesStep() {
+            if (!basePromise) {
+                basePromise = FirstDataService.getSequenceIndices($scope.stepData.baseSequence, $scope.stepData.kTup);
+            }
+            basePromise.then(function (data) {
+                FirstDataService.baseSequenceIndices = data;
                 $scope.stepData.baseSequenceIndices = data;
             });
+        }
 
-            basePromise = FirstDataService.getSequenceIndices($scope.stepData.querySequence, $scope.stepData.kTup);
-            basePromise.then(function(data) {
+        function queryIndicesStep() {
+            if (!sequencePromise) {
+                sequencePromise = FirstDataService.getSequenceIndices($scope.stepData.querySequence, $scope.stepData.kTup);
+            }
+            sequencePromise.then(function (data) {
+                FirstDataService.querySequenceIndices = data;
                 $scope.stepData.querySequenceIndices = data;
             });
+        }
 
-            $q.all([sequencePromise, basePromise]).then(function() {
+        function hotSpotsStep() {
+            $q.all([sequencePromise, basePromise]).then(function () {
                 FirstDataService.getHotSpots($scope.stepData.baseSequenceIndices, $scope.stepData.querySequenceIndices).then(function (data) {
                     ConfigurationService.hotSpots = data;
                     $scope.stepData.hotSpots = data;
                 });
             });
         }
+
+        function reverseBaseIndices() {
+            $scope.stepData.baseSequenceIndices = undefined;
+        }
+
+        function reverseQueryIndices() {
+            $scope.stepData.querySequenceIndices = undefined;
+        }
+
+        function reverseHotSpots() {
+            ConfigurationService.hotSpots = undefined;
+            $scope.stepData.hotSpots = undefined;
+        }
+
+        function saveLastStep(lastStep) {
+            FirstDataService.lastStep = lastStep;
+        }
     }
-})();
+})
+();
 
 (function () {
     angular
@@ -316,36 +492,6 @@ function makeRemoveClassHandler(regex) {
         .factory('FirstDataService', ['$q', '$timeout', firstDataService]);
 
     function firstDataService($q, $timeout) {
-        var baseSequence = {
-            'GACACC': [1, 3],
-            'ACACCA': [13],
-            'CACCAT': [5, 7, 4],
-            'ACCATC': [10, 6],
-            'GAATGG': [0, 16],
-            'AATGGC': [18],
-            'CCTTTC': [22, 17, 14],
-            'CGCGGT': [26, 28]
-            },
-            querySequence = {
-            'GACACC': [1, 2],
-                'ACACCA': [13],
-                'CACCAT': [5, 7, 4],
-                'ACCATC': [10, 6],
-                'GAATGG': [0, 16],
-                'AATGGC': [18],
-                'CCTTTC': [22, 17, 14],
-                'CGCGGT': [26, 28]
-            },
-            hotSpots = {
-            'GACACC': [],
-                'ACACCA': [1],
-                'CACCAT': [-5, 7, 4],
-                'ACCATC': [10, -6],
-                'GAATGG': [],
-                'AATGGC': [18],
-                'CGCGGT': [26, 28]
-        };
-
         return {
             getSequenceIndices: getSequenceIndices,
             getHotSpots: getHotSpots
@@ -393,14 +539,40 @@ function makeRemoveClassHandler(regex) {
             $scope.stepData.kTup = ConfigurationService.kTup;
             $scope.stepData.baseSequence = ConfigurationService.baseSequence;
             $scope.stepData.querySequence = ConfigurationService.querySequence;
+            $scope.stepData.lastStep = SecondDataService.lastStep || 0;
 
-            $scope.stepData.scoreMatrix = {
-                A: {A:1, C:-1, G:-1, T:-1},
-                C: {A:-1, C:1, G:-1, T:-1},
-                G: {A:-1, C:-1, G:1, T:-1},
-                T: {A:-1, C:-1, G:-1, T:1}
-            };
+            $scope.stepData.scoreMatrix = ConfigurationService.scoreMatrix;
 
+            $scope.stepData.stepByStepConfig = [
+                {description: 'Stage 2 - beginning'},
+                {
+                    description: "find all diagonals",
+                    action: findDiagonals,
+                    reverse: reverseFindDiagonals
+                }
+            ];
+        }
+
+        function initializeScopeFunctions() {
+            $scope.score = score;
+            $scope.saveLastStep = saveLastStep;
+        }
+
+        function score() {
+            SecondDataService.score($scope.stepData.diagonals, $scope.stepData.scoreMatrix,
+                $scope.stepData.baseSequence, $scope.stepData.querySequence).then(function(scored) {
+                    console.log('ha');
+                    $scope.stepData.diagonals = scored;
+                    $scope.clearDiagonalsTable();
+                    $scope.drawDiagonalsTable($scope.stepData.diagonals);
+                });
+        }
+
+        function saveLastStep() {
+            SecondDataService.lastStep = lastStep;
+        }
+
+        function findDiagonals() {
             //TODO: param for max gap
             SecondDataService.getDiagonals(ConfigurationService.hotSpots, $scope.stepData.kTup, 0).then(function (diagonals) {
                 $scope.stepData.diagonals = diagonals;
@@ -417,18 +589,9 @@ function makeRemoveClassHandler(regex) {
             });
         }
 
-        function initializeScopeFunctions() {
-            $scope.score = score;
-        }
-
-        function score() {
-            SecondDataService.score($scope.stepData.diagonals, $scope.stepData.scoreMatrix,
-                $scope.stepData.baseSequence, $scope.stepData.querySequence).then(function(scored) {
-                    console.log('ha');
-                    $scope.stepData.diagonals = scored;
-                    $scope.clearDiagonalsTable();
-                    $scope.drawDiagonalsTable($scope.stepData.diagonals);
-                });
+        function reverseFindDiagonals() {
+            $scope.stepData.diagonals = undefined;
+            $scope.clearDiagonalsTable();
         }
     }
 })();

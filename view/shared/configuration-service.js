@@ -14,7 +14,7 @@
 
         return {
             // default values
-            baseSequence: "AACACTTTTCAAT",
+            baseSequence: "AACACTTTTCA",
             querySequence: "ACTTATCA",
             kTup: 2,
             scoreMatrix: scoreMatrix,

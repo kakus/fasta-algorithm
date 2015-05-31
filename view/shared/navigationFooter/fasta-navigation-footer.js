@@ -1,14 +1,16 @@
 (function () {
     angular.
         module('fastaView').
-        directive('fastaNavigationFooter', [navigationFooter]);
+        directive('fastaNavigationFooter', ['$location', navigationFooter]);
 
-    function navigationFooter() {
+    function navigationFooter($location) {
         return {
             restrict: 'A',
             scope: {
                 previousUrl: '@',
                 nextUrl: '@',
+                lastStep: '=',
+                saveStep: '&',
                 config: '='
             },
             link: link,
@@ -19,12 +21,23 @@
             initialize();
 
             function initialize() {
-                scope.currentStep = 0;
+                initializeScopeVariables();
+                initializeScopeFunctions();
+            }
+
+            function initializeScopeVariables() {
+                console.log(scope);
+                scope.currentStep = scope.lastStep;
                 scope.description = scope.config[scope.currentStep].description;
+            }
+
+            function initializeScopeFunctions() {
                 scope.nextStep = nextStep;
                 scope.previousStep = previousStep;
-                scope.lastStep = lastStep;
-                scope.firstStep = firstStep;
+                scope.isLastStep = isLastStep;
+                scope.isFirstStep = isFirstStep;
+
+                scope.nextStage = nextStage;
             }
 
             function nextStep() {
@@ -39,12 +52,27 @@
                 scope.description = scope.config[scope.currentStep].description;
             }
 
-            function lastStep() {
+            function isLastStep() {
                 return scope.currentStep === scope.config.length - 1;
             }
 
-            function firstStep() {
+            function isFirstStep() {
                 return scope.currentStep === 0;
+            }
+
+            function nextStage() {
+                if (isLastStep()) {
+                    scope.saveStep({lastStep: scope.currentStep});
+                    $location.url(scope.nextUrl);
+                } else {
+                    finishStage();
+                }
+            }
+
+            function finishStage() {
+                while(!isLastStep()) {
+                    nextStep();
+                }
             }
         }
     }

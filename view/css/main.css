@@ -20,12 +20,12 @@ body {
 
 /* TABLE */
 
-table {
-    table-layout: fixed;
+.scroll-table {
+    overflow-x: auto;
 }
 
 td, th{
-    text-align:center; 
+    text-align:center;
     vertical-align:middle;
 }
 
@@ -37,7 +37,8 @@ td, th{
 }
 
 .highlight{
-    color: #DDD;
+    font-weight: bold;
+    color: #FF0000;
 }
 
 .diagonal-highlight{

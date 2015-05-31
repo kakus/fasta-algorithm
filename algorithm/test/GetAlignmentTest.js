@@ -71,7 +71,7 @@ describe("getAlignment", function() {
         expect(alignment.querySequence).toEqual('AC---T');
         expect(alignment.baseOffset).toEqual(1);
     });
-    
+
     it("should return alignment AC--CTT-AG - A|ACGG-TTCAG| for path with three diagonals and sequences: ACCTTAG and AACGGTTCAG", function() {
         var path = new fasta.DiagonalsPath([
                 new fasta.Diagonal([0, 1], [1, 2]),

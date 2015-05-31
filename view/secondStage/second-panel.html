@@ -11,7 +11,7 @@
         <tr ng-repeat="(symbol, values) in stepData.scoreMatrix track by $index">
             <td ><b> {{symbol}} </b></td>
             <td ng-repeat="(key, scoreValue) in values track by $index" data-container="body">
-                <input type="number" ng-model="stepData.scoreMatrix[symbol][key]">
+                <input type="number" class="text-center" disabled ng-model="stepData.scoreMatrix[symbol][key]">
             </td>
         </tr>
         </tbody>
@@ -24,4 +24,5 @@
     </div>
 </div>
 
-<div fasta-navigation-footer previous-url="#/first_stage" next-url="#/third_stage"></div>
+<div fasta-navigation-footer previous-url="#/first_stage" next-url="#/third_stage" last-step="stepData.lastStep"
+     save-step="saveLastStep(lastStep)" config="stepData.stepByStepConfig"></div>
