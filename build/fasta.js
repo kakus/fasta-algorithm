@@ -14,6 +14,19 @@ Array.prototype.pushUnique = function(element)
 var fasta;
 (function (fasta) {
 
+    function Alignment(baseSequence, querySequence, baseOffset, queryOffset) {
+        this.baseSequence = baseSequence;
+        this.querySequence = querySequence;
+        this.baseOffset = baseOffset;
+        this.queryOffset = queryOffset;
+    }
+
+    fasta.Alignment = Alignment;
+})(fasta = fasta || {});
+
+var fasta;
+(function (fasta) {
+
     function Diagonal(startPoint, endPoint, score) {
         this.startPoint = startPoint; // [int x, int y]
         this.endPoint = endPoint; // [int x, int y]
@@ -28,7 +41,6 @@ var fasta;
 
     function DiagonalsPath(diagonals, score) {
         this.diagonals = diagonals;
-        //TODO: start and end points calculated from array?
         this.score = score;
     }
 
@@ -46,80 +58,15 @@ var fasta;
 fasta.HotSpot = HotSpot;
 })(fasta = fasta || {});
 
+
 var fasta;
 (function (fasta) {
 
-// Calucalte diffrence of indexes in same tulples in query and example.
-//
-// @param example the IndexingArray of sequence from database
-// @param query the IndexingArray of query sequence
-// @return IndexingArray with hotspots
-    function findHotspots(query, example) {
-        checkNotNull(query);
-        checkNotNull(example);
-        var hotspots = {};
+    function restrictedSmithWaterman(bestDiagonal, k, baseSequence, querySequence) {
 
-        for (var tuple in query) {
-            if (example[tuple]) {
-
-                var queryOffset = query[tuple];
-                for (var i = 0; i < queryOffset.length; i++) {
-
-                    var exampleOffset = example[tuple];
-                    for (var j = 0; j < exampleOffset.length; j++) {
-                        var hotSpot = new fasta.HotSpot(exampleOffset[j] - queryOffset[i],
-                            {query: queryOffset[i], base: exampleOffset[j]});
-                        if (!hotspots[tuple]) {
-                            hotspots[tuple] = [];
-                        }
-                        hotspots[tuple].pushUnique(hotSpot);
-                    }
-
-                }
-
-            }
-        }
-        return hotspots;
     }
 
-    fasta.findHotspots = findHotspots;
-})(fasta = fasta || {});
-
-var fasta;
-(function(fasta) {
-
-// First step in FASTA algorithm.
-// Find all tuples/fragments (unique combination of symbols) of length ktup in given
-// sequence, also store offset of appearance of tuple in sequence.
-//
-// This object is a map where key <String> is the tuple, and value <Array<number>> is
-// array of offsets where this tuple appears.
-// @example
-//    var array = new IndexingArray('ABA', 2);
-//    array['AB']; // will return [0]
-function IndexingArray(sequence, ktup)
-{
-   checkNotNull(sequence);
-   checkNotNull(ktup);
-
-   if (sequence.length < ktup) {
-      throw new Error("ktup must be greater or equal to sequence length");
-   }
-
-   for(var i = 0; i <= sequence.length - ktup; ++i) {
-
-      var tuple = sequence.substring(i, i + ktup);
-
-      if (this[tuple]) {
-         this[tuple].push(i);
-      }
-      else {
-         this[tuple] = [i];
-      }
-   }
-}
-
-fasta.IndexingArray = IndexingArray;
+    fasta.restrictedSmithWaterman = restrictedSmithWaterman;
 })(fasta = fasta || {});
 
 var fasta;
@@ -376,9 +323,58 @@ var fasta;
     fasta.createDiagonalsPaths = createDiagonalsPaths;
 })(fasta = fasta || {});
 
-/**
- * Created by kubex on 2015-05-28.
- */
+
+var fasta;
+(function (fasta) {
+
+    function getAlignment(path, baseSequence, querySequence) {
+        var diagonals = path.diagonals,
+            previous = diagonals[0],
+            baseAlignment = baseSequence.substring(previous.startPoint[0], previous.endPoint[0] + 1),
+            queryAlignment = querySequence.substring(previous.startPoint[1], previous.endPoint[1] + 1);
+
+        for (var i = 1; i < diagonals.length; i++) {
+            var current = diagonals[i];
+            baseAlignment += createBaseAlignment(current, previous, baseSequence);
+            queryAlignment += createQueryAlignment(current, previous, querySequence);
+            previous = current;
+        }
+
+        return new fasta.Alignment(baseAlignment, queryAlignment,  diagonals[0].startPoint[0], diagonals[0].startPoint[1]);
+    }
+
+    function createBaseAlignment(current, previous, baseSequence) {
+        var baseAlignment = Array((current.startPoint[1] - previous.endPoint[1])).join('-'),
+            additionalBase = 0;
+
+        if (current.startPoint[0] === previous.endPoint[0]) {
+            baseAlignment += '-';
+            additionalBase = 1;
+        } else {
+            baseAlignment += baseSequence.substring(previous.endPoint[0] + 1, current.startPoint[0]);
+        }
+        baseAlignment += baseSequence.substring(current.startPoint[0] + additionalBase, current.endPoint[0] + 1);
+
+        return baseAlignment;
+    }
+
+    function createQueryAlignment(current, previous, querySequence) {
+        var queryAlignment = "",
+            additionalQuery = 0;
+        if (current.startPoint[1] !== previous.endPoint[1]) {
+            queryAlignment += querySequence.substring(previous.endPoint[1] + 1, current.startPoint[1]);
+        } else {
+            queryAlignment += '-';
+            additionalQuery = 1;
+        }
+        queryAlignment += Array((current.startPoint[0] - previous.endPoint[0])).join('-');
+        queryAlignment += querySequence.substring(current.startPoint[1] + additionalQuery, current.endPoint[1] + 1);
+
+        return queryAlignment;
+    }
+
+    fasta.getAlignment = getAlignment;
+})(fasta = fasta || {});
 
 var fasta;
 (function (fasta) {
@@ -428,4 +424,80 @@ var fasta;
     }
 
     fasta.scoreDiagonalsPaths = scoreDiagonalsPaths;
+})(fasta = fasta || {});
+
+var fasta;
+(function (fasta) {
+
+// Calucalte diffrence of indexes in same tulples in query and example.
+//
+// @param example the IndexingArray of sequence from database
+// @param query the IndexingArray of query sequence
+// @return IndexingArray with hotspots
+    function findHotspots(query, example) {
+        checkNotNull(query);
+        checkNotNull(example);
+        var hotspots = {};
+
+        for (var tuple in query) {
+            if (example[tuple]) {
+
+                var queryOffset = query[tuple];
+                for (var i = 0; i < queryOffset.length; i++) {
+
+                    var exampleOffset = example[tuple];
+                    for (var j = 0; j < exampleOffset.length; j++) {
+                        var hotSpot = new fasta.HotSpot(exampleOffset[j] - queryOffset[i],
+                            {query: queryOffset[i], base: exampleOffset[j]});
+                        if (!hotspots[tuple]) {
+                            hotspots[tuple] = [];
+                        }
+                        hotspots[tuple].pushUnique(hotSpot);
+                    }
+
+                }
+
+            }
+        }
+        return hotspots;
+    }
+
+    fasta.findHotspots = findHotspots;
+})(fasta = fasta || {});
+
+var fasta;
+(function(fasta) {
+
+// First step in FASTA algorithm.
+// Find all tuples/fragments (unique combination of symbols) of length ktup in given
+// sequence, also store offset of appearance of tuple in sequence.
+//
+// This object is a map where key <String> is the tuple, and value <Array<number>> is
+// array of offsets where this tuple appears.
+// @example
+//    var array = new IndexingArray('ABA', 2);
+//    array['AB']; // will return [0]
+function IndexingArray(sequence, ktup)
+{
+   checkNotNull(sequence);
+   checkNotNull(ktup);
+
+   if (sequence.length < ktup) {
+      throw new Error("ktup must be greater or equal to sequence length");
+   }
+
+   for(var i = 0; i <= sequence.length - ktup; ++i) {
+
+      var tuple = sequence.substring(i, i + ktup);
+
+      if (this[tuple]) {
+         this[tuple].push(i);
+      }
+      else {
+         this[tuple] = [i];
+      }
+   }
+}
+
+fasta.IndexingArray = IndexingArray;
 })(fasta = fasta || {});
