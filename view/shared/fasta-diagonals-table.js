@@ -13,6 +13,8 @@
 
         function link(scope, element) {
 
+            var currentHighlightedCells;
+
             initialize();
 
             function initialize() {
@@ -22,8 +24,8 @@
             function initializeScopeFunctions() {
                 scope.drawDiagonalsTable = drawDiagonalsTable;
                 scope.drawDiagonal = drawDiagonal;
-                scope.eraseDiagonal = eraseDiagonal;
                 scope.clearDiagonalsTable = clearDiagonalsTable;
+                scope.highlightDiagonal = highlightDiagonal;
             }
 
             function drawDiagonalsTable(diagonals) {
@@ -46,9 +48,11 @@
                 var name = x + '_' + y,
                     cell = element.find('[name="' + name + '"]');
                 cell.html('x');
-                cell.attr('title', 'score: ' + score);
+                if (score !== undefined) {
+                    cell.attr('title', 'score: ' + score);
+                    cell.tooltip();
+                }
                 cell.addClass(diagonalClassName);
-                cell.tooltip();
 
                 cell.hover(function () {
                     element.find('.' + diagonalClassName).addClass("diagonal-highlight");
@@ -69,18 +73,16 @@
                 }
             }
 
-            function eraseDiagonal(tableId, diagonal) {
-                var diagonalClassName = "diagonal-" + diagonal.startPoint[0] + "-" + diagonal.startPoint[1]; //name is necessary to group cells in one diagonal - by css class
+            function highlightDiagonal(diagonal) {
+                var diagonalClassName = "diagonal-" + diagonal.startPoint[0] + "-" + diagonal.startPoint[1],
+                    cells = element.find('.' + diagonalClassName);
 
-                $.each($('#' + tableId + ' .' + diagonalClassName), function () {
-                    $(this).empty();
-                    $(this).removeAttr("title");
-                    $(this).removeClass(diagonalClassName);
-                    $(this).off('mouseenter mouseleave');
-                });
+                if (currentHighlightedCells) {
+                    currentHighlightedCells.removeClass('highlight-on-click');
+                }
+                cells.addClass('highlight-on-click');
+                currentHighlightedCells = cells;
             }
-
-
         }
     }
 })();

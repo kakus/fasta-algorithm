@@ -1,23 +1,50 @@
 <div class="panel panel-default">
-    <div class="panel-heading">Stage 2</div>
-    <table id="scoring-matrix" class="">
-        <thead>
-        <tr class="success">
-            <th> # </th>
-            <th ng-repeat="(symbol, values) in stepData.scoreMatrix track by $index">{{symbol}}</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr ng-repeat="(symbol, values) in stepData.scoreMatrix track by $index">
-            <td ><b> {{symbol}} </b></td>
-            <td ng-repeat="(key, scoreValue) in values track by $index" data-container="body">
-                <input type="number" class="text-center" disabled ng-model="stepData.scoreMatrix[symbol][key]">
-            </td>
-        </tr>
-        </tbody>
-    </table>
-    <a class="btn btn-default" ng-click="score()">Recalculate score</a>
+    <div class="panel-heading text-center"><b>Stage 2 - Linking Hot Spots and finding best Diagonals</b></div>
+
     <div class="panel-body">
+        <table id="scoring-matrix" class="">
+            <thead>
+            <tr class="success">
+                <th> #</th>
+                <th ng-repeat="(symbol, values) in stepData.scoreMatrix track by $index">{{symbol}}</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr ng-repeat="(symbol, values) in stepData.scoreMatrix track by $index">
+                <td><b> {{symbol}} </b></td>
+                <td ng-repeat="(key, scoreValue) in values track by $index" data-container="body">
+                    <input type="number" class="text-center" disabled ng-model="stepData.scoreMatrix[symbol][key]">
+                </td>
+            </tr>
+            </tbody>
+        </table>
+        <label>Maximum distance between Hot Spots to link:</label>
+        <input type="number">
+
+        <div>
+            <label>List of<span ng-if="stepData.foundBestStep"> 10 best</span> found diagonals:</label>
+            <span>(coordinates starts from 0, click on diagonal to highlight in Diagonals Table)</span>
+
+            <p>Base Sequence: <span id="baseSequence-p">{{::stepData.baseSequence}}</span></p>
+
+            <p>Query Sequence: <span id="querySequence-p"> {{::stepData.querySequence}} </span></p>
+            <ul>
+                <li ng-repeat="diagonal in stepData.currentDiagonals" class="highlight-on-hover" fasta-highlight
+                    highlight-paragraphs-list="::[{paragraphId: 'baseSequence-p', content: stepData.baseSequence,
+                     startIndex: diagonal.startPoint[0], length: (diagonal.endPoint[0] - diagonal.startPoint[0]) + 1},
+                     {paragraphId: 'querySequence-p', content: stepData.querySequence, startIndex: diagonal.startPoint[1], length: (diagonal.endPoint[1] - diagonal.startPoint[1]) + 1}]">
+                    <a class="diagonal-link" ng-click="highlightOnDiagonalsTable(diagonal)" ng-class="{'highlight-on-click-text' : (stepData.selectedDiagonal == diagonal)}">
+                        Base Sequence: [{{::diagonal.startPoint[0]}}, {{::diagonal.endPoint[0]}}] -
+                        {{::stepData.baseSequence | limitTo : (diagonal.endPoint[0] - diagonal.startPoint[0]) + 1 :
+                        diagonal.startPoint[0]}},
+                        Query Sequence: [{{::diagonal.startPoint[1]}}, {{::diagonal.endPoint[1]}}] -
+                        {{::stepData.querySequence | limitTo : (diagonal.endPoint[1] - diagonal.startPoint[1]) + 1 :
+                        diagonal.startPoint[1]}}<span ng-show="diagonal.score !== undefined">, Diagonal Score: {{diagonal.score}}</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+
         <div class="container-overflow">
             <div fasta-diagonals-table></div>
         </div>

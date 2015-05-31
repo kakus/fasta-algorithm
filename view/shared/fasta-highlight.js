@@ -1,26 +1,24 @@
 (function () {
     angular
         .module('fastaView')
-        .directive('fastaHighlight', [fastaHighlight]);
+        .directive('fastaHighlight', ['$document', fastaHighlight]);
 
-    function fastaHighlight() {
+    function fastaHighlight($document) {
         return {
             restrict: 'A',
             scope: {
-                paragraphId: '@',
-                content: '=',
-                startIndex: '=',
-                length: '='
+                highlightParagraphsList: '='
+                //paragraphId: '@',
+                //content: '=',
+                //startIndex: '=',
+                //length: '='
             },
             transclude: true,
             link: link,
-            template: '<div ng-mouseover="highlightPartOfParagraph()" ng-mouseleave="highlightOff()"><ng-transclude ></ng-transclude></div>'
+            template: '<div ng-mouseover="highlightPartOfParagraphs()" ng-mouseleave="highlightOff()"><ng-transclude></ng-transclude></div>'
         };
 
-        function link(scope) {
-
-            var index = parseInt(scope.startIndex),
-                length = parseInt(scope.length);
+        function link(scope, element) {
 
             initialize();
 
@@ -29,22 +27,33 @@
             }
 
             function initializeScopeFunctions() {
-                scope.highlightPartOfParagraph = highlightPartOfParagraph;
+                scope.highlightPartOfParagraphs = highlightPartOfParagraphs;
                 scope.highlightOff = highlightOff;
             }
 
-            function highlightPartOfParagraph() {
-                var prefix, suffix, highlightedPart;
+            function highlightPartOfParagraphs() {
+                for (var i = 0; i < scope.highlightParagraphsList.length; i++) {
+                    highlight(scope.highlightParagraphsList[i]);
+                }
+            }
 
-                prefix = scope.content.slice(0, index);
-                highlightedPart = scope.content.slice(index, index + length);
-                suffix = scope.content.slice(index + length);
+            function highlight(paragraphData) {
+                var prefix, suffix, highlightedPart,
+                    index = parseInt(paragraphData.startIndex),
+                    length = parseInt(paragraphData.length);
 
-                $('#' + scope.paragraphId).html(prefix + '<span class="highlight">' + highlightedPart + '</span>' + suffix);
+                prefix = paragraphData.content.slice(0, index);
+                highlightedPart = paragraphData.content.slice(index, index + length);
+                suffix = paragraphData.content.slice(index + length);
+
+                $document.find('#' + paragraphData.paragraphId).html(prefix + '<span class="highlight">' + highlightedPart + '</span>' + suffix);
             }
 
             function highlightOff() {
-                $('#' + scope.paragraphId).html(scope.content);
+                for (var i = 0; i < scope.highlightParagraphsList.length; i++) {
+                    $document.find('#' + scope.highlightParagraphsList[i].paragraphId)
+                        .html(scope.highlightParagraphsList[i].content)
+                }
             }
         }
     }

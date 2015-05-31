@@ -24,8 +24,8 @@
                         <tr>
                             <td ng-repeat="value in stepData.baseSequenceIndices">
                                 <p class="highlight-on-hover"
-                                   fasta-highlight paragraph-id="baseSequence-p" content="stepData.baseSequence"
-                                   start-index="element" length="stepData.kTup"
+                                   fasta-highlight highlight-paragraphs-list="[{paragraphId: 'baseSequence-p',
+                                    content: stepData.baseSequence, startIndex: element, length: stepData.kTup}]"
                                    ng-repeat="element in value">
                                     {{::element}}
                                 </p>
@@ -54,8 +54,8 @@
                         <tr>
                             <td ng-repeat="value in stepData.querySequenceIndices">
                                 <p class="highlight-on-hover"
-                                   fasta-highlight paragraph-id="querySequence-p" content="stepData.querySequence"
-                                   start-index="element" length="stepData.kTup"
+                                   fasta-highlight highlight-paragraphs-list="[{paragraphId: 'querySequence-p',
+                                    content: stepData.querySequence, startIndex: element, length: stepData.kTup}]"
                                    ng-repeat="element in value">
                                     {{element}}
                                 </p>

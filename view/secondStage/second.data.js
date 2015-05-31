@@ -7,7 +7,8 @@
 
         return {
             getDiagonals: getDiagonals,
-            score: score
+            score: score,
+            get10Best: get10Best
         };
 
         function getDiagonals(hotSpots, ktup, maxGapLength) {
@@ -23,10 +24,18 @@
         function score(diagonals, scoreMatrix, baseSequence, querySequence) {
             var deferred = $q.defer();
 
-            console.log(scoreMatrix);
-
             $timeout(function () {
                 deferred.resolve(fasta.scoreDiagonals(diagonals, scoreMatrix, baseSequence, querySequence));
+            });
+
+            return deferred.promise;
+        }
+
+        function get10Best(diagonals) {
+            var deferred = $q.defer();
+
+            $timeout(function () {
+                deferred.resolve(fasta.getBestDiagonals(diagonals));
             });
 
             return deferred.promise;

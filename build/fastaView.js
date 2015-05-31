@@ -87,6 +87,8 @@ function Diagonal(startPoint, endPoint, score ){
 
         function link(scope, element) {
 
+            var currentHighlightedCells;
+
             initialize();
 
             function initialize() {
@@ -96,8 +98,8 @@ function Diagonal(startPoint, endPoint, score ){
             function initializeScopeFunctions() {
                 scope.drawDiagonalsTable = drawDiagonalsTable;
                 scope.drawDiagonal = drawDiagonal;
-                scope.eraseDiagonal = eraseDiagonal;
                 scope.clearDiagonalsTable = clearDiagonalsTable;
+                scope.highlightDiagonal = highlightDiagonal;
             }
 
             function drawDiagonalsTable(diagonals) {
@@ -120,9 +122,11 @@ function Diagonal(startPoint, endPoint, score ){
                 var name = x + '_' + y,
                     cell = element.find('[name="' + name + '"]');
                 cell.html('x');
-                cell.attr('title', 'score: ' + score);
+                if (score !== undefined) {
+                    cell.attr('title', 'score: ' + score);
+                    cell.tooltip();
+                }
                 cell.addClass(diagonalClassName);
-                cell.tooltip();
 
                 cell.hover(function () {
                     element.find('.' + diagonalClassName).addClass("diagonal-highlight");
@@ -143,44 +147,40 @@ function Diagonal(startPoint, endPoint, score ){
                 }
             }
 
-            function eraseDiagonal(tableId, diagonal) {
-                var diagonalClassName = "diagonal-" + diagonal.startPoint[0] + "-" + diagonal.startPoint[1]; //name is necessary to group cells in one diagonal - by css class
+            function highlightDiagonal(diagonal) {
+                var diagonalClassName = "diagonal-" + diagonal.startPoint[0] + "-" + diagonal.startPoint[1],
+                    cells = element.find('.' + diagonalClassName);
 
-                $.each($('#' + tableId + ' .' + diagonalClassName), function () {
-                    $(this).empty();
-                    $(this).removeAttr("title");
-                    $(this).removeClass(diagonalClassName);
-                    $(this).off('mouseenter mouseleave');
-                });
+                if (currentHighlightedCells) {
+                    currentHighlightedCells.removeClass('highlight-on-click');
+                }
+                cells.addClass('highlight-on-click');
+                currentHighlightedCells = cells;
             }
-
-
         }
     }
 })();
 (function () {
     angular
         .module('fastaView')
-        .directive('fastaHighlight', [fastaHighlight]);
+        .directive('fastaHighlight', ['$document', fastaHighlight]);
 
-    function fastaHighlight() {
+    function fastaHighlight($document) {
         return {
             restrict: 'A',
             scope: {
-                paragraphId: '@',
-                content: '=',
-                startIndex: '=',
-                length: '='
+                highlightParagraphsList: '='
+                //paragraphId: '@',
+                //content: '=',
+                //startIndex: '=',
+                //length: '='
             },
             transclude: true,
             link: link,
-            template: '<div ng-mouseover="highlightPartOfParagraph()" ng-mouseleave="highlightOff()"><ng-transclude ></ng-transclude></div>'
+            template: '<div ng-mouseover="highlightPartOfParagraphs()" ng-mouseleave="highlightOff()"><ng-transclude></ng-transclude></div>'
         };
 
-        function link(scope) {
-
-            var index = parseInt(scope.startIndex),
-                length = parseInt(scope.length);
+        function link(scope, element) {
 
             initialize();
 
@@ -189,22 +189,33 @@ function Diagonal(startPoint, endPoint, score ){
             }
 
             function initializeScopeFunctions() {
-                scope.highlightPartOfParagraph = highlightPartOfParagraph;
+                scope.highlightPartOfParagraphs = highlightPartOfParagraphs;
                 scope.highlightOff = highlightOff;
             }
 
-            function highlightPartOfParagraph() {
-                var prefix, suffix, highlightedPart;
+            function highlightPartOfParagraphs() {
+                for (var i = 0; i < scope.highlightParagraphsList.length; i++) {
+                    highlight(scope.highlightParagraphsList[i]);
+                }
+            }
 
-                prefix = scope.content.slice(0, index);
-                highlightedPart = scope.content.slice(index, index + length);
-                suffix = scope.content.slice(index + length);
+            function highlight(paragraphData) {
+                var prefix, suffix, highlightedPart,
+                    index = parseInt(paragraphData.startIndex),
+                    length = parseInt(paragraphData.length);
 
-                $('#' + scope.paragraphId).html(prefix + '<span class="highlight">' + highlightedPart + '</span>' + suffix);
+                prefix = paragraphData.content.slice(0, index);
+                highlightedPart = paragraphData.content.slice(index, index + length);
+                suffix = paragraphData.content.slice(index + length);
+
+                $document.find('#' + paragraphData.paragraphId).html(prefix + '<span class="highlight">' + highlightedPart + '</span>' + suffix);
             }
 
             function highlightOff() {
-                $('#' + scope.paragraphId).html(scope.content);
+                for (var i = 0; i < scope.highlightParagraphsList.length; i++) {
+                    $document.find('#' + scope.highlightParagraphsList[i].paragraphId)
+                        .html(scope.highlightParagraphsList[i].content)
+                }
             }
         }
     }
@@ -216,63 +227,6 @@ function makeRemoveClassHandler(regex) {
     }
 }
 
-(function () {
-    angular.
-        module('fastaView').
-        directive('fastaMenu', ['$location', menu]);
-
-    function menu($location) {
-        return {
-            restrict: 'A',
-            link: link,
-            templateUrl: 'view/shared/menu/fasta-menu.html'
-        };
-
-        function link(scope) {
-            initialize();
-
-            function initialize() {
-                initializeScopeFunctions();
-            }
-
-            function initializeScopeFunctions() {
-                scope.menuSelected = menuSelected;
-            }
-
-            function menuSelected(selected) {
-                return $location.path() === selected;
-            }
-        }
-    }
-})();
-
-(function () {
-    angular.
-        module('fastaView').
-        directive('fastaSequenceValidator', [sequenceValidator]);
-
-    function sequenceValidator() {
-        return {
-            restrict: 'A',
-            link: link
-        };
-
-        function link(scope, element, attrs) {
-            var possibleCharacters = attrs.fastaSequenceValidator || ['A', 'C', 'T', 'G'];
-
-            initialize();
-
-            function initialize() {
-                element.on('keypress', function(event) {
-                    var pressed = String.fromCharCode(event.which);
-                    if (possibleCharacters.indexOf(pressed) === -1) {
-                        event.preventDefault();
-                    }
-                });
-            }
-        }
-    }
-})();
 (function () {
     angular.
         module('fastaView').
@@ -353,6 +307,63 @@ function makeRemoveClassHandler(regex) {
     }
 })();
 
+(function () {
+    angular.
+        module('fastaView').
+        directive('fastaMenu', ['$location', menu]);
+
+    function menu($location) {
+        return {
+            restrict: 'A',
+            link: link,
+            templateUrl: 'view/shared/menu/fasta-menu.html'
+        };
+
+        function link(scope) {
+            initialize();
+
+            function initialize() {
+                initializeScopeFunctions();
+            }
+
+            function initializeScopeFunctions() {
+                scope.menuSelected = menuSelected;
+            }
+
+            function menuSelected(selected) {
+                return $location.path() === selected;
+            }
+        }
+    }
+})();
+
+(function () {
+    angular.
+        module('fastaView').
+        directive('fastaSequenceValidator', [sequenceValidator]);
+
+    function sequenceValidator() {
+        return {
+            restrict: 'A',
+            link: link
+        };
+
+        function link(scope, element, attrs) {
+            var possibleCharacters = attrs.fastaSequenceValidator || ['A', 'C', 'T', 'G'];
+
+            initialize();
+
+            function initialize() {
+                element.on('keypress', function(event) {
+                    var pressed = String.fromCharCode(event.which);
+                    if (possibleCharacters.indexOf(pressed) === -1) {
+                        event.preventDefault();
+                    }
+                });
+            }
+        }
+    }
+})();
 (function() {
     angular
     .module('fastaView')
@@ -546,9 +557,19 @@ function makeRemoveClassHandler(regex) {
             $scope.stepData.stepByStepConfig = [
                 {description: 'Stage 2 - beginning'},
                 {
-                    description: "find all diagonals",
+                    description: "Find all diagonals by linking close Hot Spots",  //and show
                     action: findDiagonals,
                     reverse: reverseFindDiagonals
+                },
+                {
+                    description: 'Score diagonals with values from score matrix',
+                    action: score,
+                    reverse: reverseScore
+                },
+                {
+                    description: 'Get 10 best diagonals',
+                    action: getBest,
+                    reverse: reverseGetBest
                 }
             ];
         }
@@ -556,16 +577,41 @@ function makeRemoveClassHandler(regex) {
         function initializeScopeFunctions() {
             $scope.score = score;
             $scope.saveLastStep = saveLastStep;
+            $scope.highlightOnDiagonalsTable = highlightOnDiagonalsTable;
         }
 
         function score() {
-            SecondDataService.score($scope.stepData.diagonals, $scope.stepData.scoreMatrix,
+            SecondDataService.score($scope.stepData.currentDiagonals, $scope.stepData.scoreMatrix,
                 $scope.stepData.baseSequence, $scope.stepData.querySequence).then(function(scored) {
-                    console.log('ha');
-                    $scope.stepData.diagonals = scored;
+                    SecondDataService.scoredDiagonals = angular.copy(scored);
+                    $scope.stepData.currentDiagonals = scored;
                     $scope.clearDiagonalsTable();
-                    $scope.drawDiagonalsTable($scope.stepData.diagonals);
+                    $scope.drawDiagonalsTable($scope.stepData.currentDiagonals);
                 });
+        }
+
+        function reverseScore() {
+            $scope.stepData.currentDiagonals = SecondDataService.diagonals;
+            $scope.clearDiagonalsTable();
+            $scope.drawDiagonalsTable($scope.stepData.currentDiagonals);
+        }
+
+        function getBest() {
+            SecondDataService.get10Best($scope.stepData.currentDiagonals).then(function(best) {
+                $scope.stepData.foundBestStep = true;
+                $scope.stepData.currentDiagonals = best;
+                ConfigurationService.bestDiagonals = angular.copy(best);
+                $scope.clearDiagonalsTable();
+                $scope.drawDiagonalsTable($scope.stepData.currentDiagonals);
+            })
+        }
+
+        function reverseGetBest() {
+            ConfigurationService.bestDiagonals = undefined;
+            $scope.stepData.foundBestStep = false;
+            $scope.stepData.currentDiagonals = SecondDataService.scoredDiagonals;
+            $scope.clearDiagonalsTable();
+            $scope.drawDiagonalsTable($scope.stepData.currentDiagonals);
         }
 
         function saveLastStep() {
@@ -575,13 +621,14 @@ function makeRemoveClassHandler(regex) {
         function findDiagonals() {
             //TODO: param for max gap
             SecondDataService.getDiagonals(ConfigurationService.hotSpots, $scope.stepData.kTup, 0).then(function (diagonals) {
-                $scope.stepData.diagonals = diagonals;
+                SecondDataService.diagonals = angular.copy(diagonals);
+                $scope.stepData.currentDiagonals = diagonals;
 
                 var removeWatch = $scope.$watch('drawDiagonalsTable', function () {
                     if ($scope.drawDiagonalsTable) {
                         removeWatch();
                         $timeout(function () {
-                            $scope.drawDiagonalsTable($scope.stepData.diagonals);
+                            $scope.drawDiagonalsTable($scope.stepData.currentDiagonals);
                         });
 
                     }
@@ -590,8 +637,14 @@ function makeRemoveClassHandler(regex) {
         }
 
         function reverseFindDiagonals() {
-            $scope.stepData.diagonals = undefined;
+            $scope.stepData.currentDiagonals = undefined;
+            SecondDataService.diagonals = undefined;
             $scope.clearDiagonalsTable();
+        }
+
+        function highlightOnDiagonalsTable(diagonal) {
+            $scope.stepData.selectedDiagonal = diagonal;
+            $scope.highlightDiagonal(diagonal);
         }
     }
 })();
@@ -605,7 +658,8 @@ function makeRemoveClassHandler(regex) {
 
         return {
             getDiagonals: getDiagonals,
-            score: score
+            score: score,
+            get10Best: get10Best
         };
 
         function getDiagonals(hotSpots, ktup, maxGapLength) {
@@ -621,10 +675,18 @@ function makeRemoveClassHandler(regex) {
         function score(diagonals, scoreMatrix, baseSequence, querySequence) {
             var deferred = $q.defer();
 
-            console.log(scoreMatrix);
-
             $timeout(function () {
                 deferred.resolve(fasta.scoreDiagonals(diagonals, scoreMatrix, baseSequence, querySequence));
+            });
+
+            return deferred.promise;
+        }
+
+        function get10Best(diagonals) {
+            var deferred = $q.defer();
+
+            $timeout(function () {
+                deferred.resolve(fasta.getBestDiagonals(diagonals));
             });
 
             return deferred.promise;

@@ -3,7 +3,6 @@ var fasta;
 
     /**
      * Scores given array of diagonals. Returns same array as input, but with scored diagonals.
-     * WARNING: Objects in original array will be modified by setting score!
      *
      * @param diagonals
      * @param scoreMatrix
@@ -15,10 +14,11 @@ var fasta;
         var diagonal,
             querySubsequence,
             baseSubsequence,
-            score;
-        for (var i = 0; i < diagonals.length; i++) {
+            score,
+            scoredDiagonals = diagonals.slice();
+        for (var i = 0; i < scoredDiagonals.length; i++) {
             score = 0;
-            diagonal = diagonals[i];
+            diagonal = scoredDiagonals[i];
             baseSubsequence = baseSequence.substring(diagonal.startPoint[0], diagonal.endPoint[0] + 1);
             querySubsequence = querySequence.substring(diagonal.startPoint[1], diagonal.endPoint[1] + 1);
 
@@ -29,7 +29,7 @@ var fasta;
 
             diagonal.score = score;
         }
-        return diagonals;
+        return scoredDiagonals;
     }
 
     fasta.scoreDiagonals = scoreDiagonals;
