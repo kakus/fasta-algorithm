@@ -18,6 +18,8 @@
             $scope.configData.baseSequence = ConfigurationService.baseSequence;
             $scope.configData.querySequence = ConfigurationService.querySequence;
             $scope.configData.kTup = ConfigurationService.kTup;
+            $scope.configData.scoreMatrix = ConfigurationService.scoreMatrix;
+            $scope.configData.gapPenalty = ConfigurationService.gapPenalty;
         }
 
         function initializeScopeFunctions() {
@@ -29,6 +31,8 @@
             ConfigurationService.baseSequence = $scope.configData.baseSequence;
             ConfigurationService.querySequence = $scope.configData.querySequence;
             ConfigurationService.kTup = $scope.configData.kTup;
+            ConfigurationService.scoreMatrix = $scope.configData.scoreMatrix;
+            ConfigurationService.gapPenalty = $scope.configData.gapPenalty;
         }
     }
 })();

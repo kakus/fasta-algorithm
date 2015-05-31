@@ -2,22 +2,58 @@
     <div class="panel-heading">
         Configuration
     </div>
-    <div class="panel-body">
-        <div class="input-group">
-            <span class="input-group-addon"><b>Base sequence</b></span>
-            <input type="text" class="form-control" ng-model="configData.baseSequence" name="baseSequence-input"/>
+    <form class="panel-body">
+        <div class="form-group">
+            <div class="input-group">
+                <span class="input-group-addon"><b>Base sequence:</b></span>
+                <input type="text" class="form-control" ng-model="configData.baseSequence" name="baseSequence-input"
+                       fasta-sequence-validator/>
+            </div>
         </div>
-        <br>
-        <div class="input-group">
-            <span class="input-group-addon"><b>Query sequence</b></span>
-            <input type="text" class="form-control" ng-model="configData.querySequence" name="querySequence-input"/>
+
+        <div class="form-group">
+            <div class="input-group">
+                <span class="input-group-addon"><b>Query sequence:</b></span>
+                <input type="text" class="form-control" ng-model="configData.querySequence" name="querySequence-input"
+                       fasta-sequence-validator/>
+            </div>
         </div>
-        <br>
-        <div class="input-group">
-            <span class="input-group-addon"><b>ktup</b></span>
-            <input type="number" name="ktup-input" min="2" max="6" ng-model="configData.kTup"  class="form-control"/>
+
+        <div class="form-group">
+            <div class="input-group">
+                <span class="input-group-addon"><b>ktup:</b></span>
+                <input type="number" name="ktup-input" min="2" max="6" ng-model="configData.kTup"
+                       class="form-control"/>
+            </div>
         </div>
-    </div>
+
+        <div class="form-group">
+            <div class="input-group">
+                <span class="input-group-addon"><b>Gap penalty:</b></span>
+                <input type="number" name="gapPenalty-input" ng-model="configData.gapPenalty" class="form-control"/>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="control-label">Score Matrix:</label>
+            <table id="scoring-matrix" class="">
+                <thead>
+                <tr class="success">
+                    <th> #</th>
+                    <th ng-repeat="(symbol, values) in configData.scoreMatrix track by $index">{{symbol}}</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr ng-repeat="(symbol, values) in configData.scoreMatrix track by $index">
+                    <td><b> {{symbol}} </b></td>
+                    <td ng-repeat="(key, scoreValue) in values track by $index" data-container="body">
+                        <input type="number" ng-model="configData.scoreMatrix[symbol][key]">
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </form>
 </div>
 
 <div class="panel panel-default">

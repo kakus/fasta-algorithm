@@ -18,12 +18,7 @@
             $scope.stepData.baseSequence = ConfigurationService.baseSequence;
             $scope.stepData.querySequence = ConfigurationService.querySequence;
 
-            $scope.stepData.scoreMatrix = {
-                A: {A:1, C:-1, G:-1, T:-1},
-                C: {A:-1, C:1, G:-1, T:-1},
-                G: {A:-1, C:-1, G:1, T:-1},
-                T: {A:-1, C:-1, G:-1, T:1}
-            };
+            $scope.stepData.scoreMatrix = ConfigurationService.scoreMatrix;
 
             //TODO: param for max gap
             SecondDataService.getDiagonals(ConfigurationService.hotSpots, $scope.stepData.kTup, 0).then(function (diagonals) {
