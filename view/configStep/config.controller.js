@@ -26,7 +26,6 @@
             $scope.save = save;
         }
 
-        //TODO: instead of saving - bind already to ConfigurationService
         function save(){
             ConfigurationService.baseSequence = $scope.configData.baseSequence;
             ConfigurationService.querySequence = $scope.configData.querySequence;

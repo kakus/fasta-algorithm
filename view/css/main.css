@@ -1,3 +1,8 @@
+body {
+    height: 100%;
+    padding-top: 50px;
+}
+
 .panel{
     margin: 10px;
 }
