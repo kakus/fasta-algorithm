@@ -1,23 +1,23 @@
 var fasta;
 (function (fasta) {
 
-// Calucalte diffrence of indexes in same tulples in query and example.
+// Calcucalte difference of indexes in same tuples in query and example.
 //
 // @param example the IndexingArray of sequence from database
 // @param query the IndexingArray of query sequence
-// @return IndexingArray with hotspots
-    function findHotspots(query, example) {
+// @return object with hotspots
+    function findHotspots(query, base) {
         checkNotNull(query);
-        checkNotNull(example);
+        checkNotNull(base);
         var hotspots = {};
 
         for (var tuple in query) {
-            if (example[tuple]) {
+            if (base[tuple]) {
 
                 var queryOffset = query[tuple];
                 for (var i = 0; i < queryOffset.length; i++) {
 
-                    var exampleOffset = example[tuple];
+                    var exampleOffset = base[tuple];
                     for (var j = 0; j < exampleOffset.length; j++) {
                         var hotSpot = new fasta.HotSpot(exampleOffset[j] - queryOffset[i],
                             {query: queryOffset[i], base: exampleOffset[j]});
@@ -26,7 +26,6 @@ var fasta;
                         }
                         hotspots[tuple].pushUnique(hotSpot);
                     }
-
                 }
 
             }
@@ -34,5 +33,16 @@ var fasta;
         return hotspots;
     }
 
+    function findHotspotsForMultipleSequences(query, baseArrays) {
+        var hotspots = {};
+
+        for (var baseSequence in baseArrays) {
+            var base = baseArrays[baseSequence];
+            hotspots[baseSequence] = findHotspots(query, base);
+        }
+        return hotspots;
+    }
+
     fasta.findHotspots = findHotspots;
+    fasta.findHotspotsForMultipleSequences = findHotspotsForMultipleSequences;
 })(fasta = fasta || {});

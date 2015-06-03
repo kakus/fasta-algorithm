@@ -32,5 +32,16 @@ var fasta;
         return scoredDiagonals;
     }
 
+    function scoreDiagonalsForEachBaseSequence(diagonalsBySequences, scoreMatrix, querySequence) {
+        var scoredDiagonals = {};
+
+        for (var sequence in diagonalsBySequences) {
+            var diagonals = diagonalsBySequences[sequence];
+            scoredDiagonals[sequence] = scoreDiagonals(diagonals, scoreMatrix, sequence, querySequence);
+        }
+        return scoredDiagonals;
+    }
+
+    fasta.scoreDiagonalsForEachBaseSequence = scoreDiagonalsForEachBaseSequence;
     fasta.scoreDiagonals = scoreDiagonals;
 })(fasta = fasta || {});

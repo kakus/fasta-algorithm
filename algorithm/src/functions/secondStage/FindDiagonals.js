@@ -1,6 +1,16 @@
 var fasta;
 (function (fasta) {
 
+    function findDiagonalsForEachBaseSequence(hotspotsBySequences, ktup, maxGapLength) {
+        var diagonals = {};
+
+        for (var sequence in hotspotsBySequences) {
+            var hotSpots = hotspotsBySequences[sequence];
+            diagonals[sequence] = findDiagonals(hotSpots, ktup, maxGapLength);
+        }
+        return diagonals;
+    }
+
     function findDiagonals(hotspots, ktup, maxGapLength) {
         var diagonals = [],
             diagonalsOnLine,
@@ -85,8 +95,8 @@ var fasta;
     }
 
     function notIsDuplicate(array, element) {
-        for(var i=0; i < array.length; i++) {
-            if(array[i].startPoint === element.startPoint && array[i].endPoint === element.endPoint) {
+        for (var i = 0; i < array.length; i++) {
+            if (array[i].startPoint === element.startPoint && array[i].endPoint === element.endPoint) {
                 return false;
             }
         }
@@ -94,4 +104,5 @@ var fasta;
     }
 
     fasta.findDiagonals = findDiagonals;
+    fasta.findDiagonalsForEachBaseSequence = findDiagonalsForEachBaseSequence;
 })(fasta = fasta || {});

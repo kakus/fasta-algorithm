@@ -10,6 +10,16 @@ var fasta;
         return sorted.slice(0, 10);
     }
 
+    function getBestDiagonalsForEachSequence(diagonalsBySequences) {
+        var bestDiagonals = {};
+
+        for (var sequence in diagonalsBySequences) {
+            var diagonals = diagonalsBySequences[sequence];
+            bestDiagonals[sequence] = getBestDiagonals(diagonals);
+        }
+        return bestDiagonals;
+    }
+
     function compareDiagonalsByScore(first, second) {
         if (first.score < second.score)
             return 1;
@@ -18,5 +28,6 @@ var fasta;
         return 0;
     }
 
+    fasta.getBestDiagonalsForEachSequence = getBestDiagonalsForEachSequence;
     fasta.getBestDiagonals = getBestDiagonals;
 })(fasta = fasta || {});
