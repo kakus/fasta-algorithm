@@ -6,7 +6,7 @@
     </tr>
     </thead>
     <tbody>
-    <tr ng-repeat="(key,value) in stepData.baseSequence track by $index">
+    <tr ng-repeat="(key,value) in stepData.currentBaseSequence track by $index">
         <td class="success"><b> {{value}} </b></td>
         <td ng-repeat="(key2,value2) in stepData.querySequence track by $index" name="{{key}}_{{key2}}" data-container="body"></td>
     </tr>

@@ -26,8 +26,7 @@
             }
 
             function initializeScopeVariables() {
-                console.log(scope);
-                scope.currentStep = scope.lastStep;
+                scope.currentStep = scope.lastStep || 0;
                 scope.description = scope.config[scope.currentStep].description;
             }
 
@@ -42,6 +41,7 @@
 
             function nextStep() {
                 ++scope.currentStep;
+
                 scope.description = scope.config[scope.currentStep].description;
                 scope.config[scope.currentStep].action();
             }

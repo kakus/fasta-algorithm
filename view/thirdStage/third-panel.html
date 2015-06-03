@@ -1,22 +1,46 @@
 <div class="panel panel-default">
-    <div class="panel-heading">Stage 3</div>
+    <div class="panel-heading text-center"><b>Etap 3 - Łączenie ciągów diagonalnych i znalezienie najlepszej ścieżki diagonalnej</b></div>
     <div class="panel-body">
-        <div class="input-group">
-            <span class="input-group-addon">
-                <input type="radio" name="substitutionMat" ng-model="substitutionMat" value="BLOSSUM" checked/>
-            </span>
-            <input type="text" value="BLOSSUM" class="form-control" disabled>
-        </div><!-- /input-group -->
-        <br>
-        <div class="input-group">
-            <span class="input-group-addon">
-                <input type="radio" name="substitutionMat" ng-model="substitutionMat" value="PAM"/>
-            </span>
-            <input type="text" class="form-control" value="PAM" disabled>
-        </div><!-- /input-group -->
-        <br>
+
+        <div fasta-sequences-at-stage sequences="stepData.baseSequences"></div>
+
+        <div ng-show="stepData.bestSequences">
+            Sekwencje wybrane do następnego etapu na podstawie najlepszych ścieżek diagonalnych:
+            <ul>
+                <li ng-repeat="sequence in stepData.bestSequences">{{::sequence}}</li>
+            </ul>
+        </div>
+
+        <div fasta-sequences-tabs sequences="stepData.baseSequences" change-sequence="changeSequence(index)"></div>
+
+        <div>
+            <label>Lista znalezionych Ścieżek Diagonalnych:</label>
+            <span>(kliknij na ścieżkę, aby ją wyświetlić w tabeli)</span>
+
+            <p>Base Sequence: <span ng-bind=stepData.currentBaseSequence id="baseSequence-p"></span></p>
+
+            <p>Query Sequence: <span id="querySequence-p"> {{::stepData.querySequence}}</span></p>
+            <ul>
+                <li ng-repeat="path in stepData.currentDiagonalsPaths[stepData.currentBaseSequence]" class="highlight-on-hover" fasta-highlight
+                    highlight-paragraphs-list="::[{paragraphId: 'baseSequence-p', content: stepData.currentBaseSequence,
+                     startIndex: path.diagonals[0].startPoint[0], length: (path.diagonals[path.diagonals.length-1].endPoint[0] - path.diagonals[0].startPoint[0]) + 1},
+                     {paragraphId: 'querySequence-p', content: stepData.querySequence,
+                      startIndex: path.diagonals[0].startPoint[1], length: (path.diagonals[path.diagonals.length-1].endPoint[1] - path.diagonals[0].startPoint[1]) + 1}]">
+                    <a class="diagonal-link" ng-click="drawPath(path)" ng-class="{'highlight-on-click-text' : (stepData.selectedPath == path)}">
+                        Base Sequence: [{{::path.diagonals[0].startPoint[0]}}, {{::path.diagonals[path.diagonals.length-1].endPoint[0]}}] -
+                        {{::stepData.currentBaseSequence | limitTo : (path.diagonals[path.diagonals.length-1].endPoint[0] - path.diagonals[0].startPoint[0]) + 1 :
+                        path.diagonals[0].startPoint[0]}},
+                        Query Sequence: [{{::path.diagonals[0].startPoint[1]}}, {{::path.diagonals[path.diagonals.length-1].endPoint[1]}}] -
+                        {{::stepData.querySequence | limitTo : (path.diagonals[path.diagonals.length-1].endPoint[1] - path.diagonals[0].startPoint[1]) + 1 :
+                        path.diagonals[0].startPoint[1]}}<span ng-show="diagonal.score !== undefined">, Path Score: {{path.score}}</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+
         <div fasta-diagonals-table></div>
     </div>
 </div>
 
-<div fasta-navigation-footer previous-url="#/second_stage" next-url="#/third_stage"></div>
+<div fasta-navigation-footer previous-url="/second_stage" next-url="/third_stage" last-step="stepData.lastStep"
+     save-step="saveLastStep(lastStep)" config="stepData.stepByStepConfig"></div>

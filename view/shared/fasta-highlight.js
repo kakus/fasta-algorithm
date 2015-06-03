@@ -8,10 +8,6 @@
             restrict: 'A',
             scope: {
                 highlightParagraphsList: '='
-                //paragraphId: '@',
-                //content: '=',
-                //startIndex: '=',
-                //length: '='
             },
             transclude: true,
             link: link,
@@ -19,7 +15,6 @@
         };
 
         function link(scope, element) {
-
             initialize();
 
             function initialize() {

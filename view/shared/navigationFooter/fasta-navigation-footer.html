@@ -1,15 +1,15 @@
 <div class="footer navbar-fixed-bottom navbar-fixed-bottom steps-footer">
     <div class="row text-center col-md-12">
         <div class="pull-left">
-            <a class="btn btn-danger" href="{{previousUrl}}">Previous Stage</a>
-                <a class="btn btn-danger " ng-disabled="isFirstStep()" ng-click="previousStep()">Previous Step</a>
+            <a class="btn btn-danger" href="#{{previousUrl}}">Poprzedni Etap</a>
+                <a class="btn btn-danger " ng-disabled="isFirstStep()" ng-click="previousStep()">Poprzedni Krok</a>
             </div>
 
-        <span class="text-center">Step {{currentStep}}: {{description}}</span>
+        <span class="text-center">Krok {{currentStep}}: {{description}}</span>
 
         <div class="pull-right">
-            <a class="btn btn-primary " ng-disabled="isLastStep()" ng-click="nextStep()">Next Step</a>
-            <a class="btn btn-primary " ng-click="nextStage()">Next Stage</a>
+            <a class="btn btn-primary " ng-disabled="isLastStep()" ng-click="nextStep()">Następny Krok</a>
+            <a class="btn btn-primary " ng-click="nextStage()">Następny Etap</a>
         </div>
     </div>
 </div>

@@ -67,3 +67,9 @@ td, th{
     color: inherit;
     text-decoration: none;
 }
+
+input[disabled] {
+    box-shadow: none !important;
+    background-color: white !important;
+    cursor: default !important;
+}

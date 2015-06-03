@@ -6,7 +6,9 @@
     function firstDataService($q, $timeout) {
         return {
             getSequenceIndices: getSequenceIndices,
-            getHotSpots: getHotSpots
+            getMultipleSequenceIndices: getMultipleSequenceIndices,
+            getHotSpots: getHotSpots,
+            getHotSpotsForBestSequences: getHotSpotsForBestSequences
         };
 
         function getSequenceIndices(sequence, ktup) {
@@ -20,11 +22,34 @@
             return deferred.promise;
         }
 
-        function getHotSpots(baseIndices, queryIndices) {
+        function getMultipleSequenceIndices(sequences, ktup) {
             var deferred = $q.defer();
 
             $timeout(function() {
-                deferred.resolve(fasta.findHotspots(queryIndices, baseIndices));
+                var indexingArrays = {};
+                for (var i = 0; i < sequences.length; i++) {
+                    var sequence = sequences[i];
+                    indexingArrays[sequence] = new fasta.IndexingArray(sequence, ktup);
+                }
+                deferred.resolve(indexingArrays);
+            });
+
+            return deferred.promise;
+        }
+
+        function getHotSpots(baseIndicesArray, queryIndices) {
+            var deferred = $q.defer();
+            $timeout(function() {
+                deferred.resolve(fasta.findHotspotsForMultipleSequences(queryIndices, baseIndicesArray));
+            });
+
+            return deferred.promise;
+        }
+
+        function getHotSpotsForBestSequences(hotSpots) {
+            var deferred = $q.defer();
+            $timeout(function() {
+                deferred.resolve(fasta.getHotSpotsForBestSequences(hotSpots));
             });
 
             return deferred.promise;

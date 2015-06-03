@@ -6,36 +6,47 @@
     function SecondDataService($q, $timeout) {
 
         return {
-            getDiagonals: getDiagonals,
-            score: score,
-            get10Best: get10Best
+            getDiagonalsForEachBaseSequence: getDiagonalsForEachBaseSequence,
+            scoreForEachBaseSequence: scoreForEachBaseSequence,
+            getBestDiagonalsForEachSequence: getBestDiagonalsForEachSequence,
+            getDiagonalsForBestSequences: getDiagonalsForBestSequences
         };
 
-        function getDiagonals(hotSpots, ktup, maxGapLength) {
+        function getDiagonalsForEachBaseSequence(hotSpotsBySequences, ktup, maxGapLength) {
             var deferred = $q.defer();
 
             $timeout(function () {
-                deferred.resolve(fasta.findDiagonals(hotSpots, ktup, maxGapLength));
+                deferred.resolve(fasta.findDiagonalsForEachBaseSequence(hotSpotsBySequences, ktup, maxGapLength));
             });
 
             return deferred.promise;
         }
 
-        function score(diagonals, scoreMatrix, baseSequence, querySequence) {
+        function scoreForEachBaseSequence(diagonalsBySequences, scoreMatrix, querySequence) {
             var deferred = $q.defer();
 
             $timeout(function () {
-                deferred.resolve(fasta.scoreDiagonals(diagonals, scoreMatrix, baseSequence, querySequence));
+                deferred.resolve(fasta.scoreDiagonalsForEachBaseSequence(diagonalsBySequences, scoreMatrix, querySequence));
             });
 
             return deferred.promise;
         }
 
-        function get10Best(diagonals) {
+        function getBestDiagonalsForEachSequence(diagonalsBySequences) {
             var deferred = $q.defer();
 
             $timeout(function () {
-                deferred.resolve(fasta.getBestDiagonals(diagonals));
+                deferred.resolve(fasta.getBestDiagonalsForEachSequence(diagonalsBySequences));
+            });
+
+            return deferred.promise;
+        }
+
+        function getDiagonalsForBestSequences(diagonalsBySequences) {
+            var deferred = $q.defer();
+
+            $timeout(function () {
+                deferred.resolve(fasta.getDiagonalsForBestSequences(diagonalsBySequences));
             });
 
             return deferred.promise;
