@@ -1,6 +1,16 @@
 var fasta;
 (function (fasta) {
 
+    function createDiagonalsPathsForEachSequence(diagonalsBySequences) {
+        var paths = {};
+
+        for (var sequence in diagonalsBySequences) {
+            var diagonals = diagonalsBySequences[sequence];
+            paths[sequence] = createDiagonalsPaths(diagonals);
+        }
+        return paths;
+    }
+
     function createDiagonalsPaths(diagonals) {
         var sortedDiagonals = diagonals.slice().sort(compareDiagonalsByStart),
             startingDiagonals = getStartingDiagonals(sortedDiagonals),
@@ -15,7 +25,7 @@ var fasta;
     }
 
     function compareDiagonalsByStart(first, second) {
-        return first.startPoint[0] - second.startPoint[0] || first.startPoint[1] - second.startPoint[1];
+        return first.startPoint[1] - second.startPoint[1] || first.startPoint[0] - second.startPoint[0];
     }
 
     function getStartingDiagonals(diagonals) {
@@ -23,7 +33,7 @@ var fasta;
             startingDiagonals = [firstDiagonal];
         for (var i = 1; i < diagonals.length; i++) {
             if (nextCanBeJoinedWithCurrent([firstDiagonal], diagonals[i])) {
-                return startingDiagonals;
+                continue;
             }
             startingDiagonals = startingDiagonals.concat(diagonals[i]);
         }
@@ -41,17 +51,15 @@ var fasta;
             return;
 
         if (rest.length === 0) {
-            result.push(new fasta.DiagonalsPath(current));
+            if (currentIsNotSubPath(current, result)) {
+                result.push(new fasta.DiagonalsPath(current));
+            }
             return result;
         }
-
         nextDiagonal = rest[0];
 
-        if (nextCanBeJoinedWithAnyFromPrevious(nextDiagonal, previous)) {
-            //as diagonals are sorted, if next can be joined with any from previously joined,
-            //there is no need to check the rest of them, as they all can be joined the same way
-            return result;
-        }
+        //TODO: można dodać warunek, żeby nie dodawać kolejnego diagonala, jak zbyt mała ocena?
+        //jedynie w celu optymalizacji, bo i tak one będą odrzucone na dalszych etapach
 
         if (nextCanBeJoinedWithCurrent(current, nextDiagonal)) {
             if (lastDiagonal(rest)) {
@@ -70,6 +78,28 @@ var fasta;
         return result;
     }
 
+    function currentIsNotSubPath(current, paths) {
+        var path,
+            isSubset = false;
+        for (var i = 0; i < paths.length; i++) {
+            path = paths[i];
+            if (path.diagonals.length <= current) {
+                continue;
+            }
+            isSubset = true;
+            for (var j = 0; j < current.length; j++) {
+                if (current[j] !== path.diagonals[j]) {
+                    isSubset = false;
+                    break;
+                }
+            }
+            if (isSubset) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     function nextCanBeJoinedWithCurrent(current, next) {
         var currentEnd = current[current.length - 1].endPoint,
             nextStart = next.startPoint;
@@ -77,19 +107,6 @@ var fasta;
         return (nextStart[0] >= currentEnd[0] && nextStart[1] >= currentEnd[1]);
     }
 
-    function nextCanBeJoinedWithAnyFromPrevious(next, previous) {
-        var nextStart = next.startPoint,
-            previousEnd;
-
-        for (var i = 0; i < previous.length; i++) {
-            previousEnd = previous[i].endPoint;
-
-            if (nextStart[0] >= previousEnd[0] && nextStart[1] >= previousEnd[1]) {
-                return true;
-            }
-        }
-        return false;
-    }
-
+    fasta.createDiagonalsPathsForEachSequence = createDiagonalsPathsForEachSequence;
     fasta.createDiagonalsPaths = createDiagonalsPaths;
 })(fasta = fasta || {});

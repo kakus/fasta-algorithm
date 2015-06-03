@@ -19,7 +19,7 @@ describe("createDiagonalsPaths", function() {
         expect(paths[1].diagonals[0]).toEqual(diagonals[1]);
     });
 
-    it("should return 4 paths for given diagonals, with 2 start points", function() {
+    it("should return 6 paths for given diagonals, with 2 start points", function() {
         var diagonals = [
                 new fasta.Diagonal([0, 0], [2, 2], 1),
                 new fasta.Diagonal([1, 0], [3, 2], 2),
@@ -29,7 +29,7 @@ describe("createDiagonalsPaths", function() {
             ],
             paths = fasta.createDiagonalsPaths(diagonals);
 
-        expect(paths.length).toEqual(4);
+        expect(paths.length).toEqual(6);
     });
 
     it("should return 4 paths for given diagonals", function() {
@@ -43,7 +43,7 @@ describe("createDiagonalsPaths", function() {
             ],
             paths = fasta.createDiagonalsPaths(diagonals);
 
-        expect(paths.length).toEqual(4);
+        expect(paths.length).toEqual(6);
     });
 
     it("should return 4 paths for given diagonals, not sorted before", function() {
@@ -57,7 +57,7 @@ describe("createDiagonalsPaths", function() {
             ],
             paths = fasta.createDiagonalsPaths(diagonals);
 
-        expect(paths.length).toEqual(4);
+        expect(paths.length).toEqual(6);
         for (var i = 0; i < paths.length; i++) {
             expect(paths[i].diagonals[0].score).toEqual(1);
         }
@@ -114,23 +114,26 @@ describe("createDiagonalsPaths", function() {
 
         expect(paths.length).toEqual(2);
         expect(paths[0].diagonals[0]).toEqual(diagonals[0]);
-        expect(paths[0].diagonals[1]).toEqual(diagonals[2]);
+        expect(paths[0].diagonals[1]).toEqual(diagonals[1]);
 
         expect(paths[1].diagonals[0]).toEqual(diagonals[0]);
-        expect(paths[1].diagonals[1]).toEqual(diagonals[1]);
+        expect(paths[1].diagonals[1]).toEqual(diagonals[2]);
     });
 
-    it("should return 1 paths from 3 not overlapping diagonals", function() {
+    it("should return 2 paths from 3 not overlapping diagonals", function() {
         var diagonals = [new fasta.Diagonal([0, 0], [2, 2]), new fasta.Diagonal([3, 2], [5, 4]), new fasta.Diagonal([5, 6], [7, 8])],
             paths = fasta.createDiagonalsPaths(diagonals);
 
-        expect(paths.length).toEqual(1);
+        expect(paths.length).toEqual(2);
         expect(paths[0].diagonals[0]).toEqual(diagonals[0]);
         expect(paths[0].diagonals[1]).toEqual(diagonals[1]);
         expect(paths[0].diagonals[2]).toEqual(diagonals[2]);
+
+        expect(paths[1].diagonals[0]).toEqual(diagonals[0]);
+        expect(paths[1].diagonals[1]).toEqual(diagonals[2]);
     });
 
-    it("should return 1 paths from 4 not overlapping diagonals", function() {
+    it("should return 4 paths from 4 not overlapping diagonals", function() {
         var diagonals = [
                 new fasta.Diagonal([0, 0], [2, 2]),
                 new fasta.Diagonal([3, 2], [5, 4]),
@@ -139,14 +142,14 @@ describe("createDiagonalsPaths", function() {
             ],
             paths = fasta.createDiagonalsPaths(diagonals);
 
-        expect(paths.length).toEqual(1);
+        expect(paths.length).toEqual(4);
         expect(paths[0].diagonals[0]).toEqual(diagonals[0]);
         expect(paths[0].diagonals[1]).toEqual(diagonals[1]);
         expect(paths[0].diagonals[2]).toEqual(diagonals[2]);
         expect(paths[0].diagonals[3]).toEqual(diagonals[3]);
     });
 
-    it("should return 2 paths from 5 diagonals, from which 2 are overlapping", function() {
+    it("should return 6 paths from 5 diagonals, from which 2 are overlapping", function() {
         var diagonals = [
                 new fasta.Diagonal([0, 0], [2, 2]),
                 new fasta.Diagonal([3, 2], [5, 4]),
@@ -156,13 +159,12 @@ describe("createDiagonalsPaths", function() {
             ],
             paths = fasta.createDiagonalsPaths(diagonals);
 
-        expect(paths.length).toEqual(2);
+        expect(paths.length).toEqual(6);
         expect(paths[0].diagonals[0]).toEqual(diagonals[0]);
         expect(paths[1].diagonals[0]).toEqual(diagonals[0]);
-        //TODO: asserts
     });
 
-    it("should return 3 paths from 5 diagonals", function() {
+    it("should return 4 paths from 5 diagonals", function() {
         var diagonals = [
                 new fasta.Diagonal([0, 0], [2, 2]),
                 new fasta.Diagonal([4, 2], [8, 6]),
@@ -172,7 +174,26 @@ describe("createDiagonalsPaths", function() {
             ],
             paths = fasta.createDiagonalsPaths(diagonals);
 
-        expect(paths.length).toEqual(3);
-        //TODO: asserts
+        expect(paths.length).toEqual(4);
+    });
+
+    it("should return 13 paths for given diagonals", function() {
+
+        var diagonals = [
+                new fasta.Diagonal([4, 3], [8, 7], 5),
+                new fasta.Diagonal([12, 10], [15, 13], 4),
+                new fasta.Diagonal([8, 4], [11, 7], 4),
+                new fasta.Diagonal([11, 4], [14, 7], 4),
+                new fasta.Diagonal([9, 10], [12, 13], 4),
+                new fasta.Diagonal([6, 10], [9, 13], 4),
+                new fasta.Diagonal([2, 8], [4, 10], 3),
+                new fasta.Diagonal([2, 0], [4, 2], 3),
+                new fasta.Diagonal([14, 4], [15, 5], 2),
+                new fasta.Diagonal([7, 17], [8, 18], 2)
+            ],
+            paths = fasta.createDiagonalsPaths(diagonals);
+
+
+        expect(paths.length).toEqual(13);
     });
 });
