@@ -41,63 +41,31 @@ var fasta;
         return startingDiagonals;
     }
 
-    function lastDiagonal(rest) {
-        return rest.slice(1).length === 0;
-    }
-
-    function create(current, rest, result, previous) {
+    function create(current, rest, result) {
         var nextDiagonal;
         if (current.length === 0 && rest.length === 0)
             return;
 
         if (rest.length === 0) {
-            if (currentIsNotSubPath(current, result)) {
-                result.push(new fasta.DiagonalsPath(current));
-            }
+            result.push(new fasta.DiagonalsPath(current));
             return result;
         }
         nextDiagonal = rest[0];
 
-        //TODO: moÅ¼na dodaÄ‡ warunek, Å¼eby nie dodawaÄ‡ kolejnego diagonala, jak zbyt maÅ‚a ocena?
-        //jedynie w celu optymalizacji, bo i tak one bÄ™dÄ… odrzucone na dalszych etapach
+        //TODO: mo¿na dodaæ warunek, ¿eby nie dodawaæ kolejnego diagonala, jak zbyt ma³a ocena?
+        //jedynie w celu optymalizacji, bo i tak one bêd¹ odrzucone na dalszych etapach
 
         if (nextCanBeJoinedWithCurrent(current, nextDiagonal)) {
-            if (lastDiagonal(rest)) {
-                result.push(new fasta.DiagonalsPath(current.concat([nextDiagonal])));
-            } else {
-                //go deeper with next diagonal joined current
-                create(current.concat([nextDiagonal]), rest.slice(1), result, []);
+            //go deeper with next diagonal joined current
+            create(current.concat([nextDiagonal]), rest.slice(1), result);
 
-                //continue without next diagonal
-                create(current, rest.slice(1), result, previous.concat([nextDiagonal]));
-            }
+            //continue without next diagonal
+            create(current, rest.slice(1), result);
         } else {
             //skip next diagonal and continue
-            create(current, rest.slice(1), result, previous);
+            create(current, rest.slice(1), result);
         }
         return result;
-    }
-
-    function currentIsNotSubPath(current, paths) {
-        var path,
-            isSubset = false;
-        for (var i = 0; i < paths.length; i++) {
-            path = paths[i];
-            if (path.diagonals.length <= current) {
-                continue;
-            }
-            isSubset = true;
-            for (var j = 0; j < current.length; j++) {
-                if (current[j] !== path.diagonals[j]) {
-                    isSubset = false;
-                    break;
-                }
-            }
-            if (isSubset) {
-                return false;
-            }
-        }
-        return true;
     }
 
     function nextCanBeJoinedWithCurrent(current, next) {
