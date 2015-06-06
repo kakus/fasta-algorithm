@@ -3,7 +3,6 @@ describe("scoreDiagonalsPaths", function () {
     var gapPenalty = -5,
         scores = [5, 10, 6];
 
-
     it("should return same score as diagonal for path with only one diagonal", function () {
         var paths = [new fasta.DiagonalsPath([new fasta.Diagonal([0, 0], [2, 2], scores[0])])],
             scoredPaths = fasta.scoreDiagonalsPaths(paths, gapPenalty);
@@ -81,7 +80,7 @@ describe("scoreDiagonalsPaths", function () {
             scoredPaths = fasta.scoreDiagonalsPaths(paths, gapPenalty),
             expectedScore = scores.slice(0, 2).reduce(function (a, b) {
                     return a + b;
-                }) + Math.sqrt(5) * gapPenalty;
+                }) + 3 * gapPenalty;
 
         expect(scoredPaths.length).toEqual(1);
         expect(scoredPaths[0].score).toEqual(expectedScore);
@@ -161,7 +160,7 @@ describe("scoreDiagonalsPaths", function () {
             scoredPaths = fasta.scoreDiagonalsPaths(paths, gapPenalty),
             expectedScore = scores.slice(0, 3).reduce(function (a, b) {
                     return a + b;
-                }) + gapPenalty + Math.sqrt(5) * gapPenalty;
+                }) + gapPenalty + (3 * gapPenalty);
 
         expect(scoredPaths.length).toEqual(1);
         expect(scoredPaths[0].score).toEqual(expectedScore);
@@ -177,7 +176,7 @@ describe("scoreDiagonalsPaths", function () {
             scoredPaths = fasta.scoreDiagonalsPaths(paths, gapPenalty),
             expectedScore = scores.slice(0, 3).reduce(function (a, b) {
                     return a + b;
-                }) + Math.sqrt(5) * gapPenalty + Math.sqrt(5) * gapPenalty;
+                }) + 3 * gapPenalty + 3 * gapPenalty;
 
         expect(scoredPaths.length).toEqual(1);
         expect(scoredPaths[0].score).toEqual(expectedScore);
@@ -194,7 +193,7 @@ describe("scoreDiagonalsPaths", function () {
                     new fasta.Diagonal([2, 3], [4, 5], scores[2])
                 ])
             ],
-            scoredPaths = fasta.scoreDiagonalsPaths(paths, gapPenalty);;
+            scoredPaths = fasta.scoreDiagonalsPaths(paths, gapPenalty);
 
         expect(scoredPaths.length).toEqual(2);
         expect(scoredPaths[0].score).toBeDefined();

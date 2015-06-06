@@ -1,6 +1,16 @@
 var fasta;
 (function (fasta) {
 
+    function scoreDiagonalsPathsForEachSequence(pathsBySequences, gapPenalty) {
+        var scoredPathsBySequences = {};
+
+        for (var sequence in pathsBySequences) {
+            var paths = pathsBySequences[sequence];
+            scoredPathsBySequences[sequence] = scoreDiagonalsPaths(paths, gapPenalty);
+        }
+        return scoredPathsBySequences;
+    }
+
     function scoreDiagonalsPaths(paths, gapPenalty) {
         var scoredPaths = [],
             path;
@@ -20,15 +30,14 @@ var fasta;
             current = diagonals[i];
 
             totalScore += current.score;
-            totalScore += gapPenalty * Math.sqrt(
-                Math.pow(current.startPoint[0] - previous.endPoint[0], 2) +
-                Math.pow(current.startPoint[1] - previous.endPoint[1], 2)
-            );
+            totalScore += gapPenalty *
+                ((current.startPoint[0] - previous.endPoint[0]) + (current.startPoint[1] - previous.endPoint[1]));
 
             previous = current;
         }
         return new fasta.DiagonalsPath(diagonals, totalScore);
     }
 
+    fasta.scoreDiagonalsPathsForEachSequence = scoreDiagonalsPathsForEachSequence;
     fasta.scoreDiagonalsPaths = scoreDiagonalsPaths;
 })(fasta = fasta || {});

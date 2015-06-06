@@ -19,13 +19,12 @@
             $scope.stepData.querySequence = ConfigurationService.querySequence;
 
             $scope.stepData.lastStep = SecondDataService.lastStep || 0;
-            $scope.stepData.currentDiagonals = ConfigurationService.bestDiagonals || SecondDataService.scoredDiagonals || SecondDataService.diagonals;
+            $scope.stepData.currentDiagonals = SecondDataService.bestDiagonals || SecondDataService.scoredDiagonals || SecondDataService.diagonals;
             $scope.stepData.bestSequences = ConfigurationService.thirdStage.baseSequences;
-            if ($scope.stepData.currentDiagonals) {
-                redrawDiagonalsTable();     //TODO: delay
-            }
-
             $scope.stepData.currentBaseSequence = $scope.stepData.baseSequences[0];
+            if ($scope.stepData.currentDiagonals) {
+                redrawDiagonalsTable();
+            }
 
             $scope.stepData.scoreMatrix = ConfigurationService.scoreMatrix;
 
@@ -105,7 +104,6 @@
         }
 
         function bestBaseSequences() {
-            console.log($scope.stepData.currentDiagonals);
             SecondDataService.getDiagonalsForBestSequences($scope.stepData.currentDiagonals).then(function (diagonalsForBestSequences) {
                 ConfigurationService.thirdStage.bestDiagonals = diagonalsForBestSequences;
                 ConfigurationService.thirdStage.baseSequences = Object.keys(diagonalsForBestSequences);

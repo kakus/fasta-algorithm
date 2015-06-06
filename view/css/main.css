@@ -73,3 +73,7 @@ input[disabled] {
     background-color: white !important;
     cursor: default !important;
 }
+
+.highlight-sw {
+    background-color: #FFFCD7;
+}

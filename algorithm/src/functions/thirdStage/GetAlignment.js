@@ -1,6 +1,17 @@
 var fasta;
 (function (fasta) {
 
+    function getAlignmentOfBestPathForEachSequence(pathsBySequences, querySequence) {
+        var pathsWithAlignmentsBySequences = {};
+
+        for (var sequence in pathsBySequences) {
+            var path = pathsBySequences[sequence][0],
+                alignment = getAlignment(path, sequence, querySequence);
+            pathsWithAlignmentsBySequences[sequence] = [new fasta.DiagonalsPath(path.diagonals, path.score, alignment)];
+        }
+        return pathsWithAlignmentsBySequences;
+    }
+
     function getAlignment(path, baseSequence, querySequence) {
         var diagonals = path.diagonals,
             previous = diagonals[0],
@@ -14,7 +25,7 @@ var fasta;
             previous = current;
         }
 
-        return new fasta.Alignment(baseAlignment, queryAlignment,  diagonals[0].startPoint[0], diagonals[0].startPoint[1]);
+        return new fasta.Alignment(baseAlignment, queryAlignment, diagonals[0].startPoint[0], diagonals[0].startPoint[1]);
     }
 
     function createBaseAlignment(current, previous, baseSequence) {
@@ -47,5 +58,6 @@ var fasta;
         return queryAlignment;
     }
 
+    fasta.getAlignmentOfBestPathForEachSequence = getAlignmentOfBestPathForEachSequence;
     fasta.getAlignment = getAlignment;
 })(fasta = fasta || {});

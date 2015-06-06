@@ -92,7 +92,6 @@
 
         function bestBaseSequencesStep() {
             hotSpotPromise.then(function() {
-                console.log($scope.stepData.hotSpots);
                 FirstDataService.getHotSpotsForBestSequences($scope.stepData.hotSpots).then(function (bestHotSpots) {
                     ConfigurationService.secondStage.baseSequences = Object.keys(bestHotSpots);
                     ConfigurationService.secondStage.hotSpots = bestHotSpots;

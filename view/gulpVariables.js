@@ -6,7 +6,8 @@ exports.sourceFiles = [
     'configStep/*.js',
     'firstStage/*.js',
     'secondStage/*.js',
-    'thirdStage/*.js'
+    'thirdStage/*.js',
+    'fourthStage/*.js'
 ];
 
 exports.fileName = 'fastaView.js';

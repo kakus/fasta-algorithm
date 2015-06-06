@@ -1,0 +1,27 @@
+<table class="table table-bordered table-condensed">
+    <thead>
+    <tr class="success">
+        <th> #</th>
+
+        <th ng-repeat="value in ('-' + stepData.querySequence) track by $index">{{value}}</th>
+    </tr>
+    </thead>
+    <tbody>
+    <!--<tr>-->
+        <!--<td class="success"><b> &#45;&#45; </b></td>-->
+        <!--<td > &#45;&#45; </td>-->
+        <!--<td ng-repeat="querySymbol in stepData.querySequence track by $index">-->
+            <!--&#45;&#45;-->
+        <!--</td>-->
+    <!--</tr>-->
+    <tr ng-repeat="(baseIndex, baseSymbol) in ('-' + stepData.currentBaseSequence) track by $index">
+
+        <td class="success"><b> {{baseSymbol}} </b></td>
+
+        <td ng-repeat="(queryIndex, querySymbol) in ('-' + stepData.querySequence) track by $index"
+            name="{{baseIndex}}_{{queryIndex}}" data-container="body">
+            {{stepData.smithWatermanMatrices[stepData.currentBaseSequence][baseIndex][queryIndex].value}}
+        </td>
+    </tr>
+    </tbody>
+</table>

@@ -36,6 +36,10 @@ angular.module('fastaView', ['ngRoute']);
                 templateUrl: 'view/thirdStage/third-panel.html',
                 controller: 'ThirdController'
             }).
+            when('/fourth_stage', {
+                templateUrl: 'view/fourthStage/fourth-panel.html',
+                controller: 'FourthController'
+            }).
             otherwise({
                 redirectTo: '/home'
             });
@@ -56,19 +60,33 @@ function Diagonal(startPoint, endPoint, score ){
     function configurationService() {
 
         var scoreMatrix = {
-            A: {A:1, C:-1, G:-1, T:-1},
-            C: {A:-1, C:1, G:-1, T:-1},
-            G: {A:-1, C:-1, G:1, T:-1},
-            T: {A:-1, C:-1, G:-1, T:1}
+            A: {A:10, C:-1, G:-3, T:-4},
+            C: {A:-1, C:7, G:-5, T:-3},
+            G: {A:-3, C:-5, G:9, T:0},
+            T: {A:-4, C:-3, G:0, T:8}
         };
 
         return {
             // default values
-            baseSequence: "AACACTTTTCA",
-            querySequence: "ACTTATCA",
+            baseSequences: [
+                "AACACTTTTCA",
+                "ACCTACTTTAC",
+                "ATCATCTACTACT",
+                "CTACTATCATCATCAT",
+                "ACACATCATCACTCT",
+                "ACTCTCTACTCATACT",
+                "ACTCACTCATCTACT",
+                "TACTCTTCCTCTATC",
+                "CTAGCTGCTGAATCTTCA",
+                "ACTCTCTTACGCTACATCGTAC"
+            ],
+            querySequence: "ACTTATCAACTCATTCCCA",
             kTup: 2,
             scoreMatrix: scoreMatrix,
-            gapPenalty: -5
+            gapPenalty: -5,
+            secondStage: {},
+            thirdStage: {},
+            fourthStage: {}
         };
     }
 })();
@@ -170,10 +188,6 @@ function Diagonal(startPoint, endPoint, score ){
             restrict: 'A',
             scope: {
                 highlightParagraphsList: '='
-                //paragraphId: '@',
-                //content: '=',
-                //startIndex: '=',
-                //length: '='
             },
             transclude: true,
             link: link,
@@ -181,7 +195,6 @@ function Diagonal(startPoint, endPoint, score ){
         };
 
         function link(scope, element) {
-
             initialize();
 
             function initialize() {
@@ -255,8 +268,7 @@ function makeRemoveClassHandler(regex) {
             }
 
             function initializeScopeVariables() {
-                console.log(scope);
-                scope.currentStep = scope.lastStep;
+                scope.currentStep = scope.lastStep || 0;
                 scope.description = scope.config[scope.currentStep].description;
             }
 
@@ -265,12 +277,14 @@ function makeRemoveClassHandler(regex) {
                 scope.previousStep = previousStep;
                 scope.isLastStep = isLastStep;
                 scope.isFirstStep = isFirstStep;
+                scope.isLastStage = isLastStage;
 
                 scope.nextStage = nextStage;
             }
 
             function nextStep() {
                 ++scope.currentStep;
+
                 scope.description = scope.config[scope.currentStep].description;
                 scope.config[scope.currentStep].action();
             }
@@ -287,6 +301,10 @@ function makeRemoveClassHandler(regex) {
 
             function isFirstStep() {
                 return scope.currentStep === 0;
+            }
+
+            function isLastStage() {
+                return scope.nextUrl ? false : true;
             }
 
             function nextStage() {
@@ -307,6 +325,33 @@ function makeRemoveClassHandler(regex) {
     }
 })();
 
+(function () {
+    angular.
+        module('fastaView').
+        directive('fastaSequenceValidator', [sequenceValidator]);
+
+    function sequenceValidator() {
+        return {
+            restrict: 'A',
+            link: link
+        };
+
+        function link(scope, element, attrs) {
+            var possibleCharacters = attrs.fastaSequenceValidator || ['A', 'C', 'T', 'G'];
+
+            initialize();
+
+            function initialize() {
+                element.on('keypress', function(event) {
+                    var pressed = String.fromCharCode(event.which);
+                    if (possibleCharacters.indexOf(pressed) === -1) {
+                        event.preventDefault();
+                    }
+                });
+            }
+        }
+    }
+})();
 (function () {
     angular.
         module('fastaView').
@@ -340,30 +385,100 @@ function makeRemoveClassHandler(regex) {
 (function () {
     angular.
         module('fastaView').
-        directive('fastaSequenceValidator', [sequenceValidator]);
+        directive('fastaSequencesAtStage', [sequencesAtStage]);
 
-    function sequenceValidator() {
+    function sequencesAtStage() {
         return {
             restrict: 'A',
-            link: link
+            scope: {
+                sequences: '='
+            },
+            link: link,
+            templateUrl: 'view/shared/sequencesAtStage/fasta-sequences-at-stage.html'
         };
 
-        function link(scope, element, attrs) {
-            var possibleCharacters = attrs.fastaSequenceValidator || ['A', 'C', 'T', 'G'];
+        function link() {
+        }
+    }
+})();
+
+(function () {
+    angular.
+        module('fastaView').
+        directive('fastaSequencesTabs', [sequencesTabs]);
+
+    function sequencesTabs() {
+        return {
+            restrict: 'A',
+            scope: {
+                sequences: '=',
+                changeSequence: '&'
+            },
+            link: link,
+            templateUrl: 'view/shared/sequencesTabs/fasta-sequences-tabs.html'
+        };
+
+        function link() {
+        }
+    }
+})();
+
+(function () {
+    angular
+        .module('fastaView')
+        .directive('fastaSmithWatermanTable', [smithWatermanTable]);
+
+    function smithWatermanTable() {
+        return {
+            scope: false,
+            link: link,
+            replace: true,
+            templateUrl: 'view/shared/smithWatermanTable/fasta-smith-waterman-table.html'
+        };
+
+        function link(scope, element) {
 
             initialize();
 
             function initialize() {
-                element.on('keypress', function(event) {
-                    var pressed = String.fromCharCode(event.which);
-                    if (possibleCharacters.indexOf(pressed) === -1) {
-                        event.preventDefault();
+                initializeScopeFunctions();
+            }
+
+            function initializeScopeFunctions() {
+                scope.highlightCells = highlightCells;
+                scope.clearHighlight = clearHighlight;
+            }
+
+            function highlightCells(solutions) {
+                var solution;
+                console.log(solutions);
+                for (var i = 0; i < solutions.length; i++) {
+                    solution = solutions[i];
+                    console.log(solution.path);
+                    for (var j = 0; j < solution.path.length; j++) {
+                        highlightCell(solution.path[j]);
                     }
-                });
+                }
+            }
+
+            function highlightCell(cellIndices) {
+                var name = cellIndices[0] + '_' + cellIndices[1],
+                    cell = element.find('[name="' + name + '"]');
+                console.log('new');
+                console.log(name);
+                console.log(cell);
+
+                cell.addClass('highlight-sw');
+            }
+
+            function clearHighlight() {
+                var cells = element.find('.highlight-sw');
+                cells.removeClass('highlight-sw');
             }
         }
     }
 })();
+
 (function() {
     angular
     .module('fastaView')
@@ -381,23 +496,44 @@ function makeRemoveClassHandler(regex) {
 
         function initializeScopeVariables() {
             $scope.configData = {};
-            $scope.configData.baseSequence = ConfigurationService.baseSequence;
+            $scope.configData.baseSequences = ConfigurationService.baseSequences;
             $scope.configData.querySequence = ConfigurationService.querySequence;
             $scope.configData.kTup = ConfigurationService.kTup;
             $scope.configData.scoreMatrix = ConfigurationService.scoreMatrix;
             $scope.configData.gapPenalty = ConfigurationService.gapPenalty;
+
+            $scope.configData.newSequence = '';
+
+            $scope.configData.emptyNewSequence = false;
         }
 
         function initializeScopeFunctions() {
             $scope.save = save;
+            $scope.removeBaseSequence = removeBaseSequence;
+            $scope.addBaseSequence = addBaseSequence;
         }
 
         function save(){
-            ConfigurationService.baseSequence = $scope.configData.baseSequence;
+            ConfigurationService.baseSequences = $scope.configData.baseSequences;
             ConfigurationService.querySequence = $scope.configData.querySequence;
             ConfigurationService.kTup = $scope.configData.kTup;
             ConfigurationService.scoreMatrix = $scope.configData.scoreMatrix;
             ConfigurationService.gapPenalty = $scope.configData.gapPenalty;
+        }
+
+        function removeBaseSequence(index) {
+            $scope.configData.baseSequences.splice(index, 1);
+        }
+
+        function addBaseSequence() {
+            if (!$scope.configData.newSequence) {
+                $scope.configData.emptyNewSequence = true;
+                return;
+            }
+
+            $scope.configData.baseSequences.pushUnique($scope.configData.newSequence);
+            $scope.configData.newSequence = '';
+            $scope.configData.emptyNewSequence = false;
         }
     }
 })();
@@ -409,7 +545,7 @@ function makeRemoveClassHandler(regex) {
 
     function FirstController($scope, $q, ConfigurationService, FirstDataService) {
 
-        var sequencePromise, basePromise;
+        var sequencePromise, basePromise, hotSpotPromise;
 
         initialize();
 
@@ -421,40 +557,54 @@ function makeRemoveClassHandler(regex) {
         function initializeScopeVariables() {
             $scope.stepData = {};
             $scope.stepData.kTup = ConfigurationService.kTup;
-            $scope.stepData.baseSequence = ConfigurationService.baseSequence;
+            $scope.stepData.baseSequences = ConfigurationService.baseSequences;
             $scope.stepData.querySequence = ConfigurationService.querySequence;
-            $scope.stepData.baseSequenceIndices = FirstDataService.baseSequenceIndices;
+
             $scope.stepData.lastStep = FirstDataService.lastStep || 0;
+            $scope.stepData.baseSequencesIndices = FirstDataService.baseSequencesIndices;
             $scope.stepData.querySequenceIndices = FirstDataService.querySequenceIndices;
-            $scope.stepData.hotSpots = ConfigurationService.hotSpots;
+            $scope.stepData.hotSpots = FirstDataService.hotSpots;
+            $scope.stepData.bestSequences = ConfigurationService.secondStage.baseSequences;
+
+            $scope.stepData.currentBaseSequence = $scope.stepData.baseSequences[0];
 
             $scope.stepData.stepByStepConfig = [
-                {description: 'Stage 1 - beginning'},
+                {description: 'Etap 1 - rozpoczęcie'},
                 {
-                    description: "calculating indices for base sequence",
-                    action: baseIndicesStep,
-                    reverse: reverseBaseIndices
-                },
-                {
-                    description: "calculating indices for query sequence",
+                    description: "Wyliczenie tabeli indeksującej dla szukanej sekwencji",
                     action: queryIndicesStep,
                     reverse: reverseQueryIndices
                 },
-                {description: "calculating hot spots", action: hotSpotsStep, reverse: reverseHotSpots}
+                {
+                    description: "Wyliczenie tabel indeksujących dla sekwencji z bazy danych",
+                    action: baseIndicesStep,
+                    reverse: reverseBaseIndices
+                },
+                {description: "Znalezienie Gorących Miejsc", action: hotSpotsStep, reverse: reverseHotSpots},
+                {
+                    description: "Wybranie najlepszych sekwencji do następnego etapu",
+                    action: bestBaseSequencesStep,
+                    reverse: reverseBestBaseSequences
+                }
             ];
         }
 
         function initializeScopeFunctions() {
             $scope.saveLastStep = saveLastStep;
+            $scope.changeSequence = changeSequence;
+        }
+
+        function changeSequence(index) {
+            $scope.stepData.currentBaseSequence = $scope.stepData.baseSequences[index];
         }
 
         function baseIndicesStep() {
             if (!basePromise) {
-                basePromise = FirstDataService.getSequenceIndices($scope.stepData.baseSequence, $scope.stepData.kTup);
+                basePromise = FirstDataService.getMultipleSequenceIndices($scope.stepData.baseSequences, $scope.stepData.kTup);
             }
             basePromise.then(function (data) {
-                FirstDataService.baseSequenceIndices = data;
-                $scope.stepData.baseSequenceIndices = data;
+                FirstDataService.baseSequencesIndices = data;
+                $scope.stepData.baseSequencesIndices = data;
             });
         }
 
@@ -469,16 +619,30 @@ function makeRemoveClassHandler(regex) {
         }
 
         function hotSpotsStep() {
+            var deferred = $q.defer();
+            hotSpotPromise = deferred.promise;
             $q.all([sequencePromise, basePromise]).then(function () {
-                FirstDataService.getHotSpots($scope.stepData.baseSequenceIndices, $scope.stepData.querySequenceIndices).then(function (data) {
-                    ConfigurationService.hotSpots = data;
+                FirstDataService.getHotSpots($scope.stepData.baseSequencesIndices, $scope.stepData.querySequenceIndices).then(function (data) {
+                    FirstDataService.hotSpots = data;
                     $scope.stepData.hotSpots = data;
+                    deferred.resolve();
+                });
+            });
+        }
+
+        function bestBaseSequencesStep() {
+            hotSpotPromise.then(function() {
+                FirstDataService.getHotSpotsForBestSequences($scope.stepData.hotSpots).then(function (bestHotSpots) {
+                    ConfigurationService.secondStage.baseSequences = Object.keys(bestHotSpots);
+                    ConfigurationService.secondStage.hotSpots = bestHotSpots;
+                    $scope.stepData.bestSequences = Object.keys(bestHotSpots);
+
                 });
             });
         }
 
         function reverseBaseIndices() {
-            $scope.stepData.baseSequenceIndices = undefined;
+            $scope.stepData.baseSequencesIndices = undefined;
         }
 
         function reverseQueryIndices() {
@@ -486,8 +650,13 @@ function makeRemoveClassHandler(regex) {
         }
 
         function reverseHotSpots() {
-            ConfigurationService.hotSpots = undefined;
+            FirstDataService.hotSpots = undefined;
             $scope.stepData.hotSpots = undefined;
+        }
+
+        function reverseBestBaseSequences() {
+            ConfigurationService.secondStage = {};
+            $scope.stepData.bestSequences = undefined;
         }
 
         function saveLastStep(lastStep) {
@@ -505,7 +674,9 @@ function makeRemoveClassHandler(regex) {
     function firstDataService($q, $timeout) {
         return {
             getSequenceIndices: getSequenceIndices,
-            getHotSpots: getHotSpots
+            getMultipleSequenceIndices: getMultipleSequenceIndices,
+            getHotSpots: getHotSpots,
+            getHotSpotsForBestSequences: getHotSpotsForBestSequences
         };
 
         function getSequenceIndices(sequence, ktup) {
@@ -519,11 +690,34 @@ function makeRemoveClassHandler(regex) {
             return deferred.promise;
         }
 
-        function getHotSpots(baseIndices, queryIndices) {
+        function getMultipleSequenceIndices(sequences, ktup) {
             var deferred = $q.defer();
 
             $timeout(function() {
-                deferred.resolve(fasta.findHotspots(queryIndices, baseIndices));
+                var indexingArrays = {};
+                for (var i = 0; i < sequences.length; i++) {
+                    var sequence = sequences[i];
+                    indexingArrays[sequence] = new fasta.IndexingArray(sequence, ktup);
+                }
+                deferred.resolve(indexingArrays);
+            });
+
+            return deferred.promise;
+        }
+
+        function getHotSpots(baseIndicesArray, queryIndices) {
+            var deferred = $q.defer();
+            $timeout(function() {
+                deferred.resolve(fasta.findHotspotsForMultipleSequences(queryIndices, baseIndicesArray));
+            });
+
+            return deferred.promise;
+        }
+
+        function getHotSpotsForBestSequences(hotSpots) {
+            var deferred = $q.defer();
+            $timeout(function() {
+                deferred.resolve(fasta.getHotSpotsForBestSequences(hotSpots));
             });
 
             return deferred.promise;
@@ -548,92 +742,100 @@ function makeRemoveClassHandler(regex) {
         function initializeScopeVariables() {
             $scope.stepData = {};
             $scope.stepData.kTup = ConfigurationService.kTup;
-            $scope.stepData.baseSequence = ConfigurationService.baseSequence;
+            $scope.stepData.baseSequences = ConfigurationService.secondStage.baseSequences;
             $scope.stepData.querySequence = ConfigurationService.querySequence;
+
             $scope.stepData.lastStep = SecondDataService.lastStep || 0;
+            $scope.stepData.currentDiagonals = SecondDataService.bestDiagonals || SecondDataService.scoredDiagonals || SecondDataService.diagonals;
+            $scope.stepData.bestSequences = ConfigurationService.thirdStage.baseSequences;
+            $scope.stepData.currentBaseSequence = $scope.stepData.baseSequences[0];
+            if ($scope.stepData.currentDiagonals) {
+                redrawDiagonalsTable();
+            }
 
             $scope.stepData.scoreMatrix = ConfigurationService.scoreMatrix;
 
             $scope.stepData.stepByStepConfig = [
-                {description: 'Stage 2 - beginning'},
+                {description: 'Etap 2 - początek'},
                 {
-                    description: "Find all diagonals by linking close Hot Spots",  //and show
+                    description: "Znalezienie wszystkich Ciągów Diagonalnych dla każdej z par sekwencji poprzez łączenie bliskich Gorących Miejsc",  //and show
                     action: findDiagonals,
                     reverse: reverseFindDiagonals
                 },
                 {
-                    description: 'Score diagonals with values from score matrix',
+                    description: 'Ocena Ciągów za pomocą ustalonej macierzy substytucji',
                     action: score,
                     reverse: reverseScore
                 },
                 {
-                    description: 'Get 10 best diagonals',
-                    action: getBest,
-                    reverse: reverseGetBest
+                    description: 'Wybranie 10 najlepszych ciągów diagonalnych dla każdej z par sekwencji bazowa - szukana',
+                    action: getBestDiagonals,
+                    reverse: reverseGetBestDiagonals
+                },
+                {
+                    description: "Wybranie najlepszych sekwencji do następnego etapu",
+                    action: bestBaseSequences,
+                    reverse: reverseBestBaseSequences
                 }
             ];
         }
 
         function initializeScopeFunctions() {
-            $scope.score = score;
+            $scope.changeSequence = changeSequence;
             $scope.saveLastStep = saveLastStep;
             $scope.highlightOnDiagonalsTable = highlightOnDiagonalsTable;
         }
 
-        function score() {
-            SecondDataService.score($scope.stepData.currentDiagonals, $scope.stepData.scoreMatrix,
-                $scope.stepData.baseSequence, $scope.stepData.querySequence).then(function(scored) {
-                    SecondDataService.scoredDiagonals = angular.copy(scored);
-                    $scope.stepData.currentDiagonals = scored;
-                    $scope.clearDiagonalsTable();
-                    $scope.drawDiagonalsTable($scope.stepData.currentDiagonals);
-                });
+        function changeSequence(index) {
+            $scope.stepData.currentBaseSequence = $scope.stepData.baseSequences[index];
+            if ($scope.stepData.currentDiagonals) {
+                redrawDiagonalsTable();
+            }
         }
 
-        function reverseScore() {
-            $scope.stepData.currentDiagonals = SecondDataService.diagonals;
-            $scope.clearDiagonalsTable();
-            $scope.drawDiagonalsTable($scope.stepData.currentDiagonals);
-        }
-
-        function getBest() {
-            SecondDataService.get10Best($scope.stepData.currentDiagonals).then(function(best) {
-                $scope.stepData.foundBestStep = true;
-                $scope.stepData.currentDiagonals = best;
-                ConfigurationService.bestDiagonals = angular.copy(best);
-                $scope.clearDiagonalsTable();
-                $scope.drawDiagonalsTable($scope.stepData.currentDiagonals);
-            })
-        }
-
-        function reverseGetBest() {
-            ConfigurationService.bestDiagonals = undefined;
-            $scope.stepData.foundBestStep = false;
-            $scope.stepData.currentDiagonals = SecondDataService.scoredDiagonals;
-            $scope.clearDiagonalsTable();
-            $scope.drawDiagonalsTable($scope.stepData.currentDiagonals);
-        }
-
-        function saveLastStep() {
+        function saveLastStep(lastStep) {
             SecondDataService.lastStep = lastStep;
+        }
+
+        function highlightOnDiagonalsTable(diagonal) {
+            $scope.stepData.selectedDiagonal = diagonal;
+            $scope.highlightDiagonal(diagonal);
         }
 
         function findDiagonals() {
             //TODO: param for max gap
-            SecondDataService.getDiagonals(ConfigurationService.hotSpots, $scope.stepData.kTup, 0).then(function (diagonals) {
+            SecondDataService.getDiagonalsForEachBaseSequence(ConfigurationService.secondStage.hotSpots, $scope.stepData.kTup, 0).then(function (diagonals) {
                 SecondDataService.diagonals = angular.copy(diagonals);
                 $scope.stepData.currentDiagonals = diagonals;
-
-                var removeWatch = $scope.$watch('drawDiagonalsTable', function () {
-                    if ($scope.drawDiagonalsTable) {
-                        removeWatch();
-                        $timeout(function () {
-                            $scope.drawDiagonalsTable($scope.stepData.currentDiagonals);
-                        });
-
-                    }
-                })
+                $scope.drawDiagonalsTable($scope.stepData.currentDiagonals[$scope.stepData.currentBaseSequence]);
             });
+        }
+
+        function score() {
+            SecondDataService.scoreForEachBaseSequence($scope.stepData.currentDiagonals, $scope.stepData.scoreMatrix,
+                $scope.stepData.querySequence).then(function (scored) {
+                    SecondDataService.scoredDiagonals = angular.copy(scored);
+                    $scope.stepData.currentDiagonals = scored;
+                    redrawDiagonalsTable();
+                });
+        }
+
+        function getBestDiagonals() {
+            SecondDataService.getBestDiagonalsForEachSequence($scope.stepData.currentDiagonals).then(function (best) {
+                $scope.stepData.foundBestStep = true;
+                $scope.stepData.currentDiagonals = best;
+                SecondDataService.bestDiagonals = angular.copy(best);
+                SecondDataService.foundBestStep = $scope.stepData.foundBestStep;
+                redrawDiagonalsTable();
+            })
+        }
+
+        function bestBaseSequences() {
+            SecondDataService.getDiagonalsForBestSequences($scope.stepData.currentDiagonals).then(function (diagonalsForBestSequences) {
+                ConfigurationService.thirdStage.bestDiagonals = diagonalsForBestSequences;
+                ConfigurationService.thirdStage.baseSequences = Object.keys(diagonalsForBestSequences);
+                $scope.stepData.bestSequences = Object.keys(diagonalsForBestSequences);
+            })
         }
 
         function reverseFindDiagonals() {
@@ -642,9 +844,30 @@ function makeRemoveClassHandler(regex) {
             $scope.clearDiagonalsTable();
         }
 
-        function highlightOnDiagonalsTable(diagonal) {
-            $scope.stepData.selectedDiagonal = diagonal;
-            $scope.highlightDiagonal(diagonal);
+        function reverseScore() {
+            $scope.stepData.currentDiagonals = SecondDataService.diagonals;
+            redrawDiagonalsTable();
+        }
+
+        function reverseGetBestDiagonals() {
+            SecondDataService.bestDiagonals = undefined;
+            $scope.stepData.foundBestStep = false;
+            SecondDataService.foundBestStep = $scope.stepData.foundBestStep;
+            $scope.stepData.currentDiagonals = SecondDataService.scoredDiagonals;
+            redrawDiagonalsTable();
+        }
+
+        function reverseBestBaseSequences() {
+            ConfigurationService.thirdStage = {};
+            $scope.stepData.bestSequences = undefined;
+        }
+
+        function redrawDiagonalsTable() {
+            $timeout(function() {
+                $scope.clearDiagonalsTable();
+                $scope.drawDiagonalsTable($scope.stepData.currentDiagonals[$scope.stepData.currentBaseSequence]);
+            });
+
         }
     }
 })();
@@ -657,36 +880,47 @@ function makeRemoveClassHandler(regex) {
     function SecondDataService($q, $timeout) {
 
         return {
-            getDiagonals: getDiagonals,
-            score: score,
-            get10Best: get10Best
+            getDiagonalsForEachBaseSequence: getDiagonalsForEachBaseSequence,
+            scoreForEachBaseSequence: scoreForEachBaseSequence,
+            getBestDiagonalsForEachSequence: getBestDiagonalsForEachSequence,
+            getDiagonalsForBestSequences: getDiagonalsForBestSequences
         };
 
-        function getDiagonals(hotSpots, ktup, maxGapLength) {
+        function getDiagonalsForEachBaseSequence(hotSpotsBySequences, ktup, maxGapLength) {
             var deferred = $q.defer();
 
             $timeout(function () {
-                deferred.resolve(fasta.findDiagonals(hotSpots, ktup, maxGapLength));
+                deferred.resolve(fasta.findDiagonalsForEachBaseSequence(hotSpotsBySequences, ktup, maxGapLength));
             });
 
             return deferred.promise;
         }
 
-        function score(diagonals, scoreMatrix, baseSequence, querySequence) {
+        function scoreForEachBaseSequence(diagonalsBySequences, scoreMatrix, querySequence) {
             var deferred = $q.defer();
 
             $timeout(function () {
-                deferred.resolve(fasta.scoreDiagonals(diagonals, scoreMatrix, baseSequence, querySequence));
+                deferred.resolve(fasta.scoreDiagonalsForEachBaseSequence(diagonalsBySequences, scoreMatrix, querySequence));
             });
 
             return deferred.promise;
         }
 
-        function get10Best(diagonals) {
+        function getBestDiagonalsForEachSequence(diagonalsBySequences) {
             var deferred = $q.defer();
 
             $timeout(function () {
-                deferred.resolve(fasta.getBestDiagonals(diagonals));
+                deferred.resolve(fasta.getBestDiagonalsForEachSequence(diagonalsBySequences));
+            });
+
+            return deferred.promise;
+        }
+
+        function getDiagonalsForBestSequences(diagonalsBySequences) {
+            var deferred = $q.defer();
+
+            $timeout(function () {
+                deferred.resolve(fasta.getDiagonalsForBestSequences(diagonalsBySequences));
             });
 
             return deferred.promise;
@@ -705,39 +939,385 @@ function makeRemoveClassHandler(regex) {
 
         function initialize() {
             initializeScopeVariables();
+            initializeScopeFunction();
         }
 
         function initializeScopeVariables() {
             $scope.stepData = {};
             $scope.stepData.kTup = ConfigurationService.kTup;
-            $scope.stepData.baseSequence = ConfigurationService.baseSequence;
+            $scope.stepData.baseSequences = ConfigurationService.thirdStage.baseSequences;
             $scope.stepData.querySequence = ConfigurationService.querySequence;
-            $scope.stepData.diagonals = ThirdDataService.diagonals;
-            $scope.stepData.substitutionMat = "BLOSSUM";
+            $scope.stepData.diagonals = ConfigurationService.thirdStage.bestDiagonals;
+
+            $scope.stepData.currentBaseSequence = $scope.stepData.baseSequences[0];
+            $scope.stepData.bestSequences = ConfigurationService.fourthStage.baseSequences;
+
+            $scope.stepData.lastStep = ThirdDataService.lastStep || 0;
+
+            $scope.stepData.currentDiagonalsPaths = ThirdDataService.bestPathsWithAlignments || ThirdDataService.bestPaths || ThirdDataService.scoredPaths || ThirdDataService.diagonalsPaths;
+            $scope.stepData.bestSequences = ConfigurationService.thirdStage.baseSequences;
+
+            $scope.stepData.stepByStepConfig = [
+                {description: 'Etap 3 - początek'},
+                {
+                    description: "Budowanie ścieżek diagonalnych z wykorzystaniem wyznaczonych ciągów diagonalnych",
+                    action: buildDiagonalsPaths,
+                    reverse: reverseBuildDiagonalsPaths
+                },
+                {
+                    description: 'Ocena ścieżek',
+                    action: scorePaths,
+                    reverse: reverseScore
+                },
+                {
+                    description: 'Wybór najlepszej ścieżki dla każdej sekwencji',
+                    action: getBestPaths,
+                    reverse: reverseGetBestPaths
+                },
+                {
+                    description: "Wyznaczenie przyk�adowych dopasowa� dla najlepszych �cie�ek dla ka�dej sekwencji",
+                    action: findAlignments,
+                    reverse: reverseFindAlignments
+                },
+                {
+                    description: "Wybranie najlepszych sekwencji do następnego etapu",
+                    action: bestBaseSequences,
+                    reverse: reverseBestBaseSequences
+                }
+            ];
         }
 
-        //angular.element(document).ready(function () {
-        //    DiagonalsService.drawDiagonalsTable('diagonals-table', $scope.diagonals);
-        //});
+        function initializeScopeFunction() {
+            $scope.changeSequence = changeSequence;
+            $scope.drawPath = drawPath;
+            $scope.saveLastStep = saveLastStep;
+        }
+
+        function changeSequence(index) {
+            var newSequence = $scope.stepData.baseSequences[index];
+            if (newSequence !== $scope.stepData.currentBaseSequence) {
+                $scope.stepData.currentBaseSequence = newSequence;
+                $scope.clearDiagonalsTable();
+            }
+        }
+
+        function drawPath(path) {
+            $scope.stepData.selectedPath = path;
+            $scope.clearDiagonalsTable();
+            $scope.drawDiagonalsTable(path.diagonals);      //TODO: draw Paths
+        }
+
+        function saveLastStep(lastStep) {
+            ThirdDataService.lastStep = lastStep;
+        }
+
+        function buildDiagonalsPaths() {
+            ThirdDataService.createDiagonalsPathsForEachSequence($scope.stepData.diagonals).then(function (paths) {
+                $scope.stepData.currentDiagonalsPaths = paths;
+                ThirdDataService.diagonalsPaths = angular.copy(paths);
+            });
+        }
+
+        function scorePaths() {
+            ThirdDataService.scorePathsForEachSequence($scope.stepData.currentDiagonalsPaths, ConfigurationService.gapPenalty)
+                .then(function (scoredPaths) {
+                    $scope.stepData.currentDiagonalsPaths = scoredPaths;
+                    ThirdDataService.scoredPaths = angular.copy(scoredPaths);
+                })
+        }
+
+        function getBestPaths() {
+            ThirdDataService.getBestPathsForEachSequence($scope.stepData.currentDiagonalsPaths).then(function (bestPaths) {
+                $scope.stepData.currentDiagonalsPaths = bestPaths;
+                ThirdDataService.bestPaths = angular.copy(bestPaths);       //TODO: clear?
+            })
+        }
+
+        function findAlignments() {
+            ThirdDataService.findAlignmentsOfBestPathsForEachSequence($scope.stepData.currentDiagonalsPaths, $scope.stepData.querySequence)
+                .then(function (pathsWithAlignments) {
+                    $scope.stepData.currentDiagonalsPaths = pathsWithAlignments;
+                    ThirdDataService.bestPathsWithAlignments = angular.copy(pathsWithAlignments);
+                });
+        }
+
+        function bestBaseSequences() {
+            ThirdDataService.getPathsForBestSequences($scope.stepData.currentDiagonalsPaths).then(function(pathsForBestSequences){
+                ConfigurationService.fourthStage.bestPaths = pathsForBestSequences;
+                ConfigurationService.fourthStage.baseSequences = Object.keys(pathsForBestSequences);
+                $scope.stepData.bestSequences = Object.keys(pathsForBestSequences);
+            });
+        }
+
+        function reverseBuildDiagonalsPaths() {
+            $scope.stepData.currentDiagonalsPaths = undefined;
+            ThirdDataService.diagonalsPaths = undefined;
+        }
+
+        function reverseScore() {
+            $scope.stepData.currentDiagonalsPaths = ThirdDataService.diagonalsPaths;
+            ThirdDataService.scoredPaths = undefined;
+        }
+
+        function reverseGetBestPaths() {
+            $scope.stepData.currentDiagonalsPaths = ThirdDataService.scoredPaths;
+            ThirdDataService.bestPaths = undefined;
+        }
+
+        function reverseFindAlignments() {
+            $scope.stepData.currentDiagonalsPaths = ThirdDataService.bestPaths;
+            ThirdDataService.bestPathsWithAlignments = undefined;
+        }
+
+        function reverseBestBaseSequences() {
+            ConfigurationService.fourthStage = {};
+            $scope.stepData.bestSequences = undefined;
+        }
     }
 })();
 
 (function(){
     angular
     .module('fastaView')
-    .factory('ThirdDataService', [ThirdDataService]);
+    .factory('ThirdDataService', ['$q', '$timeout', ThirdDataService]);
 
-function ThirdDataService(){
+function ThirdDataService($q, $timeout){
     return {
-        diagonals: [
-            new Diagonal([0,0], [4,4], 5),
-            new Diagonal([2,4], [4,6], 12),
-            new Diagonal([5,7], [7,9], -7),
-            new Diagonal([8,18], [12,22], 2),
-            new Diagonal([1,22], [4,26], 92),
-            new Diagonal([4,17], [6,19], 110)
-        ]
+        createDiagonalsPathsForEachSequence: createDiagonalsPathsForEachSequence,
+        scorePathsForEachSequence: scorePathsForEachSequence,
+        findAlignmentsOfBestPathsForEachSequence: findAlignmentsOfBestPathsForEachSequence,
+        getBestPathsForEachSequence: getBestPathsForEachSequence,
+        getPathsForBestSequences: getPathsForBestSequences
     };
+
+    function createDiagonalsPathsForEachSequence(diagonalsBySequences) {
+        var deferred = $q.defer();
+
+        $timeout(function () {
+            deferred.resolve(fasta.createDiagonalsPathsForEachSequence(diagonalsBySequences));
+        });
+
+        return deferred.promise;
+    }
+
+    function scorePathsForEachSequence(pathsBySequences, gapPenalty) {
+        var deferred = $q.defer();
+
+        $timeout(function () {
+            deferred.resolve(fasta.scoreDiagonalsPathsForEachSequence(pathsBySequences, gapPenalty));
+        });
+
+        return deferred.promise;
+    }
+
+    function findAlignmentsOfBestPathsForEachSequence(pathsBySequences, querySequence) {
+        var deferred = $q.defer();
+
+        $timeout(function () {
+            deferred.resolve(fasta.getAlignmentOfBestPathForEachSequence(pathsBySequences, querySequence));
+        });
+
+        return deferred.promise;
+    }
+
+    function getBestPathsForEachSequence(pathsBySequences) {
+        var deferred = $q.defer();
+
+        $timeout(function () {
+            deferred.resolve(fasta.getBestPathsForEachSequence(pathsBySequences));
+        });
+
+        return deferred.promise;
+    }
+
+    function getPathsForBestSequences(pathsBySequences) {
+        var deferred = $q.defer();
+
+        $timeout(function () {
+            deferred.resolve(fasta.getPathsForBestSequences(pathsBySequences));
+        });
+
+        return deferred.promise;
+    }
 }
 })();
 
+
+(function () {
+    angular
+        .module('fastaView')
+        .controller('FourthController', ['$scope', '$timeout', 'ConfigurationService', 'FourthDataService', FourthController]);
+
+    function FourthController($scope, $timeout, ConfigurationService, FourthDataService) {
+
+        initialize();
+
+        function initialize() {
+            initializeScopeVariables();
+            initializeScopeFunction();
+        }
+
+        function initializeScopeVariables() {
+            $scope.stepData = {};
+            $scope.stepData.baseSequences = ConfigurationService.fourthStage.baseSequences;
+            $scope.stepData.querySequence = ConfigurationService.querySequence;
+            $scope.stepData.paths = ConfigurationService.fourthStage.bestPaths;
+
+            $scope.stepData.currentBaseSequence = $scope.stepData.baseSequences[0];
+
+            $scope.stepData.stepByStepConfig = [
+                {description: 'Etap 4 - początek'},
+                {
+                    description: "Algorytm Smitha-Watermana dla najlepszych sekwencji",
+                    action: smithWaterman,
+                    reverse: reverseSmithWaterman
+                },
+                {
+                    description: "Zaznaczenie najlepszych ścieżek w macierzy dla każdej sekwencji",
+                    action: getBestSolutions,
+                    reverse: reverseGetBestSolutions
+                },
+                {
+                    description: 'Przedstawienie znalezionych dopasowań dla każdej sekwencji',
+                    action: getAlignments,
+                    reverse: reverseGetAlignments
+                },
+                {
+                    description: 'Wybór najlepiej dopasowanej sekwencji',
+                    action: chooseBestSequence,
+                    reverse: reverseChooseBestSequence
+                }
+            ];
+        }
+
+
+        function initializeScopeFunction() {
+            $scope.changeSequence = changeSequence;
+        }
+
+        function changeSequence(index) {
+            var newSequence = $scope.stepData.baseSequences[index];
+            if (newSequence !== $scope.stepData.currentBaseSequence) {
+                $scope.stepData.currentBaseSequence = newSequence;
+                refreshTable();
+            }
+
+        }
+
+        function smithWaterman() {
+            FourthDataService.smithWatermanForEachSequence($scope.stepData.baseSequences, $scope.stepData.querySequence,
+                ConfigurationService.scoreMatrix, ConfigurationService.gapPenalty).then(function (matrices) {
+                    $scope.stepData.smithWatermanMatrices = matrices;
+                    FourthDataService.matrices = matrices;
+                });
+        }
+
+        function getBestSolutions() {
+            FourthDataService.findSolutionsForEachSequence($scope.stepData.smithWatermanMatrices).then(function (solutions) {
+                $scope.stepData.smithWatermanSolutions = solutions;
+                FourthDataService.solutions = solutions;
+                refreshTable();
+            });
+        }
+
+        function getAlignments() {
+            FourthDataService.getAlignmentsForEachSequence($scope.stepData.smithWatermanSolutions, $scope.stepData.querySequence)
+                .then(function(alignments) {
+                    $scope.stepData.alignments = alignments;
+                    FourthDataService.alignments = alignments;
+                })
+        }
+
+        function chooseBestSequence() {
+            FourthDataService.getBestSequence($scope.stepData.smithWatermanSolutions).then(function(bestSequence) {
+                $scope.stepData.bestSequence = bestSequence;
+                FourthDataService.bestSequence = bestSequence;
+            });
+        }
+
+        function reverseSmithWaterman() {
+            $scope.stepData.smithWatermanMatrices = undefined;
+            FourthDataService.matrices = undefined;
+        }
+
+        function reverseGetBestSolutions() {
+            $scope.stepData.smithWatermanSolutions = undefined;
+            FourthDataService.solutions = undefined;
+            $scope.clearHighlight();
+        }
+
+        function reverseGetAlignments() {
+            $scope.stepData.alignments = undefined;
+            FourthDataService.alignments = undefined;
+        }
+
+        function reverseChooseBestSequence() {
+            $scope.stepData.bestSequence = undefined;
+            FourthDataService.bestSequence = undefined;
+        }
+
+        function refreshTable() {
+            if ($scope.stepData.smithWatermanSolutions) {
+                $timeout(function() {
+                    $scope.clearHighlight();
+                    $scope.highlightCells($scope.stepData.smithWatermanSolutions[$scope.stepData.currentBaseSequence]);
+                });
+            }
+        }
+    }
+})();
+
+(function () {
+    angular
+        .module('fastaView')
+        .factory('FourthDataService', ['$q', '$timeout', fourthDataService]);
+
+    function fourthDataService($q, $timeout) {
+        return {
+            smithWatermanForEachSequence: smithWatermanForEachSequence,
+            findSolutionsForEachSequence: findSolutionsForEachSequence,
+            getAlignmentsForEachSequence: getAlignmentsForEachSequence,
+            getBestSequence: getBestSequence
+        };
+
+        function smithWatermanForEachSequence(baseSequences, querySequence, scoreMatrix, gapPenalty) {
+            var deferred = $q.defer();
+
+            $timeout(function () {
+                deferred.resolve(fasta.createSmithWatermanMatrixForEachSequence(baseSequences, querySequence, scoreMatrix, gapPenalty));
+            });
+
+            return deferred.promise;
+        }
+
+        function findSolutionsForEachSequence(swMatricesBySequence) {
+            var deferred = $q.defer();
+
+            $timeout(function () {
+                deferred.resolve(fasta.findSWSolutionsForEachSequence(swMatricesBySequence));
+            });
+
+            return deferred.promise;
+        }
+
+        function getAlignmentsForEachSequence(solutionsBySequences, querySequence) {
+            var deferred = $q.defer();
+
+            $timeout(function () {
+                deferred.resolve(fasta.getSWAlignmentsForEachSequence(solutionsBySequences, querySequence));
+            });
+
+            return deferred.promise;
+        }
+
+        function getBestSequence(solutionsBySequences) {
+            var deferred = $q.defer();
+
+            $timeout(function () {
+                deferred.resolve(fasta.getBestSWSequence(solutionsBySequences));
+            });
+
+            return deferred.promise;
+        }
+    }
+})();

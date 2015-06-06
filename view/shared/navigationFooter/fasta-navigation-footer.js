@@ -35,6 +35,7 @@
                 scope.previousStep = previousStep;
                 scope.isLastStep = isLastStep;
                 scope.isFirstStep = isFirstStep;
+                scope.isLastStage = isLastStage;
 
                 scope.nextStage = nextStage;
             }
@@ -58,6 +59,10 @@
 
             function isFirstStep() {
                 return scope.currentStep === 0;
+            }
+
+            function isLastStage() {
+                return scope.nextUrl ? false : true;
             }
 
             function nextStage() {

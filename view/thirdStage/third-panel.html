@@ -32,7 +32,8 @@
                         path.diagonals[0].startPoint[0]}},
                         Query Sequence: [{{::path.diagonals[0].startPoint[1]}}, {{::path.diagonals[path.diagonals.length-1].endPoint[1]}}] -
                         {{::stepData.querySequence | limitTo : (path.diagonals[path.diagonals.length-1].endPoint[1] - path.diagonals[0].startPoint[1]) + 1 :
-                        path.diagonals[0].startPoint[1]}}<span ng-show="diagonal.score !== undefined">, Path Score: {{path.score}}</span>
+                        path.diagonals[0].startPoint[1]}}<span ng-show="path.score !== undefined">, Path Score: {{path.score}}</span>
+                        <span ng-show="path.alignment !== undefined">, Alignment: Base - {{path.alignment.baseAlignment}}, Query - {{path.alignment.queryAlignment}}</span>
                     </a>
                 </li>
             </ul>
@@ -42,5 +43,5 @@
     </div>
 </div>
 
-<div fasta-navigation-footer previous-url="/second_stage" next-url="/third_stage" last-step="stepData.lastStep"
+<div fasta-navigation-footer previous-url="/second_stage" next-url="/fourth_stage" last-step="stepData.lastStep"
      save-step="saveLastStep(lastStep)" config="stepData.stepByStepConfig"></div>

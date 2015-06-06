@@ -25,6 +25,10 @@
                 templateUrl: 'view/thirdStage/third-panel.html',
                 controller: 'ThirdController'
             }).
+            when('/fourth_stage', {
+                templateUrl: 'view/fourthStage/fourth-panel.html',
+                controller: 'FourthController'
+            }).
             otherwise({
                 redirectTo: '/home'
             });

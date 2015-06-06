@@ -1,0 +1,43 @@
+<div class="panel panel-default">
+    <div class="panel-heading text-center"><b>Etap 4 - Pełne dopasowanie algorytmem Smitha-Watermana dla najelpszych
+        znalezionych sekwencji</b></div>
+    <div class="panel-body">
+
+        <div fasta-sequences-at-stage sequences="stepData.baseSequences"></div>
+        <p>Sekwencja szukana: {{::stepData.querySequence}}</span></p>
+
+        <div ng-show="stepData.bestSequence">
+            Sekwencja z najelpszym znalezionym dopasowaniem: <b>{{stepData.bestSequence}}</b>
+        </div>
+
+
+        <div fasta-sequences-tabs sequences="stepData.baseSequences" change-sequence="changeSequence(index)"></div>
+        <div ng-show="stepData.alignments">
+            Dopasowania sekwencji szukanej i z bazy danych:
+
+
+            <p>Sekwencja: <span ng-bind=stepData.currentBaseSequence id="baseSequence-p"></span></p>
+
+            <p>Sekwencja szukana: <span id="querySequence-p"> {{::stepData.querySequence}}</span></p>
+            <ul>
+                <li ng-repeat="(index, alignment) in stepData.alignments[stepData.currentBaseSequence]"
+                    class="highlight-on-hover" fasta-highlight
+                    highlight-paragraphs-list="::[{paragraphId: 'baseSequence-p', content: stepData.currentBaseSequence,
+                     startIndex: alignment.baseOffset, length: alignment.baseAlignment.length - (alignment.baseAlignment.split('-').length - 1)},
+                     {paragraphId: 'querySequence-p', content: stepData.querySequence, startIndex: alignment.queryOffset,
+                      length: alignment.queryAlignment.length - (alignment.queryAlignment.split('-').length - 1)}]">
+                    Base Alignment: {{alignment.baseAlignment}},
+                    Query Alignment: {{alignment.queryAlignment}},
+                    Alignment Score: {{stepData.smithWatermanSolutions[stepData.currentBaseSequence][index].score}}
+
+                </li>
+            </ul>
+        </div>
+        <div ng-show="stepData.smithWatermanMatrices">
+            <div fasta-smith-waterman-table></div>
+        </div>
+    </div>
+</div>
+
+<div fasta-navigation-footer previous-url="/third_stage" last-step="stepData.lastStep"
+     save-step="saveLastStep(lastStep)" config="stepData.stepByStepConfig"></div>

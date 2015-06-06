@@ -5,8 +5,8 @@ describe("getAlignment", function() {
         ], 2),
             alignment = fasta.getAlignment(path, 'AB', 'AB');
 
-        expect(alignment.baseSequence).toEqual('AB');
-        expect(alignment.querySequence).toEqual('AB');
+        expect(alignment.baseAlignment).toEqual('AB');
+        expect(alignment.queryAlignment).toEqual('AB');
         expect(alignment.baseOffset).toEqual(0);
 
     });
@@ -18,8 +18,8 @@ describe("getAlignment", function() {
             ], 2),
             alignment = fasta.getAlignment(path, 'ABCD', 'ABECD');
 
-        expect(alignment.baseSequence).toEqual('AB-CD');
-        expect(alignment.querySequence).toEqual('ABECD');
+        expect(alignment.baseAlignment).toEqual('AB-CD');
+        expect(alignment.queryAlignment).toEqual('ABECD');
         expect(alignment.baseOffset).toEqual(0);
     });
 
@@ -31,8 +31,8 @@ describe("getAlignment", function() {
 
             alignment = fasta.getAlignment(path, 'AACACTTTTC', 'ACTTA');
 
-        expect(alignment.baseSequence).toEqual('ACACTT');
-        expect(alignment.querySequence).toEqual('AC--TT');
+        expect(alignment.baseAlignment).toEqual('ACACTT');
+        expect(alignment.queryAlignment).toEqual('AC--TT');
         expect(alignment.baseOffset).toEqual(1);
     });
 
@@ -43,8 +43,8 @@ describe("getAlignment", function() {
             ], 2),
             alignment = fasta.getAlignment(path, 'AACAC', 'ACCAA');
 
-        expect(alignment.baseSequence).toEqual('AC-A');
-        expect(alignment.querySequence).toEqual('ACCA');
+        expect(alignment.baseAlignment).toEqual('AC-A');
+        expect(alignment.queryAlignment).toEqual('ACCA');
         expect(alignment.baseOffset).toEqual(1);
     });
 
@@ -55,8 +55,8 @@ describe("getAlignment", function() {
             ], 2),
             alignment = fasta.getAlignment(path, 'AACGGTT', 'ACTTA');
 
-        expect(alignment.baseSequence).toEqual('ACGGTT');
-        expect(alignment.querySequence).toEqual('AC--TT');
+        expect(alignment.baseAlignment).toEqual('ACGGTT');
+        expect(alignment.queryAlignment).toEqual('AC--TT');
         expect(alignment.baseOffset).toEqual(1);
     });
 
@@ -67,8 +67,8 @@ describe("getAlignment", function() {
             ], 2),
             alignment = fasta.getAlignment(path, 'AACGGCT', 'ACTTA');
 
-        expect(alignment.baseSequence).toEqual('ACGGCT');
-        expect(alignment.querySequence).toEqual('AC---T');
+        expect(alignment.baseAlignment).toEqual('ACGGCT');
+        expect(alignment.queryAlignment).toEqual('AC---T');
         expect(alignment.baseOffset).toEqual(1);
     });
 
@@ -80,8 +80,8 @@ describe("getAlignment", function() {
             ], 2),
             alignment = fasta.getAlignment(path, 'ACCTTAG', 'AACGGTTCAG');
 
-        expect(alignment.baseSequence).toEqual('AC--CTT-AG');
-        expect(alignment.querySequence).toEqual('ACGG-TTCAG');
+        expect(alignment.baseAlignment).toEqual('AC--CTT-AG');
+        expect(alignment.queryAlignment).toEqual('ACGG-TTCAG');
         expect(alignment.queryOffset).toEqual(1);
     });
 });
