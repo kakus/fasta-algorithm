@@ -17,8 +17,10 @@
             $scope.stepData.kTup = ConfigurationService.kTup;
             $scope.stepData.baseSequences = ConfigurationService.secondStage.baseSequences;
             $scope.stepData.querySequence = ConfigurationService.querySequence;
+            $scope.stepData.maxDistance = ConfigurationService.maxDistance;
 
             $scope.stepData.lastStep = SecondDataService.lastStep || 0;
+            $scope.stepData.currentStep = $scope.stepData.lastStep;
             $scope.stepData.currentDiagonals = SecondDataService.bestDiagonals || SecondDataService.scoredDiagonals || SecondDataService.diagonals;
             $scope.stepData.bestSequences = ConfigurationService.thirdStage.baseSequences;
             $scope.stepData.currentBaseSequence = $scope.stepData.baseSequences[0];
@@ -29,7 +31,10 @@
             $scope.stepData.scoreMatrix = ConfigurationService.scoreMatrix;
 
             $scope.stepData.stepByStepConfig = [
-                {description: 'Etap 2 - początek'},
+                {
+                    description: 'Etap 2 - początek',
+                    reverse: clearStage
+                },
                 {
                     description: "Znalezienie wszystkich Ciągów Diagonalnych dla każdej z par sekwencji poprzez łączenie bliskich Gorących Miejsc",  //and show
                     action: findDiagonals,
@@ -63,6 +68,7 @@
             $scope.stepData.currentBaseSequence = $scope.stepData.baseSequences[index];
             if ($scope.stepData.currentDiagonals) {
                 redrawDiagonalsTable();
+                $scope.clearHighlight();
             }
         }
 
@@ -77,15 +83,16 @@
 
         function findDiagonals() {
             //TODO: param for max gap
-            SecondDataService.getDiagonalsForEachBaseSequence(ConfigurationService.secondStage.hotSpots, $scope.stepData.kTup, 0).then(function (diagonals) {
-                SecondDataService.diagonals = angular.copy(diagonals);
-                $scope.stepData.currentDiagonals = diagonals;
-                $scope.drawDiagonalsTable($scope.stepData.currentDiagonals[$scope.stepData.currentBaseSequence]);
-            });
+            return SecondDataService.getDiagonalsForEachBaseSequence(ConfigurationService.secondStage.hotSpots,
+                $scope.stepData.kTup, $scope.stepData.maxDistance).then(function (diagonals) {
+                    SecondDataService.diagonals = angular.copy(diagonals);
+                    $scope.stepData.currentDiagonals = diagonals;
+                    $scope.drawDiagonalsTable($scope.stepData.currentDiagonals[$scope.stepData.currentBaseSequence]);
+                });
         }
 
         function score() {
-            SecondDataService.scoreForEachBaseSequence($scope.stepData.currentDiagonals, $scope.stepData.scoreMatrix,
+            return SecondDataService.scoreForEachBaseSequence($scope.stepData.currentDiagonals, $scope.stepData.scoreMatrix,
                 $scope.stepData.querySequence).then(function (scored) {
                     SecondDataService.scoredDiagonals = angular.copy(scored);
                     $scope.stepData.currentDiagonals = scored;
@@ -94,7 +101,7 @@
         }
 
         function getBestDiagonals() {
-            SecondDataService.getBestDiagonalsForEachSequence($scope.stepData.currentDiagonals).then(function (best) {
+            return SecondDataService.getBestDiagonalsForEachSequence($scope.stepData.currentDiagonals).then(function (best) {
                 $scope.stepData.foundBestStep = true;
                 $scope.stepData.currentDiagonals = best;
                 SecondDataService.bestDiagonals = angular.copy(best);
@@ -104,11 +111,18 @@
         }
 
         function bestBaseSequences() {
-            SecondDataService.getDiagonalsForBestSequences($scope.stepData.currentDiagonals).then(function (diagonalsForBestSequences) {
+            return SecondDataService.getDiagonalsForBestSequences($scope.stepData.currentDiagonals).then(function (diagonalsForBestSequences) {
                 ConfigurationService.thirdStage.bestDiagonals = diagonalsForBestSequences;
                 ConfigurationService.thirdStage.baseSequences = Object.keys(diagonalsForBestSequences);
                 $scope.stepData.bestSequences = Object.keys(diagonalsForBestSequences);
             })
+        }
+
+        function clearStage() {
+            SecondDataService.bestDiagonals = undefined;
+            SecondDataService.scoredDiagonals = undefined;
+            SecondDataService.diagonals = undefined;
+            ConfigurationService.thirdStage.baseSequences = undefined;
         }
 
         function reverseFindDiagonals() {
@@ -136,7 +150,7 @@
         }
 
         function redrawDiagonalsTable() {
-            $timeout(function() {
+            $timeout(function () {
                 $scope.clearDiagonalsTable();
                 $scope.drawDiagonalsTable($scope.stepData.currentDiagonals[$scope.stepData.currentBaseSequence]);
             });

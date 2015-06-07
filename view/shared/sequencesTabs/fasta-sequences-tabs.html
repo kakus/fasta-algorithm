@@ -1,3 +1,12 @@
-<ul class="nav nav-tabs">
-    <li role="presentation" ng-repeat="baseSequence in sequences"><a ng-click="changeSequence({index: $index})">{{baseSequence}}</a></li>
-</ul>
+<div class="sequences-tabs">
+    <div class="page-header">
+        <h3>Lista sekwencji z bazy danych przetwarzanych na tym etapie
+            <small>
+                (Kliknij aby przełączyć)
+            </small>
+        </h3>
+    </div>
+    <ul class="nav nav-pills nav-justified">
+        <li ng-repeat="baseSequence in sequences" ng-class="{active: selected === baseSequence}"><a href="" ng-click="select($index)">{{baseSequence}}</a></li>
+    </ul>
+</div>

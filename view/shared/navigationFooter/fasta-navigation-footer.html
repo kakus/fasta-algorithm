@@ -1,15 +1,22 @@
 <div class="footer navbar-fixed-bottom navbar-fixed-bottom steps-footer">
     <div class="row text-center col-md-12">
         <div class="pull-left">
-            <a class="btn btn-danger" href="#{{previousUrl}}">Poprzedni Etap</a>
-                <a class="btn btn-danger " ng-disabled="isFirstStep()" ng-click="previousStep()">Poprzedni Krok</a>
-            </div>
+            <a class="btn btn-danger" ng-click="previousStage()" href="#{{previousUrl}}">Poprzedni Etap</a>
+            <a class="btn btn-danger " ng-disabled="isFirstStep()" ng-click="previousStep()" ng-dblclick="false">Poprzedni
+                Krok</a>
+        </div>
 
         <span class="text-center">Krok {{currentStep}}: {{description}}</span>
 
         <div class="pull-right">
-            <a class="btn btn-primary " ng-disabled="isLastStep()" ng-click="nextStep()">Następny Krok</a>
-            <a class="btn btn-primary " ng-disabled="isLastStage()" ng-click="nextStage()">Następny Etap</a>
+            <a class="btn btn-primary " ng-disabled="isLastStep() || disabledStepButton" ng-click="nextStep()"
+               ng-dblclick="false">Następny Krok</a>
+            <a class="btn btn-primary " ng-disabled="isLastStage() && isLastStep()" ng-click="nextStage()" ng-dblclick="false">
+                <span ng-switch="isLastStep()">
+                    <span ng-switch-when="true">Następny Etap</span>
+                    <span ng-switch-when="false">Zakończ etap</span>
+                </span>
+            </a>
         </div>
     </div>
 </div>

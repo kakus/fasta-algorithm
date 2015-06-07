@@ -23,12 +23,16 @@
             $scope.stepData.bestSequences = ConfigurationService.fourthStage.baseSequences;
 
             $scope.stepData.lastStep = ThirdDataService.lastStep || 0;
+            $scope.stepData.currentStep = $scope.stepData.lastStep;
 
-            $scope.stepData.currentDiagonalsPaths = ThirdDataService.bestPathsWithAlignments || ThirdDataService.bestPaths || ThirdDataService.scoredPaths || ThirdDataService.diagonalsPaths;
-            $scope.stepData.bestSequences = ConfigurationService.thirdStage.baseSequences;
+            $scope.stepData.currentDiagonalsPaths = ThirdDataService.bestPaths || ThirdDataService.scoredPaths || ThirdDataService.diagonalsPaths;
+            $scope.stepData.alignments = ThirdDataService.alignments;
 
             $scope.stepData.stepByStepConfig = [
-                {description: 'Etap 3 - początek'},
+                {
+                    description: 'Etap 3 - początek',
+                    reverse: clearStage
+                },
                 {
                     description: "Budowanie ścieżek diagonalnych z wykorzystaniem wyznaczonych ciągów diagonalnych",
                     action: buildDiagonalsPaths,
@@ -45,7 +49,7 @@
                     reverse: reverseGetBestPaths
                 },
                 {
-                    description: "Wyznaczenie przyk�adowych dopasowa� dla najlepszych �cie�ek dla ka�dej sekwencji",
+                    description: "Wyznaczenie przykładowych dopasowań dla najlepszych ścieżek dla każdej sekwencji",
                     action: findAlignments,
                     reverse: reverseFindAlignments
                 },
@@ -61,12 +65,14 @@
             $scope.changeSequence = changeSequence;
             $scope.drawPath = drawPath;
             $scope.saveLastStep = saveLastStep;
+            $scope.isPartOfAlignment = isPartOfAlignment;
         }
 
         function changeSequence(index) {
             var newSequence = $scope.stepData.baseSequences[index];
             if (newSequence !== $scope.stepData.currentBaseSequence) {
                 $scope.stepData.currentBaseSequence = newSequence;
+                $scope.stepData.selectedPath = undefined;
                 $scope.clearDiagonalsTable();
             }
         }
@@ -74,22 +80,27 @@
         function drawPath(path) {
             $scope.stepData.selectedPath = path;
             $scope.clearDiagonalsTable();
-            $scope.drawDiagonalsTable(path.diagonals);      //TODO: draw Paths
+            $scope.drawDiagonalsPath(path);
         }
 
         function saveLastStep(lastStep) {
             ThirdDataService.lastStep = lastStep;
         }
 
+        function isPartOfAlignment(index) {
+            return $scope.stepData.alignments && (index >= $scope.stepData.alignments[$scope.stepData.currentBaseSequence].baseHighlight[0] &&
+                index <= $scope.stepData.alignments[$scope.stepData.currentBaseSequence].baseHighlight[1]);
+        }
+
         function buildDiagonalsPaths() {
-            ThirdDataService.createDiagonalsPathsForEachSequence($scope.stepData.diagonals).then(function (paths) {
+            return ThirdDataService.createDiagonalsPathsForEachSequence($scope.stepData.diagonals).then(function (paths) {
                 $scope.stepData.currentDiagonalsPaths = paths;
                 ThirdDataService.diagonalsPaths = angular.copy(paths);
             });
         }
 
         function scorePaths() {
-            ThirdDataService.scorePathsForEachSequence($scope.stepData.currentDiagonalsPaths, ConfigurationService.gapPenalty)
+            return ThirdDataService.scorePathsForEachSequence($scope.stepData.currentDiagonalsPaths, ConfigurationService.gapPenalty)
                 .then(function (scoredPaths) {
                     $scope.stepData.currentDiagonalsPaths = scoredPaths;
                     ThirdDataService.scoredPaths = angular.copy(scoredPaths);
@@ -97,26 +108,74 @@
         }
 
         function getBestPaths() {
-            ThirdDataService.getBestPathsForEachSequence($scope.stepData.currentDiagonalsPaths).then(function (bestPaths) {
+            return ThirdDataService.getBestPathsForEachSequence($scope.stepData.currentDiagonalsPaths).then(function (bestPaths) {
                 $scope.stepData.currentDiagonalsPaths = bestPaths;
-                ThirdDataService.bestPaths = angular.copy(bestPaths);       //TODO: clear?
+                ThirdDataService.bestPaths = angular.copy(bestPaths);
+                $scope.clearDiagonalsTable();
             })
         }
 
+        function createAlignmentsStrings(pathsWithAlignments) {
+            var alignments = {};
+
+            for (var sequence in pathsWithAlignments) {
+                var path = pathsWithAlignments[sequence][0],
+                    alignment = path.alignment,
+                    baseAlignment = createAlignment(sequence, alignment.queryOffset - alignment.baseOffset,
+                        alignment.baseOffset, alignment.baseAlignment),
+                    queryAlignment = createAlignment($scope.stepData.querySequence,
+                        alignment.baseOffset - alignment.queryOffset, alignment.queryOffset, alignment.queryAlignment);
+
+                alignments[sequence] = {
+                    baseAlignment: baseAlignment.alignment, queryAlignment: queryAlignment.alignment,
+                    baseHighlight: baseAlignment.highlight, queryHighlight: queryAlignment.highlight
+                };
+            }
+            return alignments;
+        }
+
+        function createAlignment(sequence, offsetDifference, offset, currentAlignment) {
+            var resultAlignment = '',
+                resultHighlight = [];
+            if (offsetDifference > 0) {
+                resultAlignment += new Array(offsetDifference + 1).join(' ');
+            }
+
+            resultAlignment += sequence.slice(0, offset);
+            resultHighlight.push(resultAlignment.length);
+            resultAlignment += currentAlignment;
+            resultHighlight.push(resultAlignment.length - 1);
+            resultAlignment += sequence.slice(offset + currentAlignment.replace(/-/g, '').length);
+
+            return {
+                alignment: resultAlignment,
+                highlight: resultHighlight
+            }
+        }
+
         function findAlignments() {
-            ThirdDataService.findAlignmentsOfBestPathsForEachSequence($scope.stepData.currentDiagonalsPaths, $scope.stepData.querySequence)
+            return ThirdDataService.findAlignmentsOfBestPathsForEachSequence($scope.stepData.currentDiagonalsPaths, $scope.stepData.querySequence)
                 .then(function (pathsWithAlignments) {
-                    $scope.stepData.currentDiagonalsPaths = pathsWithAlignments;
-                    ThirdDataService.bestPathsWithAlignments = angular.copy(pathsWithAlignments);
+                    $scope.stepData.alignments = createAlignmentsStrings(pathsWithAlignments);
+                    ThirdDataService.alignments = $scope.stepData.alignments;
                 });
         }
 
         function bestBaseSequences() {
-            ThirdDataService.getPathsForBestSequences($scope.stepData.currentDiagonalsPaths).then(function(pathsForBestSequences){
+            return ThirdDataService.getPathsForBestSequences($scope.stepData.currentDiagonalsPaths).then(function (pathsForBestSequences) {
                 ConfigurationService.fourthStage.bestPaths = pathsForBestSequences;
                 ConfigurationService.fourthStage.baseSequences = Object.keys(pathsForBestSequences);
                 $scope.stepData.bestSequences = Object.keys(pathsForBestSequences);
             });
+        }
+
+        function clearStage() {
+            ConfigurationService.fourthStage.baseSequences = undefined;
+
+            ThirdDataService.bestPaths = undefined;
+            ThirdDataService.scoredPaths = undefined;
+            ThirdDataService.diagonalsPaths = undefined;
+            ThirdDataService.alignments = undefined;
         }
 
         function reverseBuildDiagonalsPaths() {
@@ -135,8 +194,8 @@
         }
 
         function reverseFindAlignments() {
-            $scope.stepData.currentDiagonalsPaths = ThirdDataService.bestPaths;
-            ThirdDataService.bestPathsWithAlignments = undefined;
+            $scope.stepData.alignments = undefined;
+            ThirdDataService.alignments = undefined;
         }
 
         function reverseBestBaseSequences() {

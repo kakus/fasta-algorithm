@@ -26,10 +26,8 @@
 
             function highlightCells(solutions) {
                 var solution;
-                console.log(solutions);
                 for (var i = 0; i < solutions.length; i++) {
                     solution = solutions[i];
-                    console.log(solution.path);
                     for (var j = 0; j < solution.path.length; j++) {
                         highlightCell(solution.path[j]);
                     }
@@ -39,10 +37,6 @@
             function highlightCell(cellIndices) {
                 var name = cellIndices[0] + '_' + cellIndices[1],
                     cell = element.find('[name="' + name + '"]');
-                console.log('new');
-                console.log(name);
-                console.log(cell);
-
                 cell.addClass('highlight-sw');
             }
 

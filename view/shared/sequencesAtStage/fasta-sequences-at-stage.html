@@ -1,7 +1,18 @@
-<div>
-
-    Sekwencje z bazy danych przetwarzane na tym etapie:
-    <ol>
-        <li ng-repeat="baseSequence in sequences">{{baseSequence}}</li>
-    </ol>
+<div class="panel-group" id="accordion" role="tablist">
+    <div class="panel panel-info">
+        <div class="panel-heading" role="tab" >
+            <span class="panel-title">
+                <a data-toggle="collapse" data-parent="#accordion" href="" ng-click="isCollapsed = !isCollapsed" class="sequences-collapse">
+                    Sekwencje z bazy danych przetwarzane na tym etapie: (kliknij, aby rozwinąć)
+                </a>
+            </span>
+        </div>
+        <div id="collapseOne" class="panel-collapse collapse" ng-class="{in: isCollapsed}" role="tabpanel">
+            <div class="panel-body">
+                <ol>
+                    <li ng-repeat="baseSequence in sequences">{{baseSequence}}</li>
+                </ol>
+            </div>
+        </div>
+    </div>
 </div>

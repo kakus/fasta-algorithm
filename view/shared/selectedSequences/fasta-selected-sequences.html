@@ -1,0 +1,15 @@
+<div class="" ng-show="bestSequences">
+    <div class="page-header text-center">
+        <h3 class="">
+            Sekwencje wybrane do następnego etapu:
+        </h3>
+    </div>
+    <div class="">
+        <ul class="list-group chosen-sequences-group">
+            <li ng-repeat="sequence in bestSequences"
+                class="chosen-sequence list-group-item list-group-item-success">
+                {{sequence}}
+            </li>
+        </ul>
+    </div>
+</div>

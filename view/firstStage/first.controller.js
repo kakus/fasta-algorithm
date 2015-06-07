@@ -21,6 +21,7 @@
             $scope.stepData.querySequence = ConfigurationService.querySequence;
 
             $scope.stepData.lastStep = FirstDataService.lastStep || 0;
+            $scope.stepData.currentStep = $scope.stepData.lastStep;
             $scope.stepData.baseSequencesIndices = FirstDataService.baseSequencesIndices;
             $scope.stepData.querySequenceIndices = FirstDataService.querySequenceIndices;
             $scope.stepData.hotSpots = FirstDataService.hotSpots;
@@ -29,18 +30,21 @@
             $scope.stepData.currentBaseSequence = $scope.stepData.baseSequences[0];
 
             $scope.stepData.stepByStepConfig = [
-                {description: 'Etap 1 - rozpoczęcie'},
                 {
-                    description: "Wyliczenie tabeli indeksującej dla szukanej sekwencji",
+                    description: 'Etap 1 - rozpoczęcie',
+                    reverse: clearStage
+                },
+                {
+                    description: "Wyliczenie tablicy indeksującej dla szukanej sekwencji",
                     action: queryIndicesStep,
                     reverse: reverseQueryIndices
                 },
                 {
-                    description: "Wyliczenie tabel indeksujących dla sekwencji z bazy danych",
+                    description: "Wyliczenie tablic indeksujących dla wszystkich sekwencji z bazy danych",
                     action: baseIndicesStep,
                     reverse: reverseBaseIndices
                 },
-                {description: "Znalezienie Gorących Miejsc", action: hotSpotsStep, reverse: reverseHotSpots},
+                {description: "Znalezienie gorących miejsc", action: hotSpotsStep, reverse: reverseHotSpots},
                 {
                     description: "Wybranie najlepszych sekwencji do następnego etapu",
                     action: bestBaseSequencesStep,
@@ -59,46 +63,43 @@
         }
 
         function baseIndicesStep() {
-            if (!basePromise) {
-                basePromise = FirstDataService.getMultipleSequenceIndices($scope.stepData.baseSequences, $scope.stepData.kTup);
-            }
-            basePromise.then(function (data) {
+            return FirstDataService.getMultipleSequenceIndices($scope.stepData.baseSequences, $scope.stepData.kTup).then(function (data) {
                 FirstDataService.baseSequencesIndices = data;
                 $scope.stepData.baseSequencesIndices = data;
             });
         }
 
         function queryIndicesStep() {
-            if (!sequencePromise) {
-                sequencePromise = FirstDataService.getSequenceIndices($scope.stepData.querySequence, $scope.stepData.kTup);
-            }
-            sequencePromise.then(function (data) {
+            return FirstDataService.getSequenceIndices($scope.stepData.querySequence, $scope.stepData.kTup).then(function (data) {
                 FirstDataService.querySequenceIndices = data;
                 $scope.stepData.querySequenceIndices = data;
             });
         }
 
         function hotSpotsStep() {
-            var deferred = $q.defer();
-            hotSpotPromise = deferred.promise;
-            $q.all([sequencePromise, basePromise]).then(function () {
-                FirstDataService.getHotSpots($scope.stepData.baseSequencesIndices, $scope.stepData.querySequenceIndices).then(function (data) {
-                    FirstDataService.hotSpots = data;
-                    $scope.stepData.hotSpots = data;
-                    deferred.resolve();
-                });
+            return FirstDataService.getHotSpots($scope.stepData.baseSequencesIndices, $scope.stepData.querySequenceIndices).then(function (data) {
+                FirstDataService.hotSpots = data;
+                $scope.stepData.hotSpots = data;
             });
         }
 
         function bestBaseSequencesStep() {
-            hotSpotPromise.then(function() {
-                FirstDataService.getHotSpotsForBestSequences($scope.stepData.hotSpots).then(function (bestHotSpots) {
-                    ConfigurationService.secondStage.baseSequences = Object.keys(bestHotSpots);
-                    ConfigurationService.secondStage.hotSpots = bestHotSpots;
-                    $scope.stepData.bestSequences = Object.keys(bestHotSpots);
+            return FirstDataService.getHotSpotsForBestSequences($scope.stepData.hotSpots).then(function (bestHotSpots) {
+                ConfigurationService.secondStage.baseSequences = Object.keys(bestHotSpots);
+                ConfigurationService.secondStage.hotSpots = bestHotSpots;
+                $scope.stepData.bestSequences = Object.keys(bestHotSpots);
 
-                });
             });
+        }
+
+        function clearStage() {
+            ConfigurationService.started = false;
+            FirstDataService.baseSequencesIndices = undefined;
+            FirstDataService.querySequenceIndices = undefined;
+            FirstDataService.hotSpots = undefined;
+            ConfigurationService.secondStage.hotSpots = undefined;
+            ConfigurationService.secondStage.baseSequences = undefined;
+
         }
 
         function reverseBaseIndices() {

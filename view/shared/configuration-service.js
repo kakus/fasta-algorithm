@@ -15,24 +15,26 @@
         return {
             // default values
             baseSequences: [
-                "AACACTTTTCA",
-                "ACCTACTTTAC",
-                "ATCATCTACTACT",
-                "CTACTATCATCATCAT",
-                "ACACATCATCACTCT",
-                "ACTCTCTACTCATACT",
-                "ACTCACTCATCTACT",
-                "TACTCTTCCTCTATC",
-                "CTAGCTGCTGAATCTTCA",
+                "AACACTTTTCACATGCTACATA",
+                "ACCTACTTTACCATGTACATCG",
+                "ATCATCTACTACTACTGACGAT",
+                "CTACTATCATCATCATCACCGT",
+                "ACACATCATCACTCTTTGGACC",
+                "ACTCTCTACTCATACTACATGG",
+                "ACTCACTCATCTACTACAGTGT",
+                "TACTCTTCCTCTATCACGTGGT",
+                "CTAGCTGCTGAATCTTCAACCA",
                 "ACTCTCTTACGCTACATCGTAC"
             ],
-            querySequence: "ACTTATCAACTCATTCCCA",
+            querySequence: "ACTACAGTGTGACACGTGGGTT",
             kTup: 2,
             scoreMatrix: scoreMatrix,
             gapPenalty: -5,
+            maxDistance: 2,
             secondStage: {},
             thirdStage: {},
-            fourthStage: {}
+            fourthStage: {},
+            started: false
         };
     }
 })();

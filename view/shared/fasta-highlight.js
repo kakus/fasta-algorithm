@@ -1,7 +1,7 @@
 (function () {
     angular
         .module('fastaView')
-        .directive('fastaHighlight', ['$document', fastaHighlight]);
+        .directive('fastaHighlight', ['$document', '$compile', fastaHighlight]);
 
     function fastaHighlight($document) {
         return {
@@ -9,9 +9,9 @@
             scope: {
                 highlightParagraphsList: '='
             },
-            transclude: true,
-            link: link,
-            template: '<div ng-mouseover="highlightPartOfParagraphs()" ng-mouseleave="highlightOff()"><ng-transclude></ng-transclude></div>'
+            //transclude: true,
+            link: link
+            //template: '<tr ng-mouseover="highlightPartOfParagraphs()" ng-mouseleave="highlightOff()"><ng-transclude></ng-transclude></tr>'
         };
 
         function link(scope, element) {
@@ -19,6 +19,9 @@
 
             function initialize() {
                 initializeScopeFunctions();
+
+                element.bind('mouseover', highlightPartOfParagraphs);
+                element.bind('mouseleave', highlightOff);
             }
 
             function initializeScopeFunctions() {

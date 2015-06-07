@@ -2,108 +2,155 @@
     <div class="panel-heading text-center"><b>Etap 1: Inicjalizacja - wyliczenie Tablic Indeksujących oraz znalezienie
         Gorących Miejsc</b></div>
     <div class="panel-body">
-        <div class="container-overflow">
 
-            <div fasta-sequences-at-stage sequences="::stepData.baseSequences"></div>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="well" ng-show="stepData.currentStep > 0">
+                    <div ng-show="stepData.currentStep === 1">
+                        <p><b>Krok 1: {{stepData.stepByStepConfig[1].description}}</b></p>
 
-            <div ng-show="stepData.bestSequences">
-                Sekwencje wybrane do następnego etapu na podstawie liczby gorących miejsc:
-                <ul>
-                    <li ng-repeat="sequence in stepData.bestSequences">{{sequence}}</li>
-                </ul>
-            </div>
+                        <p>W tym kroku na stronie pojawiła się tablica indeksująca dla poszukiwanej sekwencji.
+                            Tablica ta jest wyliczana poprzez znalezienie wszystkich k-krotek
+                            (k zależne od wartości parametru ktup) w danej sekwencji i przypisanie im listy indeksów,
+                            w których się one znajdują w danej sekwencji.</p>
+                    </div>
+                    <div ng-show="stepData.currentStep === 2">
+                        <p><b>Krok 2: {{stepData.stepByStepConfig[2].description}}</b></p>
 
-            <!-- WANTED SEQUENCE -->
-            <div ng-show="stepData.querySequenceIndices">
-                <label>Sekwencja Szukana - Tablica Indeksująca:</label>
+                        <p>W tym kroku na stronie pojawiły się tablice indeksujące dla każdej sekwencji z bazy danych,
+                            wyliczonych analogicznie jak w poprzednim kroku.
+                            Domyślnie pokazywany jest rezultat dla pierwsze sekwencji z bazy danych, jednak
+                            aekwencje te mogą być przełączane za pomocą wyboru odpowiedniego elementu z listy
+                            znajdującej się nad nowo pokazaną tablicą indeksującą.</p>
+                    </div>
+                    <div ng-show="stepData.currentStep === 3">
+                        <p><b>Krok 3: {{stepData.stepByStepConfig[3].description}}</b></p>
 
-                <p>Sekwencja Szukana: <span id="querySequence-p"> {{::stepData.querySequence}} </span></p>
+                        <p>W tym kroku na stronie pojawiły się tabele zawierające listę gorących miejsc z bazy danych.
+                            Gorące miejsca są wyliczane poprzez odejmowanie indeksów dla k-krotek dla sekwencji szukanej
+                            od analogicznych k-krotek dla sekwencji z bazy danych.
+                        </p>
+                    </div>
+                    <div ng-show="stepData.currentStep === 4">
+                        <p><b>Krok 4: {{stepData.stepByStepConfig[4].description}}</b></p>
 
-                <div class="scroll-table">
-                    <table class="table table-bordered">
-                        <thead>
-                        <tr class="info">
-                            <th ng-repeat="(key,value) in stepData.querySequenceIndices">{{::key}}</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr>
-                            <td ng-repeat="value in stepData.querySequenceIndices">
-                                <p class="highlight-on-hover"
-                                   fasta-highlight highlight-paragraphs-list="[{paragraphId: 'querySequence-p',
-                                    content: stepData.querySequence, startIndex: element, length: stepData.kTup}]"
-                                   ng-repeat="element in value">
-                                    {{element}}
-                                </p>
-                            </td>
-                        </tr>
-                        </tbody>
-                    </table>
+                        <p>W tym kroku wybierana jest połowa sekwencji, które zostaną przetworzone na kolejnym etapie.
+                            Polega to na policzeniu sumy liczby gorących miejsc dla każdej sekwencji i wyborze tych sekwencji, dla których suma ta jest największa.
+                        </p>
+                        <p>
+                            Celem tego jest redukcja liczby sekwencji koniecznych do przetworzenia na kolejnych etapach.
+                        </p>
+                    </div>
                 </div>
             </div>
-            <!-- WANTED SEQUENCE -->
-
-            <!-- BASE SEQUENCE -->
-            <div ng-if="stepData.baseSequencesIndices">
-                <label>Sekwencje z bazy danych:</label>
-
-                <div fasta-sequences-tabs sequences="stepData.baseSequences"
-                     change-sequence="changeSequence(index)"></div>
-
-                <label>Tablica Indeksująca:</label>
-                <p>Sekwencja: <span ng-bind=stepData.currentBaseSequence id="baseSequence-p"></span></p>
-
-                <div class="scroll-table">
-                    <table class="table table-bordered ">
-                        <thead>
-                        <tr class="success">
-                            <th ng-repeat="(key,value) in stepData.baseSequencesIndices[stepData.currentBaseSequence]">
-                                {{::key}}
-                            </th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr>
-                            <td ng-repeat="value in stepData.baseSequencesIndices[stepData.currentBaseSequence]">
-                                <p class="highlight-on-hover"
-                                   fasta-highlight highlight-paragraphs-list="[{paragraphId: 'baseSequence-p',
-                                    content: stepData.currentBaseSequence, startIndex: element, length: stepData.kTup}]"
-                                   ng-repeat="element in value">
-                                    {{::element}}
-                                </p>
-                            </td>
-                        </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            <!-- BASE SEQUENCE -->
-
-
-            <!-- HOT SPOTS -->
-            <div ng-show="stepData.hotSpots">
-                <label>Gorące Miejsca:</label>
-
-                <div class="scroll-table">
-                    <table class="table table-bordered">
-                        <thead>
-                        <tr class="warning">
-                            <th ng-repeat="(key,value) in stepData.hotSpots[stepData.currentBaseSequence]">{{::key}}</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr>
-                            <td ng-repeat="value in stepData.hotSpots[stepData.currentBaseSequence]">
-                                <p ng-repeat="element in value">{{::element.difference}}</p>
-                            </td>
-                        </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            <!-- HOT SPOTS -->
         </div>
+
+        <div fasta-selected-sequences best-sequences="stepData.bestSequences"></div>
+
+        <!-- WANTED SEQUENCE -->
+        <div ng-show="stepData.querySequenceIndices">
+            <div class="page-header">
+                <h3>Sekwencja Szukana - Tablica Indeksująca:
+                    <small>(najedź na wartość, aby podświetlić krotkę w sekwencji)</small>
+                </h3>
+            </div>
+
+            <h4 class="text-center"><b>Sekwencja Szukana: </b><span
+                    id="querySequence-p"> {{::stepData.querySequence}} </span></h4>
+
+            <div class="scroll-table">
+                <table class="table table-bordered">
+                    <thead>
+                    <tr class="info">
+                        <th ng-repeat="(key,value) in stepData.querySequenceIndices">{{::key}}</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td ng-repeat="value in stepData.querySequenceIndices">
+                            <p class="highlight-on-hover"
+                               fasta-highlight highlight-paragraphs-list="[{paragraphId: 'querySequence-p',
+                                    content: stepData.querySequence, startIndex: element, length: stepData.kTup}]"
+                               ng-repeat="element in value">
+                                {{element}}
+                            </p>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <!-- WANTED SEQUENCE -->
+
+        <!-- BASE SEQUENCE -->
+        <div ng-if="stepData.baseSequencesIndices">
+            <div fasta-sequences-tabs sequences="stepData.baseSequences"
+                 change-sequence="changeSequence(index)"></div>
+
+            <div class="page-header">
+                <h4>Tablica Indeksująca:
+                    <small>(najedź na wartość, aby podświetlić krotkę w sekwencji)</small>
+                </h4>
+            </div>
+
+            <h4 class="text-center"><b>Aktualna sekwencja:</b> <span ng-bind=stepData.currentBaseSequence
+                                                                     id="baseSequence-p"></span></h4>
+
+            <div class="scroll-table">
+                <table class="table table-bordered ">
+                    <thead>
+                    <tr class="success">
+                        <th ng-repeat="(key,value) in stepData.baseSequencesIndices[stepData.currentBaseSequence]">
+                            {{::key}}
+                        </th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td ng-repeat="value in stepData.baseSequencesIndices[stepData.currentBaseSequence]">
+                            <p class="highlight-on-hover"
+                               fasta-highlight highlight-paragraphs-list="[{paragraphId: 'baseSequence-p',
+                                    content: stepData.currentBaseSequence, startIndex: element, length: stepData.kTup}]"
+                               ng-repeat="element in value">
+                                {{::element}}
+                            </p>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <!-- BASE SEQUENCE -->
+
+
+        <!-- HOT SPOTS -->
+        <div ng-show="stepData.hotSpots">
+            <div class="page-header">
+                <h4>Gorące Miejsca:</h4>
+            </div>
+
+            <div class="scroll-table">
+                <table class="table table-bordered">
+                    <thead>
+                    <tr class="warning">
+                        <th ng-repeat="(key,value) in stepData.hotSpots[stepData.currentBaseSequence]">{{::key}}
+                        </th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td ng-repeat="value in stepData.hotSpots[stepData.currentBaseSequence]">
+                            <p ng-repeat="element in value">{{::element.difference}}</p>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <!-- HOT SPOTS -->
     </div>
 
     <div fasta-navigation-footer previous-url="/config" next-url="/second_stage" last-step="stepData.lastStep"
-         save-step="saveLastStep(lastStep)" config="stepData.stepByStepConfig"></div>
+         save-step="saveLastStep(lastStep)" config="stepData.stepByStepConfig" current-step="stepData.currentStep"
+         next-stage-number="2"></div>
+</div>

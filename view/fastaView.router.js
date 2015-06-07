@@ -1,7 +1,10 @@
 (function () {
     angular
         .module('fastaView')
-        .config(['$routeProvider', router]);
+        .config(['$routeProvider', router])
+        .run(['$location', '$rootScope', changePageListener]);
+
+    var lastRoute;
 
     function router($routeProvider) {
 
@@ -15,22 +18,60 @@
             }).
             when('/first_stage', {
                 templateUrl: 'view/firstStage/first-panel.html',
-                controller: 'FirstController'
+                controller: 'FirstController',
+                resolve: {
+                    check: createCheckStageFunction(1)
+                }
             }).
             when('/second_stage', {
                 templateUrl: 'view/secondStage/second-panel.html',
-                controller: 'SecondController'
+                controller: 'SecondController',
+                resolve: {
+                    check: createCheckStageFunction(2)
+                }
             }).
             when('/third_stage', {
                 templateUrl: 'view/thirdStage/third-panel.html',
-                controller: 'ThirdController'
+                controller: 'ThirdController',
+                resolve: {
+                    check: createCheckStageFunction(3)
+                }
             }).
             when('/fourth_stage', {
                 templateUrl: 'view/fourthStage/fourth-panel.html',
-                controller: 'FourthController'
+                controller: 'FourthController',
+                resolve: {
+                    check: createCheckStageFunction(4)
+                }
             }).
             otherwise({
                 redirectTo: '/home'
             });
+
+        function createCheckStageFunction(stageNumber) {
+            return ['$q', '$location', 'CurrentStageService', check];
+
+            function check($q, $location, CurrentStageService) {
+                if (CurrentStageService.currentStage < stageNumber) {
+                    if (lastRoute !== undefined) {
+                        $location.path(lastRoute).replace();
+                    } else {
+                        $location.path('/config').replace();
+                    }
+                    return $q.reject();
+                }
+
+            }
+        }
+    }
+
+    function changePageListener($location, $rootScope) {
+        $rootScope.$on('$routeChangeSuccess', rememberLastPage);
+
+        function rememberLastPage(event, current) {
+            if (current.$$route !== undefined) {
+                lastRoute = $location.path();
+            }
+        }
     }
 })();

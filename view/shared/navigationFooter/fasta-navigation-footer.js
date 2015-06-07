@@ -1,9 +1,9 @@
 (function () {
     angular.
         module('fastaView').
-        directive('fastaNavigationFooter', ['$location', navigationFooter]);
+        directive('fastaNavigationFooter', ['$location', 'CurrentStageService', navigationFooter]);
 
-    function navigationFooter($location) {
+    function navigationFooter($location, CurrentStageService) {
         return {
             restrict: 'A',
             scope: {
@@ -11,7 +11,9 @@
                 nextUrl: '@',
                 lastStep: '=',
                 saveStep: '&',
-                config: '='
+                config: '=',
+                nextStageNumber: '=',
+                currentStep: '='
             },
             link: link,
             templateUrl: 'view/shared/navigationFooter/fasta-navigation-footer.html'
@@ -26,8 +28,9 @@
             }
 
             function initializeScopeVariables() {
-                scope.currentStep = scope.lastStep || 0;
+                scope.currentStep = scope.currentStep || 0;
                 scope.description = scope.config[scope.currentStep].description;
+                scope.disabledStepButton = false;
             }
 
             function initializeScopeFunctions() {
@@ -38,13 +41,21 @@
                 scope.isLastStage = isLastStage;
 
                 scope.nextStage = nextStage;
+                scope.previousStage = previousStage;
             }
 
             function nextStep() {
+                var promise;
+
+                scope.disabledStepButton = true;
                 ++scope.currentStep;
 
                 scope.description = scope.config[scope.currentStep].description;
-                scope.config[scope.currentStep].action();
+                promise = scope.config[scope.currentStep].action();
+                return promise.then(function() {
+                    scope.saveStep({lastStep: scope.currentStep});
+                    scope.disabledStepButton = false;
+                });
             }
 
             function previousStep() {
@@ -67,7 +78,7 @@
 
             function nextStage() {
                 if (isLastStep()) {
-                    scope.saveStep({lastStep: scope.currentStep});
+                    CurrentStageService.currentStage = scope.nextStageNumber;
                     $location.url(scope.nextUrl);
                 } else {
                     finishStage();
@@ -75,9 +86,18 @@
             }
 
             function finishStage() {
-                while(!isLastStep()) {
-                    nextStep();
+                if (!isLastStep()) {
+                    nextStep().then(function() {
+                        finishStage();
+                    });
                 }
+            }
+
+            function previousStage() {
+                scope.currentStep = 0;
+                scope.saveStep({lastStep: scope.currentStep});
+                CurrentStageService.currentStage -= 1;
+                scope.config[0].reverse();
             }
         }
     }

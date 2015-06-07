@@ -8,7 +8,7 @@
             scope: false,
             link: link,
             replace: true,
-            templateUrl: 'view/shared/fasta-diagonals-table.html'
+            templateUrl: 'view/shared/diagonalsTable/fasta-diagonals-table.html'
         };
 
         function link(scope, element) {
@@ -23,24 +23,26 @@
 
             function initializeScopeFunctions() {
                 scope.drawDiagonalsTable = drawDiagonalsTable;
-                scope.drawDiagonal = drawDiagonal;
                 scope.clearDiagonalsTable = clearDiagonalsTable;
                 scope.highlightDiagonal = highlightDiagonal;
+                scope.clearHighlight = clearHighlight;
+                scope.drawDiagonalsPath = drawDiagonalsPath;
             }
 
             function drawDiagonalsTable(diagonals) {
                 for (var i = 0; i < diagonals.length; ++i) {
-                    drawDiagonal(diagonals[i]);
+                    drawDiagonal(diagonals[i], true);
                 }
             }
 
-            function drawDiagonal(diagonal) {
+            function drawDiagonal(diagonal, withScore) {
                 var startPoint = diagonal.startPoint,
                     endPoint = diagonal.endPoint,
-                    diagonalClassName = "diagonal-" + startPoint[0] + "-" + startPoint[1]; //name is necessary to group cells in one diagonal - by css class
+                    diagonalClassName = "diagonal-" + startPoint[0] + "-" + startPoint[1],
+                    score = withScore ? diagonal.score : undefined; //name is necessary to group cells in one diagonal - by css class
 
                 for (var x = startPoint[0], y = startPoint[1]; x <= endPoint[0] && y <= endPoint[1]; ++x, ++y) {
-                    drawDiagonalCell(x, y, diagonal.score, diagonalClassName);
+                    drawDiagonalCell(x, y, score, diagonalClassName);
                 }
             }
 
@@ -83,6 +85,26 @@
                 cells.addClass('highlight-on-click');
                 currentHighlightedCells = cells;
             }
+
+            function clearHighlight() {
+                if (currentHighlightedCells) {
+                    currentHighlightedCells.removeClass('highlight-on-click');
+                    currentHighlightedCells = undefined;
+                }
+            }
+
+            function drawDiagonalsPath(path) {
+                for (var i = 0; i < path.diagonals.length; ++i) {
+                    drawDiagonal(path.diagonals[i], false);
+                }
+            }
+
+            function makeRemoveClassHandler(regex) {
+                return function (index, classes) {
+                    return classes.split(/\s+/).filter(function (el) {return regex.test(el);}).join(' ');
+                }
+            }
+
         }
     }
 })();

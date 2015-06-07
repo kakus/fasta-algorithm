@@ -1,9 +1,9 @@
 (function () {
     angular.
         module('fastaView').
-        directive('fastaMenu', ['$location', menu]);
+        directive('fastaMenu', ['$location', 'CurrentStageService', menu]);
 
-    function menu($location) {
+    function menu($location, CurrentStageService) {
         return {
             restrict: 'A',
             link: link,
@@ -19,10 +19,15 @@
 
             function initializeScopeFunctions() {
                 scope.menuSelected = menuSelected;
+                scope.getCurrentStage = getCurrentStage;
             }
 
             function menuSelected(selected) {
                 return $location.path() === selected;
+            }
+
+            function getCurrentStage() {
+                return CurrentStageService.currentStage;
             }
         }
     }

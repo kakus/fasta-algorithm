@@ -1,68 +1,124 @@
 <div class="panel panel-default">
-    <div class="panel-heading text-center"><b>Etap 2 - Łączenie Gorących Miejsc i znalezienie najlepszych Ciagów Diagonalnych</b></div>
-
-    <div fasta-sequences-at-stage sequences="stepData.baseSequences"></div>
-
-    <div ng-show="stepData.bestSequences">
-        Sekwencje wybrane do następnego etapu na podstawie najlepszych ciągów diagonalnych:
-        <ul>
-            <li ng-repeat="sequence in stepData.bestSequences">{{::sequence}}</li>
-        </ul>
+    <div class="panel-heading text-center"><b>Etap 2 - Łączenie Gorących Miejsc i znalezienie najlepszych Ciagów
+        Diagonalnych</b>
     </div>
 
     <div class="panel-body">
-        <div class="">
-            <table id="scoring-matrix">
-                <thead>
-                <tr class="success">
-                    <th></th>
-                    <th ng-repeat="(symbol, values) in stepData.scoreMatrix track by $index">{{::symbol}}</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr ng-repeat="(symbol, values) in stepData.scoreMatrix track by $index">
-                    <td class="col-md-1"> <label>{{::symbol}}</label> </td>
-                    <td class="" ng-repeat="(key, scoreValue) in values track by $index" data-container="body">
-                        <input type="number" class="form-control text-center" ng-model="::stepData.scoreMatrix[symbol][key]">
-                    </td>
-                </tr>
-                </tbody>
-            </table>
+
+        <div class="row">
+            <div class="col-md-12">
+                <div class="well" ng-show="stepData.currentStep > 0">
+                    <div ng-show="stepData.currentStep === 1">
+                        <p><b>Krok 1: {{stepData.stepByStepConfig[1].description}}</b></p>
+
+                        <p>W tym kroku utworzone zostały ciągi diagonalne dla każdej z sekwencji, któa została przekazana do tego etapu.
+                            Tworzenie ciągów diagonalnych polega na łączeniu blisko położonych gorących miejsc (które w tym przypadku otrzymano z poprzedniego etapu).
+                            O tym jak daleko od siebie mogą leżeć gorące miejsca decyduje jeden z parametrów ustalonych na etapie konfiguracji.
+                        </p>
+                        <p>
+                            Lista ciągów diagonalnych została zaprezentowana na stronie w formie tabeli. Po najechaniu na dany ciąg, zostanie on podświetlony w obu sekwencjach.
+                        </p>
+                        <p>
+                            Oprócz samej listy ciągów, zamieszczona zostałą także pomocnicza macierz, która pozwala przedstawić te ciągi w sposób graficzny.
+                        </p>
+                    </div>
+                    <div ng-show="stepData.currentStep === 2">
+                        <p><b>Krok 2: {{stepData.stepByStepConfig[2].description}}</b></p>
+
+                        <p>
+                            W tym kroku przedstawione wcześniej ciagi diagonalne zostały ocenione, zgodnie ze zdefiniowaną na etapie konfiguracji, macierzą substytucji.
+                            Ocena polega na przeiterowaniu po kolejnych symbolach obu ciągów, porównania symboli i dodania odpowiedniej wartości, wynikającej z macierzy, do całkowitej oceny.
+                        </p>
+                        <p>
+                            Oceny zostały wyświetlone w tej samej tabeli, co ciągi diagonalne.
+                        </p>
+                    </div>
+                    <div ng-show="stepData.currentStep === 3">
+                        <p><b>Krok 3: {{stepData.stepByStepConfig[3].description}}</b></p>
+
+                        <p>W tym kroku wybrane zostało 10 najlepszych ciągów, wybranych na podstawie wyliczonych w poprzednim kroku ocen.
+                            Dla każdej sekwencji, lista ciągów została ograniczona jedynie do tych 10 najlepszych.
+                        </p>
+                    </div>
+                    <div ng-show="stepData.currentStep === 4">
+                        <p><b>Krok 4: {{stepData.stepByStepConfig[4].description}}</b></p>
+
+                        <p>W tym kroku wybierana jest połowa sekwencji, które zostaną przetworzone na kolejnym etapie.
+                            Polega to na policzeniu sumy ocen najlepszych 10 ciągów diagonalnych dla każdej sekwencji i wyborze tych sekwencji, dla których suma ta jest największa.
+                        </p>
+                        <p>
+                            Celem tego jest redukcja liczby sekwencji koniecznych do przetworzenia na kolejnych etapach.
+                        </p>
+                    </div>
+                </div>
+            </div>
         </div>
-        <label>Maksymalna odległość pomiędzy Gorącymi Miejscami:</label>
-        <input type="number">
 
-        <div fasta-sequences-tabs sequences="stepData.baseSequences" change-sequence="changeSequence(index)"></div>
+        <div fasta-selected-sequences best-sequences="stepData.bestSequences"></div>
 
-        <div>
-            <label>Lista<span ng-if="stepData.foundBestStep"> 10 najlepszych</span> znalezionych Ciągów Diagonalnych:</label>
-            <span>(kliknij na ciąg, aby go podświetlić w tabeli)</span>
+        <div ng-show="stepData.currentDiagonals">
+            <div fasta-sequences-tabs sequences="stepData.baseSequences" change-sequence="changeSequence(index)"></div>
 
-            <p>Base Sequence: <span ng-bind=stepData.currentBaseSequence id="baseSequence-p"></span></p>
+            <div>
+                <div class="page-header">
+                    <h4>Lista<span ng-if="stepData.foundBestStep"> 10 najlepszych</span> znalezionych ciągów
+                        diagonalnych:
+                        <small>(Kliknij na ciąg, aby go podświetlić w tabeli. Najedź, aby podświetlić w obu
+                            sekwencjach)
+                        </small>
+                    </h4>
+                </div>
 
-            <p>Query Sequence: <span id="querySequence-p"> {{::stepData.querySequence}}</span></p>
-            <ul>
-                <li ng-repeat="diagonal in stepData.currentDiagonals[stepData.currentBaseSequence]" class="highlight-on-hover" fasta-highlight
-                    highlight-paragraphs-list="::[{paragraphId: 'baseSequence-p', content: stepData.currentBaseSequence,
-                     startIndex: diagonal.startPoint[0], length: (diagonal.endPoint[0] - diagonal.startPoint[0]) + 1},
-                     {paragraphId: 'querySequence-p', content: stepData.querySequence, startIndex: diagonal.startPoint[1], length: (diagonal.endPoint[1] - diagonal.startPoint[1]) + 1}]">
-                    <a class="diagonal-link" ng-click="highlightOnDiagonalsTable(diagonal)" ng-class="{'highlight-on-click-text' : (stepData.selectedDiagonal == diagonal)}">
-                        Base Sequence: [{{::diagonal.startPoint[0]}}, {{::diagonal.endPoint[0]}}] -
-                        {{::stepData.currentBaseSequence | limitTo : (diagonal.endPoint[0] - diagonal.startPoint[0]) + 1 :
-                        diagonal.startPoint[0]}},
-                        Query Sequence: [{{::diagonal.startPoint[1]}}, {{::diagonal.endPoint[1]}}] -
-                        {{::stepData.querySequence | limitTo : (diagonal.endPoint[1] - diagonal.startPoint[1]) + 1 :
-                        diagonal.startPoint[1]}}<span ng-show="diagonal.score !== undefined">, Diagonal Score: {{diagonal.score}}</span>
-                    </a>
-                </li>
-            </ul>
-        </div>
+                <h4 class="text-center"><b>Sekwencja Szukana: </b><span
+                        id="querySequence-p"> {{::stepData.querySequence}} </span></h4>
+                <h4 class="text-center"><b>Aktualna Sekwencja </b>
+                    <span ng-bind=stepData.currentBaseSequence id="baseSequence-p"></span>
+                </h4>
 
-        <div class="container-overflow">
-            <div fasta-diagonals-table></div>
+
+                <table class="table table-hover table-bordered fasta-list-table">
+                    <thead>
+                    <tr class="success">
+                        <th>#</th>
+                        <th>Przedział w aktualnej sekwencji</th>
+                        <th>Fragment aktualnej sekwencji</th>
+                        <th>Przedział w szukanej sekwencji</th>
+                        <th>Fragment szukanej sekwencji</th>
+                        <th>Ocena ciągu</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr ng-repeat="diagonal in stepData.currentDiagonals[stepData.currentBaseSequence]" fasta-highlight
+                        highlight-paragraphs-list="::[{paragraphId: 'baseSequence-p', content: stepData.currentBaseSequence,
+                            startIndex: diagonal.startPoint[0], length: (diagonal.endPoint[0] - diagonal.startPoint[0]) + 1},
+                            {paragraphId: 'querySequence-p', content: stepData.querySequence, startIndex: diagonal.startPoint[1], length: (diagonal.endPoint[1] - diagonal.startPoint[1]) + 1}]"
+                        ng-click="highlightOnDiagonalsTable(diagonal)"
+                        ng-class="{'info' : (stepData.selectedDiagonal == diagonal)}">
+                        <td>{{$index + 1}}</td>
+                        <td>[{{::diagonal.startPoint[0]}}, {{::diagonal.endPoint[0]}}]</td>
+                        <td>{{::stepData.currentBaseSequence | limitTo : (diagonal.endPoint[0] - diagonal.startPoint[0])
+                            + 1 : diagonal.startPoint[0]}}</td>
+                        <td>[{{::diagonal.startPoint[1]}}, {{::diagonal.endPoint[1]}}]</td>
+                        <td>{{::stepData.querySequence | limitTo : (diagonal.endPoint[1] - diagonal.startPoint[1]) + 1 :
+                            diagonal.startPoint[1]}}</td>
+                        <td >{{diagonal.score}}</td>
+                    </tr>
+                    </tbody>
+                </table>
+
+            </div>
+
+            <div class="page-header">
+                <h4>
+                    Tabela ciągów diagonalnych:
+                </h4>
+            </div>
+            <div>
+                <div fasta-diagonals-table></div>
+            </div>
         </div>
     </div>
 </div>
 
 <div fasta-navigation-footer previous-url="/first_stage" next-url="/third_stage" last-step="stepData.lastStep"
-     save-step="saveLastStep(lastStep)" config="stepData.stepByStepConfig"></div>
+     save-step="saveLastStep(lastStep)" config="stepData.stepByStepConfig" current-step="stepData.currentStep" next-stage-number="3"></div>

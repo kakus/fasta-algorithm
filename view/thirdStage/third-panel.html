@@ -1,47 +1,181 @@
 <div class="panel panel-default">
-    <div class="panel-heading text-center"><b>Etap 3 - Łączenie ciągów diagonalnych i znalezienie najlepszej ścieżki diagonalnej</b></div>
+    <div class="panel-heading text-center"><b>Etap 3 - Łączenie ciągów diagonalnych i znalezienie najlepszej ścieżki
+        diagonalnej</b></div>
     <div class="panel-body">
 
-        <div fasta-sequences-at-stage sequences="stepData.baseSequences"></div>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="well" ng-show="stepData.currentStep > 0">
+                    <div ng-show="stepData.currentStep === 1">
+                        <p><b>Krok 1: {{stepData.stepByStepConfig[1].description}}</b></p>
 
-        <div ng-show="stepData.bestSequences">
-            Sekwencje wybrane do następnego etapu na podstawie najlepszych ścieżek diagonalnych:
-            <ul>
-                <li ng-repeat="sequence in stepData.bestSequences">{{::sequence}}</li>
-            </ul>
+                        <p>
+                            W tym kroku znalezione w poprzednim etapie najlepsze ciągi diagonalne zostały wykorzystane do utworzenia ścieżek diagonalnych, dla każdej z sekwencji.
+                        </p>
+                        <p>
+                            Tworzenie ścieżek polega na wygenerowaniu wszystkich możliwych połączeń ciągów diagonalnych.
+                            Połączenie takie może być dokonane w przypadku, gdy dołączany ciąg leży poniżej (w sensie układu współrzędnych) końca dotychczasowej ścieżki.
+                            W tym przypadku ścieżka może być rozumiana jako graf, w którym wierzchołkami są ciągi diagonalne, zaś krawędziami połączenia między nimi.
+                        </p>
+                        <p>
+                            Lista ścieżek diagonalnych została zaprezentowana na stronie w formie tabeli. Po najechaniu na daną ścieżkę, zostanie on podświetlony w obu sekwencjach.
+                        </p>
+                        <p>
+                            Oprócz samej listy ścieżek, zamieszczona zostałą także pomocnicza macierz, która pozwala przedstawić te ciągi w sposób graficzny.
+                            Należy wybrać odpowiednią ścieżkę, aby została ona narysowana na macierzy.
+                        </p>
+                    </div>
+                    <div ng-show="stepData.currentStep === 2">
+                        <p><b>Krok 2: {{stepData.stepByStepConfig[2].description}}</b></p>
+
+                        <p>
+                            W tym kroku przedstawione wcześniej ścieżki zostały ocenione,
+                            zgodnie z ocenami użytych do ich utworzenia ciągów oraz zdefiniowanej na etapie konfiguracji kary za przerwę.
+
+                            Ocena polega na przeiterowaniu po kolejnych ciągach składających się na ścieżkę,
+                            zsumowanie ocen tych ciągów oraz dodanie kary odpowiedniej do długości przerwy występującą pomiędzy kolejnymi ciągami.
+                            Długość przerwy została zdefiniowana jako liczba wstawień do obu sekwencji koniecznych w celu ich dopasowania.
+                        </p>
+                        <p>
+                            Oceny zostały wyświetlone w tej samej tabeli, co ścieżki.
+                        </p>
+                    </div>
+                    <div ng-show="stepData.currentStep === 3">
+                        <p><b>Krok 3: {{stepData.stepByStepConfig[3].description}}</b></p>
+
+                        <p>W tym kroku dla każdej sekwencji została wybrana jedna ścieżka, która oznacza najlepsze dopasowanie.
+                            Polega to na wyborze ścieżki z najwyższą oceną, policzoną w poprzednim kroku.
+                        </p>
+                        <p>
+                            Lista ścieżek na stronie została ograniczona jedynie do tych najlepszych.
+                        </p>
+                    </div>
+                    <div ng-show="stepData.currentStep === 4">
+                        <p><b>Krok 4: {{stepData.stepByStepConfig[4].description}}</b></p>
+
+                        <p>
+                            W tym kroku zaprezentowane zostało dopasowanie każdych par sekwencji, wynikających ze znalezionych najlepszych ścieżek.
+                            Dopasowanie to jest uproszczone - dopuszcza jedynie wstawienia oraz usunięcia w miejscach połączeń ciągów.
+                        </p>
+                        <p>
+                            Przykładowe znalezione dopasowanie zostało zaprezentowane poniżej tabeli z listą ścieżek.
+                        </p>
+                    </div>
+                    <div ng-show="stepData.currentStep === 5">
+                        <p><b>Krok 5: {{stepData.stepByStepConfig[5].description}}</b></p>
+
+                        <p>W tym kroku wybierana jest połowa sekwencji, które zostaną przetworzone na kolejnym etapie.
+                            Polega to na wybraniu tych sekwencji, dla których oceny znalezionych ścieżek są najwyższe.
+                        </p>
+                        <p>
+                            Celem tego jest redukcja liczby sekwencji, dla których zostanie wykonane pełne dopasowanie algorytmem Smitha-Watermana na kolejnym etapie.
+                        </p>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <div fasta-sequences-tabs sequences="stepData.baseSequences" change-sequence="changeSequence(index)"></div>
+        <div fasta-selected-sequences best-sequences="stepData.bestSequences"></div>
 
-        <div>
-            <label>Lista znalezionych Ścieżek Diagonalnych:</label>
-            <span>(kliknij na ścieżkę, aby ją wyświetlić w tabeli)</span>
+        <div ng-show="stepData.currentDiagonalsPaths">
+            <div fasta-sequences-tabs sequences="stepData.baseSequences" change-sequence="changeSequence(index)"></div>
 
-            <p>Base Sequence: <span ng-bind=stepData.currentBaseSequence id="baseSequence-p"></span></p>
+            <div>
+                <div class="page-header">
+                    <h4>
+                        Lista znalezionych ścieżek diagonalnych:
+                        <small>(Kliknij na ścieżkę, aby ją wyświetlić w tabeli. Najedź, aby podświetlić w obu
+                            sekwencjach)
+                        </small>
+                    </h4>
+                </div>
 
-            <p>Query Sequence: <span id="querySequence-p"> {{::stepData.querySequence}}</span></p>
-            <ul>
-                <li ng-repeat="path in stepData.currentDiagonalsPaths[stepData.currentBaseSequence]" class="highlight-on-hover" fasta-highlight
-                    highlight-paragraphs-list="::[{paragraphId: 'baseSequence-p', content: stepData.currentBaseSequence,
-                     startIndex: path.diagonals[0].startPoint[0], length: (path.diagonals[path.diagonals.length-1].endPoint[0] - path.diagonals[0].startPoint[0]) + 1},
-                     {paragraphId: 'querySequence-p', content: stepData.querySequence,
-                      startIndex: path.diagonals[0].startPoint[1], length: (path.diagonals[path.diagonals.length-1].endPoint[1] - path.diagonals[0].startPoint[1]) + 1}]">
-                    <a class="diagonal-link" ng-click="drawPath(path)" ng-class="{'highlight-on-click-text' : (stepData.selectedPath == path)}">
-                        Base Sequence: [{{::path.diagonals[0].startPoint[0]}}, {{::path.diagonals[path.diagonals.length-1].endPoint[0]}}] -
-                        {{::stepData.currentBaseSequence | limitTo : (path.diagonals[path.diagonals.length-1].endPoint[0] - path.diagonals[0].startPoint[0]) + 1 :
-                        path.diagonals[0].startPoint[0]}},
-                        Query Sequence: [{{::path.diagonals[0].startPoint[1]}}, {{::path.diagonals[path.diagonals.length-1].endPoint[1]}}] -
-                        {{::stepData.querySequence | limitTo : (path.diagonals[path.diagonals.length-1].endPoint[1] - path.diagonals[0].startPoint[1]) + 1 :
-                        path.diagonals[0].startPoint[1]}}<span ng-show="path.score !== undefined">, Path Score: {{path.score}}</span>
-                        <span ng-show="path.alignment !== undefined">, Alignment: Base - {{path.alignment.baseAlignment}}, Query - {{path.alignment.queryAlignment}}</span>
-                    </a>
-                </li>
-            </ul>
+                <h4 class="text-center"><b>Sekwencja Szukana: </b><span
+                        id="querySequence-p"> {{::stepData.querySequence}} </span></h4>
+                <h4 class="text-center"><b>Aktualna Sekwencja </b>
+                    <span ng-bind=stepData.currentBaseSequence id="baseSequence-p"></span>
+                </h4>
+
+                <table class="table-hover table table-bordered fasta-list-table">
+                    <thead>
+                    <tr class="success">
+                        <th>#</th>
+                        <th>Przedział w aktualnej sekwencji</th>
+                        <th>Fragment aktualnej sekwencji</th>
+                        <th>Przedział w szukanej sekwencji</th>
+                        <th>Fragment szukanej sekwencji</th>
+                        <th>Ocena ścieżki</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr ng-repeat="path in stepData.currentDiagonalsPaths[stepData.currentBaseSequence]"
+                        fasta-highlight
+                        highlight-paragraphs-list="::[{paragraphId: 'baseSequence-p', content: stepData.currentBaseSequence,
+                            startIndex: path.diagonals[0].startPoint[0], length: (path.diagonals[path.diagonals.length-1].endPoint[0] - path.diagonals[0].startPoint[0]) + 1},
+                            {paragraphId: 'querySequence-p', content: stepData.querySequence,
+                            startIndex: path.diagonals[0].startPoint[1], length: (path.diagonals[path.diagonals.length-1].endPoint[1] - path.diagonals[0].startPoint[1]) + 1}]"
+                        ng-click="drawPath(path)"
+                        ng-class="{'info' : (stepData.selectedPath == path)}">
+
+                        <td>{{$index + 1}}</td>
+                        <td>[{{::path.diagonals[0].startPoint[0]}},
+                            {{::path.diagonals[path.diagonals.length-1].endPoint[0]}}]
+                        </td>
+                        <td>{{::stepData.currentBaseSequence | limitTo :
+                            (path.diagonals[path.diagonals.length-1].endPoint[0] - path.diagonals[0].startPoint[0]) + 1
+                            :
+                            path.diagonals[0].startPoint[0]}}
+                        </td>
+                        <td>[{{::path.diagonals[0].startPoint[1]}},
+                            {{::path.diagonals[path.diagonals.length-1].endPoint[1]}}]
+                        </td>
+                        <td>{{::stepData.querySequence | limitTo :
+                            (path.diagonals[path.diagonals.length-1].endPoint[1] - path.diagonals[0].startPoint[1]) + 1
+                            :
+                            path.diagonals[0].startPoint[1]}}
+                        </td>
+                        <td>{{path.score}}</td>
+                    </tr>
+                    </tbody>
+                </table>
+
+                <div ng-show="stepData.alignments">
+                    <div class="text-center">
+                        <h3>Znalezione Dopasowanie:</h3>
+
+                    </div>
+                    <div class="">
+                        <table class="found-alignments" align="center">
+                            <tbody>
+                            <tr>
+                                <td ng-repeat="char in stepData.alignments[stepData.currentBaseSequence].baseAlignment track by $index"
+                                    ng-class="{'alignment-highlight' : isPartOfAlignment($index)}">
+                                    {{char}}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td ng-repeat="char in stepData.alignments[stepData.currentBaseSequence].queryAlignment track by $index"
+                                    ng-class="{'alignment-highlight' : isPartOfAlignment($index)}">
+                                    {{char}}
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                </div>
+
+                <div class="page-header">
+                    <h4>
+                        Tabela ciągów diagonalnych:
+                    </h4>
+                </div>
+                <div class="container-overflow">
+                    <div fasta-diagonals-table></div>
+                </div>
+            </div>
         </div>
-
-        <div fasta-diagonals-table></div>
     </div>
-</div>
 
-<div fasta-navigation-footer previous-url="/second_stage" next-url="/fourth_stage" last-step="stepData.lastStep"
-     save-step="saveLastStep(lastStep)" config="stepData.stepByStepConfig"></div>
+    <div fasta-navigation-footer previous-url="/second_stage" next-url="/fourth_stage" last-step="stepData.lastStep"
+         save-step="saveLastStep(lastStep)" config="stepData.stepByStepConfig" current-step="stepData.currentStep" next-stage-number="4"></div>

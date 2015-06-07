@@ -1,84 +1,118 @@
 <div class="panel panel-default">
-    <div class="panel-heading">
-        Konfiguracja
+    <div class="panel-heading text-center">
+        <b>Konfiguracja</b>
     </div>
     <form class="panel-body form-horizontal">
-        <div class="form-group">
-            <label class="col-md-2 control-label">Szukana sekwencja:</label>
-
-            <div class="col-md-5">
-                <input type="text" class="form-control" ng-model="configData.querySequence" name="querySequence-input"
-                       fasta-sequence-validator/>
-            </div>
+        <div class="alert alert-danger text-center" ng-show="configData.formError" role="alert">
+            <b>Niepoprawne wartości, żaden parametr nie może być pusty!</b>
         </div>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label class="col-md-4 control-label">Szukana sekwencja:</label>
 
-        <div class="form-group">
-                <label class="col-md-2 control-label">Sekwencje w bazie danych:</label>
-            <div class="col-md-5">
-                <div class="input-group" ng-repeat="baseSequence in configData.baseSequences">
+                    <div class="col-md-8">
+                        <input type="text" class="form-control" ng-model="configData.querySequence"
+                               name="querySequence-input" ng-disabled="configData.started"
+                               fasta-sequence-validator/>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-md-4 control-label">Sekwencje w bazie danych:</label>
+
+                    <div class="col-md-8">
+                        <div class="input-group" ng-repeat="baseSequence in configData.baseSequences">
                     <span class="input-group-btn">
-                      <a class="btn btn-danger" ng-click="removeBaseSequence($index)">
+                      <a class="btn btn-danger" ng-click="removeBaseSequence($index)" ng-disabled="configData.started">
                           <span class="glyphicon glyphicon-trash"></span>
                       </a>
                   </span>
-                    <input type="text" class="form-control" disabled ng-model="baseSequence" name="baseSequence-input-{{$index}}"
-                           fasta-sequence-validator/>
+                            <input type="text" class="form-control config-sequence-list" disabled ng-model="baseSequence"
+                                   name="baseSequence-input-{{$index}}"
+                                   fasta-sequence-validator/>
+                        </div>
+                    </div>
                 </div>
-            </div>
-        </div>
 
-        <div class="form-group" ng-class="{'has-error' : configData.emptyNewSequence === true}">
-            <label class="col-md-2 control-label">Dodaj sekwencję:</label>
-            <div class="col-md-5">
-                <div class="input-group">
+                <div class="form-group" ng-class="{'has-error' : configData.emptyNewSequence === true}">
+                    <label class="col-md-4 control-label">Dodaj sekwencję:</label>
+
+                    <div class="col-md-8">
+                        <div class="input-group">
                     <span class="input-group-btn">
-                      <a class="btn btn-success" ng-click="addBaseSequence()">
+                      <a class="btn btn-success" ng-click="addBaseSequence()" ng-disabled="configData.started">
                           <span class="glyphicon glyphicon-ok"></span>
                       </a>
                   </span>
-                    <input type="text" class="form-control" ng-model="configData.newSequence" name="newSequence-input"
-                           fasta-sequence-validator />
+                            <input type="text" class="form-control" ng-model="configData.newSequence"
+                                   name="newSequence-input" ng-disabled="configData.started"
+                                   fasta-sequence-validator/>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <div class="form-group">
-            <label class="col-md-2 control-label">ktup:</label>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label class="col-md-4 control-label">ktup:</label>
 
-            <div class="col-md-5">
-                <input type="number" class="form-control" ng-model="configData.kTup" min="2" max="6" name="ktup-input"
-                       fasta-sequence-validator/>
-            </div>
-        </div>
+                    <div class="col-md-8">
+                        <input type="number" class="form-control" ng-model="configData.kTup" min="2" max="6"
+                               name="ktup-input" ng-disabled="configData.started" fasta-number-input-validator allow-minus="false"/>
+                    </div>
+                </div>
 
-        <div class="form-group">
-            <label class="col-md-2 control-label">Kara za przerwę:</label>
+                <div class="form-group">
+                    <label class="col-md-4 control-label">Kara za przerwę:</label>
 
-            <div class="col-md-5">
-                <input type="number" class="form-control" ng-model="configData.gapPenalty" name="gapPenalty-input"
-                       fasta-sequence-validator/>
-            </div>
-        </div>
+                    <div class="col-md-8">
+                        <input type="number" class="form-control" ng-model="configData.gapPenalty"
+                               name="gapPenalty-input" ng-disabled="configData.started" fasta-number-input-validator allow-minus="true"/>
+                    </div>
+                </div>
 
-        <div class="form-group">
-            <label class="col-md-2 control-label">Macierz Substytucji:</label>
-            <div class="col-md-5">
-            <table id="scoring-matrix">
-                <thead>
-                <tr class="success">
-                    <th></th>
-                    <th ng-repeat="(symbol, values) in configData.scoreMatrix track by $index">{{symbol}}</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr ng-repeat="(symbol, values) in configData.scoreMatrix track by $index">
-                    <td class="col-md-1"> <label>{{symbol}}</label> </td>
-                    <td class="" ng-repeat="(key, scoreValue) in values track by $index" data-container="body">
-                        <input type="number" class="form-control text-center" ng-model="configData.scoreMatrix[symbol][key]">
-                    </td>
-                </tr>
-                </tbody>
-            </table>
+                <div class="form-group">
+                    <label class="col-md-4 control-label">Łączenie gorących miejsc oddalonych o:</label>
+
+                    <div class="col-md-8">
+                        <input type="number" class="form-control" ng-model="configData.maxDistance"
+                               name="maxDistance-input" ng-disabled="configData.started" fasta-number-input-validator allow-minus="false"/>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-md-4 control-label">Macierz Substytucji:</label>
+
+                    <div class="col-md-8">
+                        <table id="scoring-matrix">
+                            <thead>
+                            <tr class="success">
+                                <th></th>
+                                <th ng-repeat="(symbol, values) in configData.scoreMatrix track by $index">{{symbol}}
+                                </th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr ng-repeat="(symbol, values) in configData.scoreMatrix track by $index">
+                                <td class="col-md-1"><label>{{symbol}}</label></td>
+                                <td class="" ng-repeat="(key, scoreValue) in values track by $index"
+                                    data-container="body">
+                                    <input type="number" class="form-control text-center"
+                                           ng-model="configData.scoreMatrix[symbol][key]" ng-disabled="configData.started"
+                                           fasta-number-input-validator allow-minus="true">
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="well">
+                    <p>Na etapie konfiguracji niezbędne jest uzupełnienie wszystkich parametrów algorytmu, które zostaną wykorzystane w kolejnych etapach.</p>
+                    <p>Początkowo wstawione zostały przykładowe wartości, które można zmieniać w zależności od potrzeb.</p>
+                    <p>Aby zmieniać wartości po uruchomieniu algorytmu, konieczne jest jego zrestartowanie, co usunie wszystkie postępy.</p>
+                </div>
             </div>
         </div>
     </form>
@@ -87,7 +121,8 @@
 <div class="panel panel-default">
     <div class="panel-body">
         <div class="text-center">
-        <a ng-click="save()" class="btn btn-primary" href="#/first_stage">Pierwszy etap</a>
+            <a ng-if="!configData.started" ng-click="saveAndContinue()" class="btn btn-primary">Rozpocznij demonstrację</a>
+            <a ng-if="configData.started" ng-click="restart()" class="btn btn-primary" >Zrestartuj algorytm</a>
         </div>
     </div>
 </div>

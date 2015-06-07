@@ -14,7 +14,26 @@
             templateUrl: 'view/shared/sequencesTabs/fasta-sequences-tabs.html'
         };
 
-        function link() {
+        function link(scope) {
+            initialize();
+
+            function initialize() {
+                initializeScopeVariables();
+                initializeScopeFunctions();
+            }
+
+            function initializeScopeVariables() {
+                scope.selected = scope.sequences[0];
+            }
+
+            function initializeScopeFunctions() {
+                scope.select = select;
+            }
+
+            function select(index) {
+                scope.selected = scope.sequences[index];
+                scope.changeSequence({index: index});
+            }
         }
     }
 })();
