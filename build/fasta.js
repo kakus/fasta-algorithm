@@ -1,7 +1,3 @@
-function checkNotNull(obj) {
-    if (!obj) throw new Error("Null argument.");
-    return obj;
-}
 
 Array.prototype.pushUnique = function (element) {
     if (this.indexOf(element) < 0) {
@@ -11,6 +7,11 @@ Array.prototype.pushUnique = function (element) {
 
 var fasta;
 (function (fasta) {
+
+    function checkNotNull(obj) {
+        if (!obj) throw new Error("Null argument.");
+        return obj;
+    }
 
     function getBestSequences(dataBySequences, calculateScore) {
         var scoredSequences = [],
@@ -36,6 +37,7 @@ var fasta;
     }
 
     fasta.utils = fasta.utils || {};
+    fasta.utils.checkNotNull = checkNotNull;
     fasta.utils.getBestSequences = getBestSequences;
 })(fasta = fasta || {});
 
@@ -43,10 +45,10 @@ var fasta;
 (function (fasta) {
 
     function Alignment(baseAlignment, queryAlignment, baseOffset, queryOffset) {
-        this.baseAlignment = baseAlignment;
-        this.queryAlignment = queryAlignment;
-        this.baseOffset = baseOffset;
-        this.queryOffset = queryOffset;
+        this.baseAlignment = baseAlignment;     //string
+        this.queryAlignment = queryAlignment;   //string
+        this.baseOffset = baseOffset;           //int
+        this.queryOffset = queryOffset;         //int
     }
 
     fasta.Alignment = Alignment;
@@ -56,8 +58,8 @@ var fasta;
 (function (fasta) {
 
     function Diagonal(startPoint, endPoint, score) {
-        this.startPoint = startPoint; // [int x, int y]
-        this.endPoint = endPoint; // [int x, int y]
+        this.startPoint = startPoint; // [baseStart, queryStart]
+        this.endPoint = endPoint; // [baseEnd, queryEnd]
         this.score = score;
     }
 
@@ -70,7 +72,7 @@ var fasta;
     function DiagonalsPath(diagonals, score, alignment) {
         this.diagonals = diagonals;
         this.score = score;
-        this.alignment = alignment;
+        this.alignment = alignment;     //fasta.Alignment object
     }
 
     fasta.DiagonalsPath = DiagonalsPath;
@@ -80,8 +82,8 @@ var fasta;
 (function(fasta) {
 
     function HotSpot(difference, startIndices) {
-        this.difference = difference;
-        this.startIndices = startIndices;
+        this.difference = difference;       //int
+        this.startIndices = startIndices;   //{query: queryStart, base: baseStart}
     }
 
 fasta.HotSpot = HotSpot;
@@ -90,14 +92,15 @@ fasta.HotSpot = HotSpot;
 var fasta;
 (function (fasta) {
 
-// Calcucalte difference of indexes in same tuples in query and example.
-//
-// @param example the IndexingArray of sequence from database
-// @param query the IndexingArray of query sequence
-// @return object with hotspots
+    /** Calculate hotSpots -  difference of indexes in same tuples in query and example.
+     *
+     * @param base the IndexingArray of sequence from database
+     * @param query the IndexingArray of query sequence
+     * @return object containing fasta.HotSpots for each k-tuple
+     */
     function findHotspots(query, base) {
-        checkNotNull(query);
-        checkNotNull(base);
+        fasta.utils.checkNotNull(query);
+        fasta.utils.checkNotNull(base);
         var hotspots = {};
 
         for (var tuple in query) {
@@ -122,6 +125,12 @@ var fasta;
         return hotspots;
     }
 
+    /** Calculate hotSpots, for each base sequence
+     *
+     * @param base the IndexingArray of sequence from database
+     * @param query the IndexingArray of query sequence
+     * @return object containing hotspots for each base sequence
+     */
     function findHotspotsForMultipleSequences(query, baseArrays) {
         var hotspots = {};
 
@@ -139,14 +148,35 @@ var fasta;
 var fasta;
 (function (fasta) {
 
+    /**
+     * Selects half of sequences with largest number of hotspots on single diagonal
+     */
     function getHotSpotsForBestSequences(hotSpotsBySequences) {
 
         return fasta.utils.getBestSequences(hotSpotsBySequences, function(hotSpots) {
-            var score = 0;
-            for (var hotSpotSequence in hotSpots) {
-                score += hotSpots[hotSpotSequence].length;
+            var scoreForLines = {},
+                sortable = [];
+
+            if (hotSpots === {}) {
+                return 0;
             }
-            return score;
+
+            for (var hotSpotSequence in hotSpots) {
+                var hotSpotsForSequence = hotSpots[hotSpotSequence];
+                for (var i = 0; i < hotSpotsForSequence.length; i++) {
+                    var hotSpot = hotSpotsForSequence[i];
+                    if (!scoreForLines[hotSpot.difference]) {
+                        scoreForLines[hotSpot.difference] = 0;
+                    }
+                    scoreForLines[hotSpot.difference] += 1;
+                }
+            }
+
+            for (var line in scoreForLines) {
+                sortable.push([line, scoreForLines[line]])
+            }
+            sortable.sort(function(a, b) {return b[1] - a[1]});
+            return sortable[0][1];
         });
     }
 
@@ -155,45 +185,55 @@ var fasta;
 
 
 var fasta;
-(function(fasta) {
+(function (fasta) {
 
-// First step in FASTA algorithm.
-// Find all tuples/fragments (unique combination of symbols) of length ktup in given
-// sequence, also store offset of appearance of tuple in sequence.
-//
-// This object is a map where key <String> is the tuple, and value <Array<number>> is
-// array of offsets where this tuple appears.
-// @example
-//    var array = new IndexingArray('ABA', 2);
-//    array['AB']; // will return [0]
-function IndexingArray(sequence, ktup)
-{
-   checkNotNull(sequence);
-   checkNotNull(ktup);
+    /** First step in FASTA algorithm.
+     * Find all tuples/fragments (unique combination of symbols) of length ktup in given
+     * sequence, also store offset of appearance of tuple in sequence.
+     *
+     * This object is a map where key <String> is the tuple, and value <Array<number>> is
+     * array of offsets where this tuple appears.
+     * @example
+     *    var array = new IndexingArray('ABA', 2);
+     *    array['AB']; // will return [0]
+     */
+    function IndexingArray(sequence, ktup) {
+        fasta.utils.checkNotNull(sequence);
+        fasta.utils.checkNotNull(ktup);
 
-   if (sequence.length < ktup) {
-      throw new Error("ktup must be greater or equal to sequence length");
-   }
+        if (sequence.length < ktup) {
+            throw new Error("ktup must be greater or equal to sequence length");
+        }
 
-   for(var i = 0; i <= sequence.length - ktup; ++i) {
+        for (var i = 0; i <= sequence.length - ktup; ++i) {
 
-      var tuple = sequence.substring(i, i + ktup);
+            var tuple = sequence.substring(i, i + ktup);
 
-      if (this[tuple]) {
-         this[tuple].push(i);
-      }
-      else {
-         this[tuple] = [i];
-      }
-   }
-}
+            if (this[tuple]) {
+                this[tuple].push(i);
+            }
+            else {
+                this[tuple] = [i];
+            }
+        }
+    }
 
-fasta.IndexingArray = IndexingArray;
+    fasta.IndexingArray = IndexingArray;
 })(fasta = fasta || {});
 
 var fasta;
 (function (fasta) {
 
+    /**
+     * Creates Smith-Waterman matrices for all base sequences
+     * @param baseSequences
+     * @param querySequence
+     * @param scoreMatrix
+     * @param gapPenalty
+     * @returns matrices with cells format as follows: {value: cellValue, source: cellSource}
+     *          cellValue - calculated value for this cell,
+     *          cellSource - source, from which cell this cell was calculated
+     */
     function createSmithWatermanMatrixForEachSequence(baseSequences, querySequence, scoreMatrix, gapPenalty) {
         var matrices = {},
             sequence;
@@ -204,10 +244,20 @@ var fasta;
         return matrices;
     }
 
+    /**
+     * Creates Smith-Waterman matrix for given sequences
+     * @param baseSequence
+     * @param querySequence
+     * @param scoreMatrix
+     * @param gapPenalty
+     * @returns matrix with cells format as follows: {value: cellValue, source: cellSource}
+     *          cellValue - calculated value for this cell,
+     *          cellSource - source, from which cell this cell was calculated
+     */
     function createSmithWatermanMatrix(baseSequence, querySequence, scoreMatrix, gapPenalty) {
         var resultMatrix = initializeMatrix(baseSequence, querySequence),
             diagonal, left, top,
-            cellValue, cellSource, cellResult;
+            cellValue, cellResult;
 
         for (var i = 1; i < (querySequence.length + 1); i++) {
             for (var j = 1; j < (baseSequence.length + 1); j++) {
@@ -216,18 +266,14 @@ var fasta;
                 top = resultMatrix[j - 1][i].value + gapPenalty;
 
                 cellValue = Math.max(0, diagonal, left, top);
+                cellResult = {value: cellValue};
 
                 if (cellValue !== 0) {
-                    cellSource = getSource(cellValue, i, j, diagonal, left, top);
-                    cellResult = {value: cellValue, source: cellSource};
-                } else {
-                    cellResult = {value: cellValue};
+                    cellResult.source = getSource(cellValue, i, j, diagonal, left, top);
                 }
-
                 resultMatrix[j][i] = cellResult;
             }
         }
-
         return resultMatrix;
     }
 
@@ -274,16 +320,20 @@ var fasta;
         return solutions;
     }
 
+    /**
+     * Finds solution for Smith-Waterman algorithm, based on matrix calculated before
+     * @param swMatrix
+     * @returns {Array} of result solutions, each with format: {score: solutionScore, path: solutionPathFromBeginning}
+     */
     function findSWSolutions(swMatrix) {
         var solutions = [],
             maxCellsIndices = findMaximumValues(swMatrix),
-            maxCellIndices, maxCell, solution;
+            maxCell, solution;
 
         for (var i = 0; i < maxCellsIndices.length; i++) {
-            maxCellIndices = maxCellsIndices[i];
-            maxCell = swMatrix[maxCellIndices[0]][maxCellIndices[1]];
+            maxCell = swMatrix[maxCellsIndices[i][0]][maxCellsIndices[i][1]];
             solution = {score: maxCell.value};
-            solution.path = recreatePath(maxCellIndices, swMatrix);
+            solution.path = recreatePath(maxCellsIndices[i], swMatrix);
             solutions.push(solution);
         }
         return solutions;
@@ -330,7 +380,6 @@ var fasta;
 (function (fasta) {
 
     function getPathsForBestSequences(solutionsBySequences) {
-
         var bestSolutions = fasta.utils.getBestSequences(solutionsBySequences, function(solution) {
             return solution[0].score;
         });
@@ -354,6 +403,13 @@ var fasta;
         return alignments;
     }
 
+    /**
+     * Generates alignments strings for given SW solutions
+     * @param solutions
+     * @param baseSequence
+     * @param querySequence
+     * @returns {Array} containing fasta.Alignment objects
+     */
     function getSWAlignments(solutions, baseSequence, querySequence) {
         var alignments = [];
         for (var i = 0; i < solutions.length; i++) {
@@ -373,19 +429,18 @@ var fasta;
 
         for (var i = 1; i < path.length; i++) {
             current = path[i];
-            if (current[0] === previous[0]) {
+            if (current[0] === previous[0]) {   //insertion for base sequence
                 baseAlignment += '-';
                 queryAlignment += querySequence.substr(current[1] - 1, 1);
-            } else if (current[1] === previous[1]) {
+            } else if (current[1] === previous[1]) { //insertion for query sequence
                 baseAlignment += baseSequence.substr(current[0] - 1, 1);
                 queryAlignment += '-';
-            } else {
+            } else { //match / mismatch
                 baseAlignment += baseSequence.substr(current[0] - 1, 1);
                 queryAlignment += querySequence.substr(current[1] - 1, 1);
             }
             previous = current;
         }
-
         return new fasta.Alignment(baseAlignment, queryAlignment, baseOffset, queryOffset);
     }
 
@@ -405,6 +460,17 @@ var fasta;
         return diagonals;
     }
 
+    /**
+     * Find all possible diagonals for given hotSpots. Close hotspots are joined together to generate diagonal.
+     * If given hotspot doesn't have close other hotspot, it becomes new diagonal.
+     * Resulting array doesn't contain duplicates.
+     *
+     * @param hotspots
+     * @param ktup
+     * @param maxGapLength - determines max distance between hotspots, that can be joined to create diagonal
+     * @returns {Array} containing all generated fasta.Diagonal objects.
+     *          All Diagonal object will contain startPoint and endPoint, where as first value are coordinates of base sequence
+     */
     function findDiagonals(hotspots, ktup, maxGapLength) {
         var diagonals = [],
             diagonalsOnLine,
@@ -414,7 +480,7 @@ var fasta;
         for (var line in diagonalsOnLines) {
             diagonalsOnLine = diagonalsOnLines[line];
 
-            partialDiagonals = generateJoinedDiagonals(diagonalsOnLine.sort(compareDiagonals), maxGapLength);
+            partialDiagonals = generateDiagonals(diagonalsOnLine.sort(compareDiagonals), maxGapLength);
 
             diagonals = diagonals.concat(partialDiagonals);
         }
@@ -425,13 +491,14 @@ var fasta;
     function splitDiagonalsByLines(hotspots, ktup) {
         var diagonalsOnLines = {},
             hotspotsForSequence,
-            diagonal;
+            diagonal, hotspot;
         for (var sequence in hotspots) {
             hotspotsForSequence = hotspots[sequence];
             for (var i = 0; i < hotspotsForSequence.length; i++) {
-                var hotspot = hotspotsForSequence[i];
+                hotspot = hotspotsForSequence[i];
                 diagonal = new fasta.Diagonal([hotspot.startIndices.base, hotspot.startIndices.query],
                     [hotspot.startIndices.base + (ktup - 1), hotspot.startIndices.query + (ktup - 1)]);
+
                 if (!diagonalsOnLines[hotspot.difference]) {
                     diagonalsOnLines[hotspot.difference] = [];
                 }
@@ -441,7 +508,7 @@ var fasta;
         return diagonalsOnLines;
     }
 
-    function generateJoinedDiagonals(diagonals, maxGapLength) {
+    function generateDiagonals(diagonals, maxGapLength) {
 
         return generate(diagonals[0], diagonals.slice(1), []);
 
@@ -450,17 +517,17 @@ var fasta;
             if (active.length === 0 && rest.length === 0)
                 return;
             if (rest.length === 0) {
-                if (notIsDuplicate(result, active)) {
+                if (isNotDuplicate(result, active)) {
                     result.push(active);
                 }
             } else {
                 nextDiagonal = rest[0];
-                if (shouldBeJoinedWithGap(active.endPoint[0], nextDiagonal.startPoint[0])) {
+                if (shouldBeJoinedWithPossibleGap(active.endPoint[0], nextDiagonal.startPoint[0])) {
                     //create new diagonal with gap and generate next ones from it
                     var diagonal = new fasta.Diagonal(active.startPoint, nextDiagonal.endPoint);
                     generate(diagonal, rest.slice(1), result);
                 }
-                if (areDiagonalsNotOverlapping(active.endPoint[0], nextDiagonal.startPoint[0])) {
+                if (diagonalsAreNotOverlapping(active.endPoint[0], nextDiagonal.startPoint[0])) {
                     generate(active, [], result);   //add current diagonal (just to avoid check in 2 places)
 
                     //continue without current diagonal - diagonals are sorted by start points,
@@ -471,11 +538,11 @@ var fasta;
             return result;
         }
 
-        function shouldBeJoinedWithGap(endPoint, nextStartPoint) {
+        function shouldBeJoinedWithPossibleGap(endPoint, nextStartPoint) {
             return endPoint + (maxGapLength + 1) >= nextStartPoint;
         }
 
-        function areDiagonalsNotOverlapping(endPoint, nextStartPoint) {
+        function diagonalsAreNotOverlapping(endPoint, nextStartPoint) {
             return endPoint < nextStartPoint;
         }
     }
@@ -488,7 +555,7 @@ var fasta;
         return 0;
     }
 
-    function notIsDuplicate(array, element) {
+    function isNotDuplicate(array, element) {
         for (var i = 0; i < array.length; i++) {
             if (array[i].startPoint === element.startPoint && array[i].endPoint === element.endPoint) {
                 return false;
@@ -504,6 +571,9 @@ var fasta;
 var fasta;
 (function (fasta) {
 
+    /**
+     * Returns 10 best diagonals from input array of diagonals
+     */
     function getBestDiagonals(diagonals) {
         if (diagonals.length <= 10) {
             return diagonals.slice();
@@ -541,11 +611,13 @@ var fasta;
     function getDiagonalsForBestSequences(diagonalsBySequences) {
 
         return fasta.utils.getBestSequences(diagonalsBySequences, function(diagonals) {
-            var score = 0;
-            for (var j = 0; j < diagonals.length; j++) {
-                score += diagonals[j].score;
+            var sortable = [];
+            for (var i = 0; i < diagonals.length; i++) {
+                sortable.push(diagonals[i].score);
             }
-            return score;
+
+            sortable.sort(function(a, b) {return b - a});
+            return sortable[0];
         });
     }
 
@@ -555,13 +627,15 @@ var fasta;
 (function (fasta) {
 
     /**
-     * Scores given array of diagonals. Returns same array as input, but with scored diagonals.
+     * Scores given array of diagonals. Returns same array as input, but with score assigned to diagonals.
+     *
+     * Scoring is done with use of given scoreMatrix, each pair of symbols are given some value.
      *
      * @param diagonals
      * @param scoreMatrix
      * @param baseSequence
      * @param querySequence
-     * @returns {*}
+     * @returns {Array} of fasta.Diagonal objects with score property
      */
     function scoreDiagonals(diagonals, scoreMatrix, baseSequence, querySequence) {
         var diagonal,
@@ -575,7 +649,6 @@ var fasta;
             baseSubsequence = baseSequence.substring(diagonal.startPoint[0], diagonal.endPoint[0] + 1);
             querySubsequence = querySequence.substring(diagonal.startPoint[1], diagonal.endPoint[1] + 1);
 
-            //TODO: move to diagonal object?
             for (var j = 0; j < baseSubsequence.length; j++) {
                 score += scoreMatrix[baseSubsequence[j]][querySubsequence[j]];
             }
@@ -612,8 +685,17 @@ var fasta;
         return paths;
     }
 
+    /**
+     * Creates all possible diagonal paths from given list of diagonals.
+     * At first, some initial start points (diagonals) are found - the ones that cannot be joined with first diagonal.
+     * Next, from this starting points, all possible combinations of diagonals linking are generated.
+     * It is similar to finding all possible paths in a tree.
+     *
+     * @param diagonals
+     * @returns {Array} of all possible paths for given diagonals
+     */
     function createDiagonalsPaths(diagonals) {
-        var sortedDiagonals = diagonals.slice().sort(compareDiagonalsByStart),
+        var sortedDiagonals = diagonals.slice().sort(compareDiagonalsByStartPoint),
             startingDiagonals = getStartingDiagonals(sortedDiagonals),
             partialPaths,
             resultPaths = [];
@@ -625,7 +707,7 @@ var fasta;
         return resultPaths;
     }
 
-    function compareDiagonalsByStart(first, second) {
+    function compareDiagonalsByStartPoint(first, second) {
         return first.startPoint[1] - second.startPoint[1] || first.startPoint[0] - second.startPoint[0];
     }
 
@@ -653,9 +735,6 @@ var fasta;
         }
         nextDiagonal = rest[0];
 
-        //TODO: mo¿na dodaæ warunek, ¿eby nie dodawaæ kolejnego diagonala, jak zbyt ma³a ocena?
-        //jedynie w celu optymalizacji, bo i tak one bêd¹ odrzucone na dalszych etapach
-
         if (nextCanBeJoinedWithCurrent(current, nextDiagonal)) {
             //go deeper with next diagonal joined current
             create(current.concat([nextDiagonal]), rest.slice(1), result);
@@ -680,7 +759,6 @@ var fasta;
     fasta.createDiagonalsPaths = createDiagonalsPaths;
 })(fasta = fasta || {});
 
-
 var fasta;
 (function (fasta) {
 
@@ -695,6 +773,14 @@ var fasta;
         return pathsWithAlignmentsBySequences;
     }
 
+    /**
+     * Returns alignments as string for both sequences and given path.
+     * Allows only insertion (in place of gaps between diagonals on path) on any sequence, doesn't support matches/mismatches.
+     * @param path
+     * @param baseSequence
+     * @param querySequence
+     * @returns {*|Alignment} fasta.Alignment object for given path
+     */
     function getAlignment(path, baseSequence, querySequence) {
         var diagonals = path.diagonals,
             previous = diagonals[0],
@@ -712,7 +798,7 @@ var fasta;
     }
 
     function createBaseAlignment(current, previous, baseSequence) {
-        var baseAlignment = Array((current.startPoint[1] - previous.endPoint[1])).join('-'),
+        var baseAlignment = new Array((current.startPoint[1] - previous.endPoint[1])).join('-'),
             additionalBase = 0;
 
         if (current.startPoint[0] === previous.endPoint[0]) {
@@ -735,7 +821,7 @@ var fasta;
             queryAlignment += '-';
             additionalQuery = 1;
         }
-        queryAlignment += Array((current.startPoint[0] - previous.endPoint[0])).join('-');
+        queryAlignment += new Array((current.startPoint[0] - previous.endPoint[0])).join('-');
         queryAlignment += querySequence.substring(current.startPoint[1] + additionalQuery, current.endPoint[1] + 1);
 
         return queryAlignment;
@@ -758,6 +844,11 @@ var fasta;
         return bestPathsBySequences;
     }
 
+    /**
+     * Returns one path with best score
+     * @param paths
+     * @returns {*|T}
+     */
     function getBestDiagonalsPath(paths) {
         var copy = paths.slice();
         copy.sort(compareByScore);
@@ -797,6 +888,14 @@ var fasta;
         return scoredPathsBySequences;
     }
 
+    /**
+     * Calculates score for path, as a sum of diagonals score and penalty for distance between them.
+     * Distance is calculated as a single difference on both coordinates between endPoint of one diagonal and startPoint of the other,
+     * multiplied by given gapPenalty.
+     * @param paths
+     * @param gapPenalty
+     * @returns {Array}
+     */
     function scoreDiagonalsPaths(paths, gapPenalty) {
         var scoredPaths = [],
             path;

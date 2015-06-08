@@ -18,3 +18,15 @@ gulp.task('build-fasta', function() {
         .pipe(concat(algorithmVariables.fileName))
         .pipe(gulp.dest('./build'));
 });
+
+gulp.task('default', function () {
+    with (console) {
+        log("usage: gulp [build-all | build-fasta | build-fasta-view]");
+        log("");
+        log("          build-all         - builds library for both modules and puts output in build folder.\n");
+        log("          build-fasta       - builds library only for algorithm module and puts output in build folder.\n");
+        log("          build-fasta-view  - builds library only for view module and puts output in build folder");
+        log("");
+        log("To run more specific tasks i.e. tests, see gulp commands for given module.");
+    }
+});

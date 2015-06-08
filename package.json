@@ -1,11 +1,8 @@
 {
   "name": "mbi-fasta",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "FASTA algorithm implementation",
   "main": "none",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
   "author": "Kamil Misiowiec, Jakub Janczyk, Anna Trzcinska",
   "license": "ISC",
   "devDependencies": {

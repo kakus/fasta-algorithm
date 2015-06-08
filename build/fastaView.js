@@ -60,9 +60,9 @@ angular.module('fastaView', ['ngRoute']);
             });
 
         function createCheckStageFunction(stageNumber) {
-            return ['$q', '$location', 'CurrentStageService', check];
+            return ['$q', '$location', 'CurrentStageService', checkIfStageCanBeLoaded];
 
-            function check($q, $location, CurrentStageService) {
+            function checkIfStageCanBeLoaded($q, $location, CurrentStageService) {
                 if (CurrentStageService.currentStage < stageNumber) {
                     if (lastRoute !== undefined) {
                         $location.path(lastRoute).replace();
@@ -95,31 +95,31 @@ angular.module('fastaView', ['ngRoute']);
     function configurationService() {
 
         var scoreMatrix = {
-            A: {A:10, C:-1, G:-3, T:-4},
-            C: {A:-1, C:7, G:-5, T:-3},
-            G: {A:-3, C:-5, G:9, T:0},
-            T: {A:-4, C:-3, G:0, T:8}
+            A: {A: 10, C: -1, G: -3, T: -4},
+            C: {A: -1, C: 7, G: -5, T: -3},
+            G: {A: -3, C: -5, G: 9, T: 0},
+            T: {A: -4, C: -3, G: 0, T: 8}
         };
 
         return {
             // default values
             baseSequences: [
-                "AACACTTTTCACATGCTACATA",
-                "ACCTACTTTACCATGTACATCG",
-                "ATCATCTACTACTACTGACGAT",
-                "CTACTATCATCATCATCACCGT",
-                "ACACATCATCACTCTTTGGACC",
-                "ACTCTCTACTCATACTACATGG",
-                "ACTCACTCATCTACTACAGTGT",
-                "TACTCTTCCTCTATCACGTGGT",
-                "CTAGCTGCTGAATCTTCAACCA",
-                "ACTCTCTTACGCTACATCGTAC"
+                "GAGGAAGTAAACTGCTATTC",
+                "GTCGCCGATGGTGGTAACTA",
+                "ATTATGTTCCTTGCCACTAC",
+                "AATTGTATCTAAGCCGTGTA",
+                "ATGAGAACATCCACACCTTA",
+                "GTGAATCGATGCGCCGCTTC",
+                "GGAATACCGTTTTGGCTACC",
+                "TGTTACTAAGCCCATCGCGA",
+                "TTTTCAGGTATCGTGCACGT",
+                "AGGGTTGCACCGCACGCATG"
             ],
-            querySequence: "ACTACAGTGTGACACGTGGGTT",
+            querySequence: "TCGAACTGGTGGCGAAGTAC",
             kTup: 2,
             scoreMatrix: scoreMatrix,
             gapPenalty: -5,
-            maxDistance: 2,
+            maxDistance: 1,
             secondStage: {},
             thirdStage: {},
             fourthStage: {},
@@ -144,15 +144,26 @@ angular.module('fastaView', ['ngRoute']);
         .module('fastaView')
         .directive('fastaHighlight', ['$document', '$compile', fastaHighlight]);
 
+    /**
+     * Directive for highlighting part of sequences paragraphs on mouseover.
+     * Used on almost all pages, i.e. to show which parts of sequences are contained in diagonal.
+     *
+     * To use it one has to pass highlightParagraphsList array as tag attribute.
+     * It has to be an array of objects like below:
+     *      {
+     *          startIndex: start index where to start highlight in paragraph,
+     *          length: length of highlight from start,
+     *          content: original content of paragraph,
+     *          paragraphId: ID of paragraph from HTML
+     *      }
+     */
     function fastaHighlight($document) {
         return {
             restrict: 'A',
             scope: {
                 highlightParagraphsList: '='
             },
-            //transclude: true,
             link: link
-            //template: '<tr ng-mouseover="highlightPartOfParagraphs()" ng-mouseleave="highlightOff()"><ng-transclude></ng-transclude></tr>'
         };
 
         function link(scope, element) {
@@ -203,6 +214,13 @@ angular.module('fastaView', ['ngRoute']);
         .module('fastaView')
         .directive('fastaDiagonalsTable', [diagonalsTable]);
 
+    /**
+     * Directive to insert diagonals table.
+     * It doesn't have isolated scope, so to be able to use it,
+     * parent scope (controller) has to contain some necessary data (see HTML file for names).
+     *
+     * It was necessary to do i t like this to be able to easily call methods provided by this directive in controller.
+     */
     function diagonalsTable() {
         return {
             scope: false,
@@ -219,6 +237,8 @@ angular.module('fastaView', ['ngRoute']);
 
             function initialize() {
                 initializeScopeFunctions();
+
+                element.on('$destroy', clearDiagonalsTable);
             }
 
             function initializeScopeFunctions() {
@@ -264,7 +284,7 @@ angular.module('fastaView', ['ngRoute']);
             }
 
             function clearDiagonalsTable() {
-                var cells =  element.find('[class*="diagonal-"]');
+                var cells = element.find('[class*="diagonal-"]');
                 for (var i = 0; i < cells.length; i++) {
                     var cell = angular.element(cells[i]);
                     cell.empty();
@@ -301,7 +321,9 @@ angular.module('fastaView', ['ngRoute']);
 
             function makeRemoveClassHandler(regex) {
                 return function (index, classes) {
-                    return classes.split(/\s+/).filter(function (el) {return regex.test(el);}).join(' ');
+                    return classes.split(/\s+/).filter(function (el) {
+                        return regex.test(el);
+                    }).join(' ');
                 }
             }
 
@@ -313,10 +335,14 @@ angular.module('fastaView', ['ngRoute']);
         module('fastaView').
         directive('fastaMenu', ['$location', 'CurrentStageService', menu]);
 
+    /**
+     * Directive for top menu.
+     */
     function menu($location, CurrentStageService) {
         return {
             restrict: 'A',
             link: link,
+            scope: {},
             templateUrl: 'view/shared/menu/fasta-menu.html'
         };
 
@@ -348,13 +374,33 @@ angular.module('fastaView', ['ngRoute']);
         module('fastaView').
         directive('fastaNavigationFooter', ['$location', 'CurrentStageService', navigationFooter]);
 
+    /**
+     * Directive for footer fixed navigation. Allows to unify actions taken on each stage for making next/previous steps/stages.
+     *
+     * Allows to "Finish Stage" by doing all steps at once.
+     * When going to previous stage, function callback from controller is called that should clear stage data
+     *
+     * Many attributes are necessary to provide:
+     *      - previousUrl - url to go when previous stage button is clicked
+     *      - nextUrl (optional) - url to go when next stage button is clicked
+     *      - saveStep - callback function to remember last performed step - necessary to restore state on controller
+     *      - nextStageNumber (optional) - number of next stage, necessary to set globally current stage
+     *      - currentStep - currently performed step - necessary to properly restore state after manually switching stage
+     *      - config - array containing object for steps definition.
+     *          First element should be "initial" step with description property and reverse function as property to clear data after doing "Previous Stage" action
+     *          Rest should be as follows:
+     *          {
+     *              description: short description of step,
+     *              action: function callback to be called when "next step" is done,
+     *              reverse: function callback to be called when "previous step" is done
+     *          }
+     */
     function navigationFooter($location, CurrentStageService) {
         return {
             restrict: 'A',
             scope: {
                 previousUrl: '@',
                 nextUrl: '@',
-                lastStep: '=',
                 saveStep: '&',
                 config: '=',
                 nextStageNumber: '=',
@@ -384,7 +430,6 @@ angular.module('fastaView', ['ngRoute']);
                 scope.isLastStep = isLastStep;
                 scope.isFirstStep = isFirstStep;
                 scope.isLastStage = isLastStage;
-
                 scope.nextStage = nextStage;
                 scope.previousStage = previousStage;
             }
@@ -397,7 +442,7 @@ angular.module('fastaView', ['ngRoute']);
 
                 scope.description = scope.config[scope.currentStep].description;
                 promise = scope.config[scope.currentStep].action();
-                return promise.then(function() {
+                return promise.then(function () {
                     scope.saveStep({lastStep: scope.currentStep});
                     scope.disabledStepButton = false;
                 });
@@ -432,7 +477,7 @@ angular.module('fastaView', ['ngRoute']);
 
             function finishStage() {
                 if (!isLastStep()) {
-                    nextStep().then(function() {
+                    nextStep().then(function () {
                         finishStage();
                     });
                 }
@@ -453,6 +498,9 @@ angular.module('fastaView', ['ngRoute']);
         module('fastaView').
         directive('fastaNumberInputValidator', [numberInputValidator]);
 
+    /**
+     * Directive for validating that only numbers are entered in "number" input.
+     */
     function numberInputValidator() {
         return {
             restrict: 'A',
@@ -470,11 +518,6 @@ angular.module('fastaView', ['ngRoute']);
             function initialize() {
                 element.on('keypress', function(event) {
                     var pressed = String.fromCharCode(event.which);
-                    console.log(pressed);
-                    console.log(scope.allowMinus);
-                    console.log(ngModel.$modelValue);
-
-
                     if (isNaN(parseInt(pressed))) {
                         if(pressed === '-' ) {
                             if (!scope.allowMinus || ngModel.$modelValue !== null) {
@@ -483,7 +526,6 @@ angular.module('fastaView', ['ngRoute']);
                         } else {
                             event.preventDefault();
                         }
-
                     }
                 });
             }
@@ -496,6 +538,9 @@ angular.module('fastaView', ['ngRoute']);
         module('fastaView').
         directive('fastaSelectedSequences', [selectedSequences]);
 
+    /**
+     * Directive to be used as common for displaying sequences selected for next stage
+     */
     function selectedSequences() {
         return {
             restrict: 'A',
@@ -516,6 +561,9 @@ angular.module('fastaView', ['ngRoute']);
         module('fastaView').
         directive('fastaSequenceValidator', [sequenceValidator]);
 
+    /**
+     * Directive for validating that only proper symbols are entered for inputs containing DNA sequences
+     */
     function sequenceValidator() {
         return {
             restrict: 'A',
@@ -545,28 +593,13 @@ angular.module('fastaView', ['ngRoute']);
 (function () {
     angular.
         module('fastaView').
-        directive('fastaSequencesAtStage', [sequencesAtStage]);
-
-    function sequencesAtStage() {
-        return {
-            restrict: 'A',
-            scope: {
-                sequences: '='
-            },
-            link: link,
-            templateUrl: 'view/shared/sequencesAtStage/fasta-sequences-at-stage.html'
-        };
-
-        function link() {
-        }
-    }
-})();
-
-(function () {
-    angular.
-        module('fastaView').
         directive('fastaSequencesTabs', [sequencesTabs]);
 
+    /**
+     * Directive to be used as common for displaying sequences available at current stage
+     *
+     * changeSequence - callback to change sequence on controller
+     */
     function sequencesTabs() {
         return {
             restrict: 'A',
@@ -607,6 +640,13 @@ angular.module('fastaView', ['ngRoute']);
         .module('fastaView')
         .directive('fastaSmithWatermanTable', [smithWatermanTable]);
 
+    /**
+     * Directive to insert Smith-Waterman Matrix.
+     * It doesn't have isolated scope, so to be able to use it,
+     * parent scope (controller) has to contain some necessary data (see HTML file for names).
+     *
+     * It was necessary to do it like this to be able to easily call methods provided by this directive in controller.
+     */
     function smithWatermanTable() {
         return {
             scope: false,
@@ -713,17 +753,17 @@ angular.module('fastaView', ['ngRoute']);
         }
 
         function anyFieldEmpty() {
-            return anyMatrixCellEmpty() || !$scope.configData.baseSequences.length ||
+            return anyMatrixCellEmpty() || $scope.configData.baseSequences.length === 0 ||
                 !$scope.configData.querySequence || !$scope.configData.kTup ||
-                !$scope.configData.gapPenalty || !$scope.configData.maxDistance;
+                !$scope.configData.gapPenalty || $scope.configData.maxDistance === null;
         }
 
         function anyMatrixCellEmpty() {
-            for (var i in $scope.configData.scoreMatrix) {
-                var row = $scope.configData.scoreMatrix[i];
+            for (var rowKey in $scope.configData.scoreMatrix) {
+                var row = $scope.configData.scoreMatrix[rowKey];
 
-                for (var j in row) {
-                    if (row[j] === null || row[j] === undefined) {
+                for (var cellKey in row) {
+                    if (row[cellKey] === null || row[cellKey] === undefined) {
                         return true;
                     }
                 }
@@ -755,11 +795,9 @@ angular.module('fastaView', ['ngRoute']);
 (function () {
     angular
         .module('fastaView')
-        .controller('FirstController', ['$scope', '$q', 'ConfigurationService', 'FirstDataService', FirstController]);
+        .controller('FirstController', ['$scope', 'ConfigurationService', 'FirstDataService', FirstController]);
 
-    function FirstController($scope, $q, ConfigurationService, FirstDataService) {
-
-        var sequencePromise, basePromise, hotSpotPromise;
+    function FirstController($scope, ConfigurationService, FirstDataService) {
 
         initialize();
 
@@ -773,38 +811,10 @@ angular.module('fastaView', ['ngRoute']);
             $scope.stepData.kTup = ConfigurationService.kTup;
             $scope.stepData.baseSequences = ConfigurationService.baseSequences;
             $scope.stepData.querySequence = ConfigurationService.querySequence;
-
-            $scope.stepData.lastStep = FirstDataService.lastStep || 0;
-            $scope.stepData.currentStep = $scope.stepData.lastStep;
-            $scope.stepData.baseSequencesIndices = FirstDataService.baseSequencesIndices;
-            $scope.stepData.querySequenceIndices = FirstDataService.querySequenceIndices;
-            $scope.stepData.hotSpots = FirstDataService.hotSpots;
-            $scope.stepData.bestSequences = ConfigurationService.secondStage.baseSequences;
-
             $scope.stepData.currentBaseSequence = $scope.stepData.baseSequences[0];
 
-            $scope.stepData.stepByStepConfig = [
-                {
-                    description: 'Etap 1 - rozpoczęcie',
-                    reverse: clearStage
-                },
-                {
-                    description: "Wyliczenie tablicy indeksującej dla szukanej sekwencji",
-                    action: queryIndicesStep,
-                    reverse: reverseQueryIndices
-                },
-                {
-                    description: "Wyliczenie tablic indeksujących dla wszystkich sekwencji z bazy danych",
-                    action: baseIndicesStep,
-                    reverse: reverseBaseIndices
-                },
-                {description: "Znalezienie gorących miejsc", action: hotSpotsStep, reverse: reverseHotSpots},
-                {
-                    description: "Wybranie najlepszych sekwencji do następnego etapu",
-                    action: bestBaseSequencesStep,
-                    reverse: reverseBestBaseSequences
-                }
-            ];
+            restoreState();
+            initializeStepsConfig();
         }
 
         function initializeScopeFunctions() {
@@ -812,48 +822,83 @@ angular.module('fastaView', ['ngRoute']);
             $scope.changeSequence = changeSequence;
         }
 
+        function saveLastStep(lastStep) {
+            FirstDataService.lastStep = lastStep;
+        }
+
         function changeSequence(index) {
             $scope.stepData.currentBaseSequence = $scope.stepData.baseSequences[index];
         }
 
-        function baseIndicesStep() {
+        function restoreState() {
+            $scope.stepData.currentStep = FirstDataService.lastStep || 0;
+            $scope.stepData.baseSequencesIndices = FirstDataService.baseSequencesIndices;
+            $scope.stepData.querySequenceIndices = FirstDataService.querySequenceIndices;
+            $scope.stepData.hotSpots = FirstDataService.hotSpots;
+            $scope.stepData.bestSequences = ConfigurationService.secondStage.baseSequences;
+        }
+
+        function initializeStepsConfig() {
+            $scope.stepData.stepByStepConfig = [
+                {
+                    description: 'Etap 1 - rozpoczęcie',
+                    reverse: clearStageData
+                },
+                {
+                    description: "Wyliczenie tablicy indeksującej dla szukanej sekwencji",
+                    action: getQuerySequenceIndices,
+                    reverse: reverseQueryIndices
+                },
+                {
+                    description: "Wyliczenie tablic indeksujących dla wszystkich sekwencji z bazy danych",
+                    action: getBaseSequencesIndices,
+                    reverse: reverseBaseIndices
+                },
+                {description: "Znalezienie gorących miejsc", action: getHotSpots, reverse: reverseHotSpots},
+                {
+                    description: "Wybranie najlepszych sekwencji do następnego etapu",
+                    action: getBestBaseSequences,
+                    reverse: reverseBestBaseSequences
+                }
+            ];
+        }
+
+        function getBaseSequencesIndices() {
             return FirstDataService.getMultipleSequenceIndices($scope.stepData.baseSequences, $scope.stepData.kTup).then(function (data) {
                 FirstDataService.baseSequencesIndices = data;
                 $scope.stepData.baseSequencesIndices = data;
             });
         }
 
-        function queryIndicesStep() {
+        function getQuerySequenceIndices() {
             return FirstDataService.getSequenceIndices($scope.stepData.querySequence, $scope.stepData.kTup).then(function (data) {
                 FirstDataService.querySequenceIndices = data;
                 $scope.stepData.querySequenceIndices = data;
             });
         }
 
-        function hotSpotsStep() {
+        function getHotSpots() {
             return FirstDataService.getHotSpots($scope.stepData.baseSequencesIndices, $scope.stepData.querySequenceIndices).then(function (data) {
                 FirstDataService.hotSpots = data;
                 $scope.stepData.hotSpots = data;
             });
         }
 
-        function bestBaseSequencesStep() {
+        function getBestBaseSequences() {
             return FirstDataService.getHotSpotsForBestSequences($scope.stepData.hotSpots).then(function (bestHotSpots) {
                 ConfigurationService.secondStage.baseSequences = Object.keys(bestHotSpots);
                 ConfigurationService.secondStage.hotSpots = bestHotSpots;
                 $scope.stepData.bestSequences = Object.keys(bestHotSpots);
-
             });
         }
 
-        function clearStage() {
+        function clearStageData() {
             ConfigurationService.started = false;
             FirstDataService.baseSequencesIndices = undefined;
             FirstDataService.querySequenceIndices = undefined;
             FirstDataService.hotSpots = undefined;
             ConfigurationService.secondStage.hotSpots = undefined;
             ConfigurationService.secondStage.baseSequences = undefined;
-
         }
 
         function reverseBaseIndices() {
@@ -873,13 +918,8 @@ angular.module('fastaView', ['ngRoute']);
             ConfigurationService.secondStage = {};
             $scope.stepData.bestSequences = undefined;
         }
-
-        function saveLastStep(lastStep) {
-            FirstDataService.lastStep = lastStep;
-        }
     }
-})
-();
+})();
 
 (function () {
     angular
@@ -960,44 +1000,13 @@ angular.module('fastaView', ['ngRoute']);
             $scope.stepData.baseSequences = ConfigurationService.secondStage.baseSequences;
             $scope.stepData.querySequence = ConfigurationService.querySequence;
             $scope.stepData.maxDistance = ConfigurationService.maxDistance;
-
-            $scope.stepData.lastStep = SecondDataService.lastStep || 0;
-            $scope.stepData.currentStep = $scope.stepData.lastStep;
-            $scope.stepData.currentDiagonals = SecondDataService.bestDiagonals || SecondDataService.scoredDiagonals || SecondDataService.diagonals;
-            $scope.stepData.bestSequences = ConfigurationService.thirdStage.baseSequences;
-            $scope.stepData.currentBaseSequence = $scope.stepData.baseSequences[0];
-            if ($scope.stepData.currentDiagonals) {
-                redrawDiagonalsTable();
-            }
-
             $scope.stepData.scoreMatrix = ConfigurationService.scoreMatrix;
 
-            $scope.stepData.stepByStepConfig = [
-                {
-                    description: 'Etap 2 - początek',
-                    reverse: clearStage
-                },
-                {
-                    description: "Znalezienie wszystkich Ciągów Diagonalnych dla każdej z par sekwencji poprzez łączenie bliskich Gorących Miejsc",  //and show
-                    action: findDiagonals,
-                    reverse: reverseFindDiagonals
-                },
-                {
-                    description: 'Ocena Ciągów za pomocą ustalonej macierzy substytucji',
-                    action: score,
-                    reverse: reverseScore
-                },
-                {
-                    description: 'Wybranie 10 najlepszych ciągów diagonalnych dla każdej z par sekwencji bazowa - szukana',
-                    action: getBestDiagonals,
-                    reverse: reverseGetBestDiagonals
-                },
-                {
-                    description: "Wybranie najlepszych sekwencji do następnego etapu",
-                    action: bestBaseSequences,
-                    reverse: reverseBestBaseSequences
-                }
-            ];
+            $scope.stepData.currentBaseSequence = $scope.stepData.baseSequences[0];
+
+            restoreState();
+            redrawDiagonalsTable();
+            initializeStepsConfig();
         }
 
         function initializeScopeFunctions() {
@@ -1008,10 +1017,7 @@ angular.module('fastaView', ['ngRoute']);
 
         function changeSequence(index) {
             $scope.stepData.currentBaseSequence = $scope.stepData.baseSequences[index];
-            if ($scope.stepData.currentDiagonals) {
-                redrawDiagonalsTable();
-                $scope.clearHighlight();
-            }
+            redrawDiagonalsTable();
         }
 
         function saveLastStep(lastStep) {
@@ -1023,8 +1029,42 @@ angular.module('fastaView', ['ngRoute']);
             $scope.highlightDiagonal(diagonal);
         }
 
+        function restoreState() {
+            $scope.stepData.currentStep = SecondDataService.lastStep || 0;
+            $scope.stepData.currentDiagonals = SecondDataService.bestDiagonals || SecondDataService.scoredDiagonals || SecondDataService.diagonals;
+            $scope.stepData.bestSequences = ConfigurationService.thirdStage.baseSequences;
+        }
+
+        function initializeStepsConfig() {
+            $scope.stepData.stepByStepConfig = [
+                {
+                    description: 'Etap 2 - początek',
+                    reverse: clearStageData
+                },
+                {
+                    description: "Znalezienie wszystkich ciągów diagonalnych dla każdej z par sekwencji",  //and show
+                    action: findDiagonals,
+                    reverse: reverseFindDiagonals
+                },
+                {
+                    description: 'Ocena ciągów za pomocą ustalonej macierzy substytucji',
+                    action: score,
+                    reverse: reverseScore
+                },
+                {
+                    description: 'Wybranie 10 najlepszych ciągów diagonalnych dla każdej z par sekwencji',
+                    action: getBestDiagonals,
+                    reverse: reverseGetBestDiagonals
+                },
+                {
+                    description: "Wybranie najlepszych sekwencji do następnego etapu",
+                    action: bestBaseSequences,
+                    reverse: reverseBestBaseSequences
+                }
+            ];
+        }
+
         function findDiagonals() {
-            //TODO: param for max gap
             return SecondDataService.getDiagonalsForEachBaseSequence(ConfigurationService.secondStage.hotSpots,
                 $scope.stepData.kTup, $scope.stepData.maxDistance).then(function (diagonals) {
                     SecondDataService.diagonals = angular.copy(diagonals);
@@ -1053,14 +1093,15 @@ angular.module('fastaView', ['ngRoute']);
         }
 
         function bestBaseSequences() {
-            return SecondDataService.getDiagonalsForBestSequences($scope.stepData.currentDiagonals).then(function (diagonalsForBestSequences) {
-                ConfigurationService.thirdStage.bestDiagonals = diagonalsForBestSequences;
-                ConfigurationService.thirdStage.baseSequences = Object.keys(diagonalsForBestSequences);
-                $scope.stepData.bestSequences = Object.keys(diagonalsForBestSequences);
-            })
+            return SecondDataService.getDiagonalsForBestSequences($scope.stepData.currentDiagonals)
+                .then(function (diagonalsForBestSequences) {
+                    ConfigurationService.thirdStage.bestDiagonals = diagonalsForBestSequences;
+                    ConfigurationService.thirdStage.baseSequences = Object.keys(diagonalsForBestSequences);
+                    $scope.stepData.bestSequences = Object.keys(diagonalsForBestSequences);
+                })
         }
 
-        function clearStage() {
+        function clearStageData() {
             SecondDataService.bestDiagonals = undefined;
             SecondDataService.scoredDiagonals = undefined;
             SecondDataService.diagonals = undefined;
@@ -1092,11 +1133,14 @@ angular.module('fastaView', ['ngRoute']);
         }
 
         function redrawDiagonalsTable() {
-            $timeout(function () {
-                $scope.clearDiagonalsTable();
-                $scope.drawDiagonalsTable($scope.stepData.currentDiagonals[$scope.stepData.currentBaseSequence]);
-            });
-
+            if ($scope.stepData.currentDiagonals) {
+                $timeout(function () {
+                    $scope.clearDiagonalsTable();
+                    $scope.drawDiagonalsTable($scope.stepData.currentDiagonals[$scope.stepData.currentBaseSequence]);
+                    $scope.stepData.selectedDiagonal = undefined;
+                    $scope.clearHighlight();
+                });
+            }
         }
     }
 })();
@@ -1179,45 +1223,8 @@ angular.module('fastaView', ['ngRoute']);
             $scope.stepData.diagonals = ConfigurationService.thirdStage.bestDiagonals;
 
             $scope.stepData.currentBaseSequence = $scope.stepData.baseSequences[0];
-            $scope.stepData.bestSequences = ConfigurationService.fourthStage.baseSequences;
-
-            $scope.stepData.lastStep = ThirdDataService.lastStep || 0;
-            $scope.stepData.currentStep = $scope.stepData.lastStep;
-
-            $scope.stepData.currentDiagonalsPaths = ThirdDataService.bestPaths || ThirdDataService.scoredPaths || ThirdDataService.diagonalsPaths;
-            $scope.stepData.alignments = ThirdDataService.alignments;
-
-            $scope.stepData.stepByStepConfig = [
-                {
-                    description: 'Etap 3 - początek',
-                    reverse: clearStage
-                },
-                {
-                    description: "Budowanie ścieżek diagonalnych z wykorzystaniem wyznaczonych ciągów diagonalnych",
-                    action: buildDiagonalsPaths,
-                    reverse: reverseBuildDiagonalsPaths
-                },
-                {
-                    description: 'Ocena ścieżek',
-                    action: scorePaths,
-                    reverse: reverseScore
-                },
-                {
-                    description: 'Wybór najlepszej ścieżki dla każdej sekwencji',
-                    action: getBestPaths,
-                    reverse: reverseGetBestPaths
-                },
-                {
-                    description: "Wyznaczenie przykładowych dopasowań dla najlepszych ścieżek dla każdej sekwencji",
-                    action: findAlignments,
-                    reverse: reverseFindAlignments
-                },
-                {
-                    description: "Wybranie najlepszych sekwencji do następnego etapu",
-                    action: bestBaseSequences,
-                    reverse: reverseBestBaseSequences
-                }
-            ];
+            restoreState();
+            initializeStepsConfig();
         }
 
         function initializeScopeFunction() {
@@ -1251,6 +1258,47 @@ angular.module('fastaView', ['ngRoute']);
                 index <= $scope.stepData.alignments[$scope.stepData.currentBaseSequence].baseHighlight[1]);
         }
 
+        function restoreState() {
+            $scope.stepData.bestSequences = ConfigurationService.fourthStage.baseSequences;
+            $scope.stepData.currentStep = ThirdDataService.lastStep || 0;
+            $scope.stepData.currentDiagonalsPaths = ThirdDataService.bestPaths || ThirdDataService.scoredPaths || ThirdDataService.diagonalsPaths;
+            $scope.stepData.alignments = ThirdDataService.alignments;
+        }
+
+        function initializeStepsConfig() {
+            $scope.stepData.stepByStepConfig = [
+                {
+                    description: 'Etap 3 - początek',
+                    reverse: clearStageData
+                },
+                {
+                    description: "Budowanie ścieżek diagonalnych z wykorzystaniem wyznaczonych ciągów diagonalnych",
+                    action: buildDiagonalsPaths,
+                    reverse: reverseBuildDiagonalsPaths
+                },
+                {
+                    description: 'Ocena ścieżek',
+                    action: scorePaths,
+                    reverse: reverseScore
+                },
+                {
+                    description: 'Wybór najlepszej ścieżki dla każdej sekwencji',
+                    action: getBestPaths,
+                    reverse: reverseGetBestPaths
+                },
+                {
+                    description: "Wyznaczenie przykładowych dopasowań dla najlepszych ścieżek dla każdej sekwencji",
+                    action: findAlignments,
+                    reverse: reverseFindAlignments
+                },
+                {
+                    description: "Wybranie najlepszych sekwencji do następnego etapu",
+                    action: bestBaseSequences,
+                    reverse: reverseBestBaseSequences
+                }
+            ];
+        }
+
         function buildDiagonalsPaths() {
             return ThirdDataService.createDiagonalsPathsForEachSequence($scope.stepData.diagonals).then(function (paths) {
                 $scope.stepData.currentDiagonalsPaths = paths;
@@ -1272,6 +1320,55 @@ angular.module('fastaView', ['ngRoute']);
                 ThirdDataService.bestPaths = angular.copy(bestPaths);
                 $scope.clearDiagonalsTable();
             })
+        }
+
+        function findAlignments() {
+            return ThirdDataService.findAlignmentsOfBestPathsForEachSequence($scope.stepData.currentDiagonalsPaths, $scope.stepData.querySequence)
+                .then(function (pathsWithAlignments) {
+                    $scope.stepData.alignments = createAlignmentsStrings(pathsWithAlignments);
+                    ThirdDataService.alignments = $scope.stepData.alignments;
+                });
+        }
+
+        function bestBaseSequences() {
+            return ThirdDataService.getPathsForBestSequences($scope.stepData.currentDiagonalsPaths).then(function (pathsForBestSequences) {
+                ConfigurationService.fourthStage.bestPaths = pathsForBestSequences;
+                ConfigurationService.fourthStage.baseSequences = Object.keys(pathsForBestSequences);
+                $scope.stepData.bestSequences = Object.keys(pathsForBestSequences);
+            });
+        }
+
+        function clearStageData() {
+            ConfigurationService.fourthStage.baseSequences = undefined;
+            ThirdDataService.bestPaths = undefined;
+            ThirdDataService.scoredPaths = undefined;
+            ThirdDataService.diagonalsPaths = undefined;
+            ThirdDataService.alignments = undefined;
+        }
+
+        function reverseBuildDiagonalsPaths() {
+            $scope.stepData.currentDiagonalsPaths = undefined;
+            ThirdDataService.diagonalsPaths = undefined;
+        }
+
+        function reverseScore() {
+            $scope.stepData.currentDiagonalsPaths = ThirdDataService.diagonalsPaths;
+            ThirdDataService.scoredPaths = undefined;
+        }
+
+        function reverseGetBestPaths() {
+            $scope.stepData.currentDiagonalsPaths = ThirdDataService.scoredPaths;
+            ThirdDataService.bestPaths = undefined;
+        }
+
+        function reverseFindAlignments() {
+            $scope.stepData.alignments = undefined;
+            ThirdDataService.alignments = undefined;
+        }
+
+        function reverseBestBaseSequences() {
+            ConfigurationService.fourthStage = {};
+            $scope.stepData.bestSequences = undefined;
         }
 
         function createAlignmentsStrings(pathsWithAlignments) {
@@ -1310,56 +1407,6 @@ angular.module('fastaView', ['ngRoute']);
                 alignment: resultAlignment,
                 highlight: resultHighlight
             }
-        }
-
-        function findAlignments() {
-            return ThirdDataService.findAlignmentsOfBestPathsForEachSequence($scope.stepData.currentDiagonalsPaths, $scope.stepData.querySequence)
-                .then(function (pathsWithAlignments) {
-                    $scope.stepData.alignments = createAlignmentsStrings(pathsWithAlignments);
-                    ThirdDataService.alignments = $scope.stepData.alignments;
-                });
-        }
-
-        function bestBaseSequences() {
-            return ThirdDataService.getPathsForBestSequences($scope.stepData.currentDiagonalsPaths).then(function (pathsForBestSequences) {
-                ConfigurationService.fourthStage.bestPaths = pathsForBestSequences;
-                ConfigurationService.fourthStage.baseSequences = Object.keys(pathsForBestSequences);
-                $scope.stepData.bestSequences = Object.keys(pathsForBestSequences);
-            });
-        }
-
-        function clearStage() {
-            ConfigurationService.fourthStage.baseSequences = undefined;
-
-            ThirdDataService.bestPaths = undefined;
-            ThirdDataService.scoredPaths = undefined;
-            ThirdDataService.diagonalsPaths = undefined;
-            ThirdDataService.alignments = undefined;
-        }
-
-        function reverseBuildDiagonalsPaths() {
-            $scope.stepData.currentDiagonalsPaths = undefined;
-            ThirdDataService.diagonalsPaths = undefined;
-        }
-
-        function reverseScore() {
-            $scope.stepData.currentDiagonalsPaths = ThirdDataService.diagonalsPaths;
-            ThirdDataService.scoredPaths = undefined;
-        }
-
-        function reverseGetBestPaths() {
-            $scope.stepData.currentDiagonalsPaths = ThirdDataService.scoredPaths;
-            ThirdDataService.bestPaths = undefined;
-        }
-
-        function reverseFindAlignments() {
-            $scope.stepData.alignments = undefined;
-            ThirdDataService.alignments = undefined;
-        }
-
-        function reverseBestBaseSequences() {
-            ConfigurationService.fourthStage = {};
-            $scope.stepData.bestSequences = undefined;
         }
     }
 })();
@@ -1453,20 +1500,48 @@ function ThirdDataService($q, $timeout){
 
             $scope.stepData.currentBaseSequence = $scope.stepData.baseSequences[0];
 
+            restoreState();
+            refreshSWMatrix();
+            initializeStepsConfig();
+        }
+
+        function initializeScopeFunction() {
+            $scope.changeSequence = changeSequence;
+            $scope.isPartOfAlignment = isPartOfAlignment;
+            $scope.saveLastStep = saveLastStep;
+        }
+
+        function changeSequence(index) {
+            var newSequence = $scope.stepData.baseSequences[index];
+            if (newSequence !== $scope.stepData.currentBaseSequence) {
+                $scope.stepData.currentBaseSequence = newSequence;
+                refreshSWMatrix();
+            }
+        }
+
+        function isPartOfAlignment(alignmentIndex, charIndex) {
+            return $scope.stepData.alignments && (charIndex >= $scope.stepData.alignments[$scope.stepData.currentBaseSequence][alignmentIndex].baseHighlight[0] &&
+                charIndex <= $scope.stepData.alignments[$scope.stepData.currentBaseSequence][alignmentIndex].baseHighlight[1]);
+        }
+
+        function saveLastStep(lastStep) {
+            FourthDataService.lastStep = lastStep;
+        }
+
+        function restoreState() {
             $scope.stepData.smithWatermanMatrices = FourthDataService.matrices;
             $scope.stepData.smithWatermanSolutions = FourthDataService.solutions;
             $scope.stepData.alignments = FourthDataService.alignments;
             $scope.stepData.bestSequence = FourthDataService.bestSequence;
 
-            $scope.stepData.lastStep = FourthDataService.lastStep || 0;
-            $scope.stepData.currentStep = $scope.stepData.lastStep;
+            $scope.stepData.currentStep = FourthDataService.lastStep || 0;
+        }
 
-            refreshTable();
-
+        function initializeStepsConfig() {
             $scope.stepData.stepByStepConfig = [
                 {
                     description: 'Etap 4 - początek',
-                    reverse: clearStage
+                    reverse: clearStageData
                 },
                 {
                     description: "Algorytm Smitha-Watermana dla najlepszych sekwencji",
@@ -1491,30 +1566,6 @@ function ThirdDataService($q, $timeout){
             ];
         }
 
-
-        function initializeScopeFunction() {
-            $scope.changeSequence = changeSequence;
-            $scope.isPartOfAlignment = isPartOfAlignment;
-            $scope.saveLastStep = saveLastStep;
-        }
-
-        function changeSequence(index) {
-            var newSequence = $scope.stepData.baseSequences[index];
-            if (newSequence !== $scope.stepData.currentBaseSequence) {
-                $scope.stepData.currentBaseSequence = newSequence;
-                refreshTable();
-            }
-        }
-
-        function isPartOfAlignment(alignmentIndex, charIndex) {
-            return $scope.stepData.alignments && (charIndex >= $scope.stepData.alignments[$scope.stepData.currentBaseSequence][alignmentIndex].baseHighlight[0] &&
-                charIndex <= $scope.stepData.alignments[$scope.stepData.currentBaseSequence][alignmentIndex].baseHighlight[1]);
-        }
-
-        function saveLastStep(lastStep) {
-            FourthDataService.lastStep = lastStep;
-        }
-
         function smithWaterman() {
             return FourthDataService.smithWatermanForEachSequence($scope.stepData.baseSequences, $scope.stepData.querySequence,
                 ConfigurationService.scoreMatrix, ConfigurationService.gapPenalty).then(function (matrices) {
@@ -1527,7 +1578,7 @@ function ThirdDataService($q, $timeout){
             return FourthDataService.findSolutionsForEachSequence($scope.stepData.smithWatermanMatrices).then(function (solutions) {
                 $scope.stepData.smithWatermanSolutions = solutions;
                 FourthDataService.solutions = solutions;
-                refreshTable();
+                refreshSWMatrix();
             });
         }
 
@@ -1546,7 +1597,7 @@ function ThirdDataService($q, $timeout){
             });
         }
 
-        function clearStage() {
+        function clearStageData() {
             FourthDataService.matrices = undefined;
             FourthDataService.solutions = undefined;
             FourthDataService.alignments = undefined;
@@ -1574,7 +1625,7 @@ function ThirdDataService($q, $timeout){
             FourthDataService.bestSequence = undefined;
         }
 
-        function refreshTable() {
+        function refreshSWMatrix() {
             if ($scope.stepData.smithWatermanSolutions) {
                 $timeout(function() {
                     $scope.clearHighlight();
