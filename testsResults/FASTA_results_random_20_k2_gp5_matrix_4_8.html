@@ -1,0 +1,161 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-US" lang="en-US"><head>
+<title>FASTA results</title>
+<script src="FASTA_results_random_20_k2_gp5_matrix_4_8_pliki/align_hide.js" type="text/javascript"></script>
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+</head>
+<body>
+<!-- DONE -->
+
+<hr>
+<center>
+<a href="http://fasta.bioch.virginia.edu/fasta_www2/fasta_www.cgi">Search Databases with FASTA</a> | 
+<a href="http://fasta.bioch.virginia.edu/fasta_www2/fasta_www.cgi?rm=lalign">Find Duplications</a> | 
+<a href="http://fasta.bioch.virginia.edu/fasta_www2/fasta_www.cgi?rm=status">Search Status</a> 
+</center>
+<hr>
+<style>
+span.c_0 { background-color:slategrey;}
+span.c_1 { background-color:lightgreen;}
+span.c_2 { background-color:lightblue;}
+span.c_3 { background-color:pink;}
+span.c_4 { background-color:cyan;}
+span.c_5 { background-color:tan;}
+span.c_6 { background-color:gold;}
+span.c_7 { background-color:plum;}
+span.c_8 { background-color:mediumplum;}
+
+#footer {
+ position:fixed;
+ left:0px;
+ bottom:0px;
+ height:16px;
+ width:100%;
+ background:tan;
+ text-align:center;
+ font-size:14px;
+ font-family:sans-serif;
+}
+
+/* IE 6 */
+* html #footer {
+  position:absolute;
+  top:expression((0-(footer.offsetHeight)+(document.documentElement.clientHeight ? document.documentElement.clientHeight : document.body.clientHeight)+(ignoreMe = document.documentElement.scrollTop ? document.documentElement.scrollTop : document.body.scrollTop))+'px');
+
+</style>
+<div id="footer"><a href="#" onclick="show_hide_class('align_class'); return false">[show/hide all alignments]</a></div>
+
+# fasta36 -n -q -w 80 -m 6 -m 9i -Z 10000 -f -5 -r +4/-8 -g -5 TMP.q TMP.q2 2<pre>FASTA searches a protein or DNA sequence data bank
+ version 36.3.7a Jan, 2015(preload9)
+Please cite:
+ W.R. Pearson &amp; D.J. Lipman PNAS (1988) 85:2444-2448
+
+Query: TMP.q
+  1&gt;&gt;&gt;seq1 - 20 nt
+Library: TMP.q2
+      200 residues in    10 sequences
+</pre>
+<pre>Statistics: (shuffled [366]) MLE statistics: Lambda= 0.3025;  K=0.3705
+ statistics sampled from 3 (3) to 366 sequences
+Algorithm: FASTA (3.8 Nov 2011) [optimized]
+Parameters: DNA matrix (4:-8), open/ext: -5/-5
+ ktup: 2, E-join: 0.25 (0.6), E-opt: 0.05 (0.2), width:  16
+ Scan time:  0.000
+</pre>
+<hr>
+<pre>The best scores are:                                           opt bits <font color="darkred">E(10000)</font> %_id  %_sim  alen
+seq1                                                (  20) [f]   24 14.2 <font color="darkred">   0.21</font> 1.000 1.000    6 <a href="#seq1">align</a>
+seq2                                                (  20) [f]   24 14.2 <font color="darkred">   0.21</font> 1.000 1.000    6 <a href="#seq2">align</a>
+seq3                                                (  20) [r]   22 13.3 <font color="darkred">   0.38</font> 0.889 0.889    9 <a href="#seq3_r">align</a>
+seq2                                                (  20) [r]   20 12.5 <font color="darkred">   0.68</font> 1.000 1.000    5 <a href="#seq2_r">align</a>
+seq8                                                (  20) [r]   17 11.2 <font color="darkred">    1.6</font> 1.000 1.000    4 <a href="#seq8_r">align</a>
+</pre><hr>
+
+&gt;&gt;&gt;seq1, 20 nt vs TMP.q2 library
+
+<a name="seq1"></a><pre><a name="seq1">&gt;&gt;seq1                                                                        (20 nt)
+ initn:  24 init1:  24 opt:  24  Z-score: 75.6  bits: 14.2 <font color="darkred">E(10000): 0.21</font>
+banded Smith-Waterman score: 24; 100.0% identity (100.0% similar) in 6 nt overlap (14-19:4-9)
+<!-- LINK_START seq1 --></a><a href="http://fasta.bioch.virginia.edu/fasta_www2/seq_info.cgi?db=nucleotide&amp;cmd=Search&amp;term=seq1&amp;doptcmdl=DocSum">Sequence Lookup</a>&nbsp;&nbsp;<a href="http://fasta.bioch.virginia.edu/fasta_www2/fasta_www.cgi?rm=search&amp;query=seq1&amp;q_type=acc&amp;db=nucleotide&amp;lib=TMP.q2&amp;pgm=fa&amp;start=4&amp;stop=9&amp;n1=20&amp;o_pgm=fa">Re-search database</a>&nbsp;&nbsp;<a href="http://fasta.bioch.virginia.edu/fasta_www2/fasta_www.cgi?rm=select&amp;query=seq1&amp;q_type=acc&amp;db=nucleotide&amp;lib=TMP.q2&amp;pgm=fa&amp;start=4&amp;stop=9&amp;n1=20&amp;o_pgm=fa">General re-search</a>
+<object type="image/svg+xml" data="FASTA_results_random_20_k2_gp5_matrix_4_8_pliki/plot_domain4t.svg" width="660" height="76"></object><a href="http://fasta.bioch.virginia.edu/fasta_www2/plot_domain4t.cgi?pgm=fa&amp;q_name=seq1&amp;q_cstart=1&amp;q_cstop=20&amp;q_astart=14&amp;q_astop=19&amp;l_name=seq1&amp;l_cstart=1&amp;l_cstop=20&amp;l_astart=4&amp;l_astop=9&amp;regions=&amp;doms=&amp;l_descr=%3E%3Eseq1%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%2820%20nt%29&amp;hscores=banded%20Smith-Waterman%20score%3A%2024%3B%20100.0%25%20identity%20%28100.0%25%20similar%29%20in%206%20nt%20overlap%20%2814-19%3A4-9%29%0A&amp;mag=1.5&amp;no_embed=1" target="svg_win">[Domains]</a>
+
+
+<!-- LINK_STOP --><a id="seq1_l" href="#seq1" onclick="show_hide('seq1_a'); return false">[alignment]</a>
+<div id="seq1_a" class="align_class" style="display:inline">               10        20          
+seq1   TCGAACTGGTGGCGAAGTAC          
+                    ::::::           
+seq1             GAGGAAGTAAACTGCTATTC
+                         10        20
+</div></pre><hr><a name="seq2"></a><pre><a name="seq2">&gt;&gt;seq2                                                                        (20 nt)
+ initn:  24 init1:  24 opt:  24  Z-score: 75.6  bits: 14.2 <font color="darkred">E(10000): 0.21</font>
+banded Smith-Waterman score: 24; 100.0% identity (100.0% similar) in 6 nt overlap (7-12:9-14)
+<!-- LINK_START seq2 --></a><a href="http://fasta.bioch.virginia.edu/fasta_www2/seq_info.cgi?db=nucleotide&amp;cmd=Search&amp;term=seq2&amp;doptcmdl=DocSum">Sequence Lookup</a>&nbsp;&nbsp;<a href="http://fasta.bioch.virginia.edu/fasta_www2/fasta_www.cgi?rm=search&amp;query=seq2&amp;q_type=acc&amp;db=nucleotide&amp;lib=TMP.q2&amp;pgm=fa&amp;start=9&amp;stop=14&amp;n1=20&amp;o_pgm=fa">Re-search database</a>&nbsp;&nbsp;<a href="http://fasta.bioch.virginia.edu/fasta_www2/fasta_www.cgi?rm=select&amp;query=seq2&amp;q_type=acc&amp;db=nucleotide&amp;lib=TMP.q2&amp;pgm=fa&amp;start=9&amp;stop=14&amp;n1=20&amp;o_pgm=fa">General re-search</a>
+<object type="image/svg+xml" data="FASTA_results_random_20_k2_gp5_matrix_4_8_pliki/plot_domain4t_004.svg" width="660" height="76"></object><a href="http://fasta.bioch.virginia.edu/fasta_www2/plot_domain4t.cgi?pgm=fa&amp;q_name=seq1&amp;q_cstart=1&amp;q_cstop=20&amp;q_astart=7&amp;q_astop=12&amp;l_name=seq2&amp;l_cstart=1&amp;l_cstop=20&amp;l_astart=9&amp;l_astop=14&amp;regions=&amp;doms=&amp;l_descr=%3E%3Eseq2%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%2820%20nt%29&amp;hscores=banded%20Smith-Waterman%20score%3A%2024%3B%20100.0%25%20identity%20%28100.0%25%20similar%29%20in%206%20nt%20overlap%20%2814-19%3A4-9%29%0Abanded%20Smith-Waterman%20score%3A%2024%3B%20100.0%25%20identity%20%28100.0%25%20similar%29%20in%206%20nt%20overlap%20%287-12%3A9-14%29%0A&amp;mag=1.5&amp;no_embed=1" target="svg_win">[Domains]</a>
+
+
+<!-- LINK_STOP --><a id="seq2_l" href="#seq2" onclick="show_hide('seq2_a'); return false">[alignment]</a>
+<div id="seq2_a" class="align_class" style="display:inline">                 10        20
+seq1     TCGAACTGGTGGCGAAGTAC
+               ::::::        
+seq2   GTCGCCGATGGTGGTAACTA  
+               10        20  
+</div></pre><hr><a name="seq3_r"></a><pre><a name="seq3_r">&gt;&gt;seq3                                                                        (20 nt)
+rev-comp initn:  20 init1:  20 opt:  22  Z-score: 70.9  bits: 13.3 <font color="darkred">E(10000): 0.38</font>
+banded Smith-Waterman score: 22; 88.9% identity (88.9% similar) in 9 nt overlap (17-9:10-17)
+<!-- LINK_START seq3_r --></a><a href="http://fasta.bioch.virginia.edu/fasta_www2/seq_info.cgi?db=nucleotide&amp;cmd=Search&amp;term=seq3&amp;doptcmdl=DocSum">Sequence Lookup</a>&nbsp;&nbsp;<a href="http://fasta.bioch.virginia.edu/fasta_www2/fasta_www.cgi?rm=search&amp;query=seq3&amp;q_type=acc&amp;db=nucleotide&amp;lib=TMP.q2&amp;pgm=fa&amp;start=10&amp;stop=17&amp;n1=20&amp;o_pgm=fa">Re-search database</a>&nbsp;&nbsp;<a href="http://fasta.bioch.virginia.edu/fasta_www2/fasta_www.cgi?rm=select&amp;query=seq3&amp;q_type=acc&amp;db=nucleotide&amp;lib=TMP.q2&amp;pgm=fa&amp;start=10&amp;stop=17&amp;n1=20&amp;o_pgm=fa">General re-search</a>
+<object type="image/svg+xml" data="FASTA_results_random_20_k2_gp5_matrix_4_8_pliki/plot_domain4t_002.svg" width="660" height="76"></object><a href="http://fasta.bioch.virginia.edu/fasta_www2/plot_domain4t.cgi?pgm=fa&amp;q_name=seq1&amp;q_cstart=20&amp;q_cstop=1&amp;q_astart=16&amp;q_astop=9&amp;l_name=seq3&amp;l_cstart=1&amp;l_cstop=20&amp;l_astart=10&amp;l_astop=17&amp;regions=&amp;doms=&amp;l_descr=%3E%3Eseq3%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%2820%20nt%29&amp;hscores=banded%20Smith-Waterman%20score%3A%2024%3B%20100.0%25%20identity%20%28100.0%25%20similar%29%20in%206%20nt%20overlap%20%2814-19%3A4-9%29%0Abanded%20Smith-Waterman%20score%3A%2024%3B%20100.0%25%20identity%20%28100.0%25%20similar%29%20in%206%20nt%20overlap%20%287-12%3A9-14%29%0Abanded%20Smith-Waterman%20score%3A%2022%3B%2088.9%25%20identity%20%2888.9%25%20similar%29%20in%209%20nt%20overlap%20%2817-9%3A10-17%29%0A&amp;mag=1.5&amp;no_embed=1" target="svg_win">[Domains]</a>
+
+
+<!-- LINK_STOP --><a id="seq3_r_l" href="#seq3_r" onclick="show_hide('seq3_r_a'); return false">[alignment]</a>
+<div id="seq3_r_a" class="align_class" style="display:inline">            20        10         
+seq1-        GTACTTCGCCACCAGTTCGA
+                ::: :::::        
+seq3   ATTATGTTCCTT-GCCACTAC     
+               10         20     
+</div></pre><hr><a name="seq2_r"></a><pre><a name="seq2_r">&gt;&gt;seq2                                                                        (20 nt)
+rev-comp initn:  20 init1:  20 opt:  20  Z-score: 66.2  bits: 12.5 <font color="darkred">E(10000): 0.68</font>
+banded Smith-Waterman score: 20; 100.0% identity (100.0% similar) in 5 nt overlap (15-11:2-6)
+<!-- LINK_START seq2_r --></a><a href="http://fasta.bioch.virginia.edu/fasta_www2/seq_info.cgi?db=nucleotide&amp;cmd=Search&amp;term=seq2&amp;doptcmdl=DocSum">Sequence Lookup</a>&nbsp;&nbsp;<a href="http://fasta.bioch.virginia.edu/fasta_www2/fasta_www.cgi?rm=search&amp;query=seq2&amp;q_type=acc&amp;db=nucleotide&amp;lib=TMP.q2&amp;pgm=fa&amp;start=2&amp;stop=6&amp;n1=20&amp;o_pgm=fa">Re-search database</a>&nbsp;&nbsp;<a href="http://fasta.bioch.virginia.edu/fasta_www2/fasta_www.cgi?rm=select&amp;query=seq2&amp;q_type=acc&amp;db=nucleotide&amp;lib=TMP.q2&amp;pgm=fa&amp;start=2&amp;stop=6&amp;n1=20&amp;o_pgm=fa">General re-search</a>
+<object type="image/svg+xml" data="FASTA_results_random_20_k2_gp5_matrix_4_8_pliki/plot_domain4t_003.svg" width="660" height="76"></object><a href="http://fasta.bioch.virginia.edu/fasta_www2/plot_domain4t.cgi?pgm=fa&amp;q_name=seq1&amp;q_cstart=20&amp;q_cstop=1&amp;q_astart=14&amp;q_astop=11&amp;l_name=seq2&amp;l_cstart=1&amp;l_cstop=20&amp;l_astart=2&amp;l_astop=6&amp;regions=&amp;doms=&amp;l_descr=%3E%3Eseq2%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%2820%20nt%29&amp;hscores=banded%20Smith-Waterman%20score%3A%2024%3B%20100.0%25%20identity%20%28100.0%25%20similar%29%20in%206%20nt%20overlap%20%2814-19%3A4-9%29%0Abanded%20Smith-Waterman%20score%3A%2024%3B%20100.0%25%20identity%20%28100.0%25%20similar%29%20in%206%20nt%20overlap%20%287-12%3A9-14%29%0Abanded%20Smith-Waterman%20score%3A%2022%3B%2088.9%25%20identity%20%2888.9%25%20similar%29%20in%209%20nt%20overlap%20%2817-9%3A10-17%29%0Abanded%20Smith-Waterman%20score%3A%2020%3B%20100.0%25%20identity%20%28100.0%25%20similar%29%20in%205%20nt%20overlap%20%2815-11%3A2-6%29%0A&amp;mag=1.5&amp;no_embed=1" target="svg_win">[Domains]</a>
+
+
+<!-- LINK_STOP --><a id="seq2_r_l" href="#seq2_r" onclick="show_hide('seq2_r_a'); return false">[alignment]</a>
+<div id="seq2_r_a" class="align_class" style="display:inline">      20        10             
+seq1-  GTACTTCGCCACCAGTTCGA    
+            :::::              
+seq2       GTCGCCGATGGTGGTAACTA
+                   10        20
+</div></pre><hr><a name="seq8_r"></a><pre><a name="seq8_r">&gt;&gt;seq8                                                                        (20 nt)
+rev-comp initn:  17 init1:  16 opt:  17  Z-score: 59.1  bits: 11.2 <font color="darkred">E(10000):  1.6</font>
+banded Smith-Waterman score: 16; 100.0% identity (100.0% similar) in 4 nt overlap (19-16:4-7)
+<!-- LINK_START seq8_r --></a><a href="http://fasta.bioch.virginia.edu/fasta_www2/seq_info.cgi?db=nucleotide&amp;cmd=Search&amp;term=seq8&amp;doptcmdl=DocSum">Sequence Lookup</a>&nbsp;&nbsp;<a href="http://fasta.bioch.virginia.edu/fasta_www2/fasta_www.cgi?rm=search&amp;query=seq8&amp;q_type=acc&amp;db=nucleotide&amp;lib=TMP.q2&amp;pgm=fa&amp;start=4&amp;stop=7&amp;n1=20&amp;o_pgm=fa">Re-search database</a>&nbsp;&nbsp;<a href="http://fasta.bioch.virginia.edu/fasta_www2/fasta_www.cgi?rm=select&amp;query=seq8&amp;q_type=acc&amp;db=nucleotide&amp;lib=TMP.q2&amp;pgm=fa&amp;start=4&amp;stop=7&amp;n1=20&amp;o_pgm=fa">General re-search</a>
+<object type="image/svg+xml" data="FASTA_results_random_20_k2_gp5_matrix_4_8_pliki/plot_domain4t_005.svg" width="660" height="76"></object><a href="http://fasta.bioch.virginia.edu/fasta_www2/plot_domain4t.cgi?pgm=fa&amp;q_name=seq1&amp;q_cstart=20&amp;q_cstop=1&amp;q_astart=18&amp;q_astop=16&amp;l_name=seq8&amp;l_cstart=1&amp;l_cstop=20&amp;l_astart=4&amp;l_astop=7&amp;regions=&amp;doms=&amp;l_descr=%3E%3Eseq8%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%2820%20nt%29&amp;hscores=banded%20Smith-Waterman%20score%3A%2024%3B%20100.0%25%20identity%20%28100.0%25%20similar%29%20in%206%20nt%20overlap%20%2814-19%3A4-9%29%0Abanded%20Smith-Waterman%20score%3A%2024%3B%20100.0%25%20identity%20%28100.0%25%20similar%29%20in%206%20nt%20overlap%20%287-12%3A9-14%29%0Abanded%20Smith-Waterman%20score%3A%2022%3B%2088.9%25%20identity%20%2888.9%25%20similar%29%20in%209%20nt%20overlap%20%2817-9%3A10-17%29%0Abanded%20Smith-Waterman%20score%3A%2020%3B%20100.0%25%20identity%20%28100.0%25%20similar%29%20in%205%20nt%20overlap%20%2815-11%3A2-6%29%0Abanded%20Smith-Waterman%20score%3A%2016%3B%20100.0%25%20identity%20%28100.0%25%20similar%29%20in%204%20nt%20overlap%20%2819-16%3A4-7%29%0A&amp;mag=1.5&amp;no_embed=1" target="svg_win">[Domains]</a>
+
+
+<!-- LINK_STOP --><a id="seq8_r_l" href="#seq8_r" onclick="show_hide('seq8_r_a'); return false">[alignment]</a>
+<div id="seq8_r_a" class="align_class" style="display:inline">        20        10         
+seq1-    GTACTTCGCCACCAGTTCGA
+          ::::               
+seq8   TGTTACTAAGCCCATCGCGA  
+               10        20  
+</div></pre><hr><pre>20 residues in 1 query   sequences
+200 residues in 10 library sequences
+ Tcomplib [36.3.7a Jan, 2015(preload9)] (16 proc in memory [0G])
+ start: Sun Jun  7 20:52:35 2015 done: Sun Jun  7 20:52:35 2015
+ Total Scan time:  0.000 Total Display time:  0.000
+
+Function used was FASTA [36.3.7a Jan, 2015(preload9)]
+</pre>
+
+
+<hr>
+<center>
+<a href="http://fasta.bioch.virginia.edu/fasta_www2/fasta_www.cgi">Search Databases with FASTA</a> | 
+<a href="http://fasta.bioch.virginia.edu/fasta_www2/fasta_www.cgi?rm=lalign">Find Duplications</a> | 
+<a href="http://fasta.bioch.virginia.edu/fasta_www2/fasta_www.cgi?rm=status">Search Status</a> 
+</center>
+<hr>
+
+
+
+</body></html>
