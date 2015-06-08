@@ -5,7 +5,7 @@ describe("getBestSequencesByHotSpots", function() {
     });
 
     it("should return hotspots for 1 sequence with only one input sequence", function() {
-        var hotspots = fasta.getHotSpotsForBestSequences({'AAA': {'AA': new fasta.HotSpot()}});
+        var hotspots = fasta.getHotSpotsForBestSequences({'AAA': {'AA': [new fasta.HotSpot(5)]}});
         expect(Object.keys(hotspots).length).toEqual(1);
         expect(Object.keys(hotspots)[0]).toEqual('AAA');
     });
@@ -14,12 +14,12 @@ describe("getBestSequencesByHotSpots", function() {
         var hotspots = fasta.getHotSpotsForBestSequences(
             {
                 'AAB': {
-                    'AA': [new fasta.HotSpot(), new fasta.HotSpot()],
-                    'AB': [new fasta.HotSpot(), new fasta.HotSpot()]
+                    'AA': [new fasta.HotSpot(5), new fasta.HotSpot(3)],
+                    'AB': [new fasta.HotSpot(2), new fasta.HotSpot(5)]
                 },
                 'AAC': {
-                    'AA': [new fasta.HotSpot(), new fasta.HotSpot()],
-                    'AC': [new fasta.HotSpot()]
+                    'AA': [new fasta.HotSpot(1), new fasta.HotSpot(2)],
+                    'AC': [new fasta.HotSpot(3)]
                 }
             }
         );
@@ -31,16 +31,16 @@ describe("getBestSequencesByHotSpots", function() {
         var hotspots = fasta.getHotSpotsForBestSequences(
             {
                 'AAB': {
-                    'AA': [new fasta.HotSpot(), new fasta.HotSpot()],
-                    'AB': [new fasta.HotSpot(), new fasta.HotSpot()]
+                    'AA': [new fasta.HotSpot(5), new fasta.HotSpot(5)],
+                    'AB': [new fasta.HotSpot(1), new fasta.HotSpot(2)]
                 },
                 'AAC': {
-                    'AA': [new fasta.HotSpot(), new fasta.HotSpot()],
-                    'AC': [new fasta.HotSpot()]
+                    'AA': [new fasta.HotSpot(1), new fasta.HotSpot(2)],
+                    'AC': [new fasta.HotSpot(3)]
                 },
                 'AAD': {
-                    'AA': [new fasta.HotSpot(), new fasta.HotSpot()],
-                    'AD': [new fasta.HotSpot(), new fasta.HotSpot(), new fasta.HotSpot()]
+                    'AA': [new fasta.HotSpot(5), new fasta.HotSpot(5)],
+                    'AD': [new fasta.HotSpot(5), new fasta.HotSpot(1), new fasta.HotSpot(2)]
                 }
             }
         );
@@ -53,19 +53,19 @@ describe("getBestSequencesByHotSpots", function() {
         var hotspots = fasta.getHotSpotsForBestSequences(
             {
                 'AAB': {
-                    'AA': [new fasta.HotSpot(), new fasta.HotSpot()],
-                    'AB': [new fasta.HotSpot(), new fasta.HotSpot()]
+                    'AA': [new fasta.HotSpot(5), new fasta.HotSpot(5)],
+                    'AB': [new fasta.HotSpot(1), new fasta.HotSpot(2)]
                 },
                 'AAC': {
-                    'AA': [new fasta.HotSpot(), new fasta.HotSpot()],
-                    'AC': [new fasta.HotSpot()]
+                    'AA': [new fasta.HotSpot(1), new fasta.HotSpot(2)],
+                    'AC': [new fasta.HotSpot(3)]
                 },
                 'AAD': {
-                    'AA': [new fasta.HotSpot(), new fasta.HotSpot()],
-                    'AD': [new fasta.HotSpot(), new fasta.HotSpot(), new fasta.HotSpot()]
+                    'AA': [new fasta.HotSpot(5), new fasta.HotSpot(5)],
+                    'AD': [new fasta.HotSpot(5), new fasta.HotSpot(1), new fasta.HotSpot(2)]
                 },
                 'AAE': {
-                    'AA': [new fasta.HotSpot(), new fasta.HotSpot()]
+                    'AA': [new fasta.HotSpot(1), new fasta.HotSpot(2)]
                 }
             }
         );
@@ -78,16 +78,16 @@ describe("getBestSequencesByHotSpots", function() {
         var hotspots = fasta.getHotSpotsForBestSequences(
             {
                 'AAB': {
-                    'AA': [new fasta.HotSpot(), new fasta.HotSpot()],
-                    'AB': [new fasta.HotSpot(), new fasta.HotSpot()]
+                    'AA': [new fasta.HotSpot(5), new fasta.HotSpot(5)],
+                    'AB': [new fasta.HotSpot(5), new fasta.HotSpot(1)]
                 },
                 'AAC': {
-                    'AA': [new fasta.HotSpot(), new fasta.HotSpot()],
-                    'AC': [new fasta.HotSpot()]
+                    'AA': [new fasta.HotSpot(5), new fasta.HotSpot(5)],
+                    'AC': [new fasta.HotSpot(1)]
                 },
                 'AAD': {
-                    'AA': [new fasta.HotSpot(), new fasta.HotSpot()],
-                    'AD': [new fasta.HotSpot()]
+                    'AA': [new fasta.HotSpot(5), new fasta.HotSpot(5)],
+                    'AD': [new fasta.HotSpot(1)]
                 }
             }
         );

@@ -12,16 +12,20 @@ var fasta;
         return solutions;
     }
 
+    /**
+     * Finds solution for Smith-Waterman algorithm, based on matrix calculated before
+     * @param swMatrix
+     * @returns {Array} of result solutions, each with format: {score: solutionScore, path: solutionPathFromBeginning}
+     */
     function findSWSolutions(swMatrix) {
         var solutions = [],
             maxCellsIndices = findMaximumValues(swMatrix),
-            maxCellIndices, maxCell, solution;
+            maxCell, solution;
 
         for (var i = 0; i < maxCellsIndices.length; i++) {
-            maxCellIndices = maxCellsIndices[i];
-            maxCell = swMatrix[maxCellIndices[0]][maxCellIndices[1]];
+            maxCell = swMatrix[maxCellsIndices[i][0]][maxCellsIndices[i][1]];
             solution = {score: maxCell.value};
-            solution.path = recreatePath(maxCellIndices, swMatrix);
+            solution.path = recreatePath(maxCellsIndices[i], swMatrix);
             solutions.push(solution);
         }
         return solutions;

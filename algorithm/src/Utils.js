@@ -1,7 +1,3 @@
-function checkNotNull(obj) {
-    if (!obj) throw new Error("Null argument.");
-    return obj;
-}
 
 Array.prototype.pushUnique = function (element) {
     if (this.indexOf(element) < 0) {
@@ -11,6 +7,11 @@ Array.prototype.pushUnique = function (element) {
 
 var fasta;
 (function (fasta) {
+
+    function checkNotNull(obj) {
+        if (!obj) throw new Error("Null argument.");
+        return obj;
+    }
 
     function getBestSequences(dataBySequences, calculateScore) {
         var scoredSequences = [],
@@ -36,5 +37,6 @@ var fasta;
     }
 
     fasta.utils = fasta.utils || {};
+    fasta.utils.checkNotNull = checkNotNull;
     fasta.utils.getBestSequences = getBestSequences;
 })(fasta = fasta || {});

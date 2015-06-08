@@ -1,6 +1,9 @@
 var fasta;
 (function (fasta) {
 
+    /**
+     * Returns 10 best diagonals from input array of diagonals
+     */
     function getBestDiagonals(diagonals) {
         if (diagonals.length <= 10) {
             return diagonals.slice();

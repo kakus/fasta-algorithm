@@ -4,11 +4,13 @@ var fasta;
     function getDiagonalsForBestSequences(diagonalsBySequences) {
 
         return fasta.utils.getBestSequences(diagonalsBySequences, function(diagonals) {
-            var score = 0;
-            for (var j = 0; j < diagonals.length; j++) {
-                score += diagonals[j].score;
+            var sortable = [];
+            for (var i = 0; i < diagonals.length; i++) {
+                sortable.push(diagonals[i].score);
             }
-            return score;
+
+            sortable.sort(function(a, b) {return b - a});
+            return sortable[0];
         });
     }
 

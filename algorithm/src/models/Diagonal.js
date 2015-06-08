@@ -2,8 +2,8 @@ var fasta;
 (function (fasta) {
 
     function Diagonal(startPoint, endPoint, score) {
-        this.startPoint = startPoint; // [int x, int y]
-        this.endPoint = endPoint; // [int x, int y]
+        this.startPoint = startPoint; // [baseStart, queryStart]
+        this.endPoint = endPoint; // [baseEnd, queryEnd]
         this.score = score;
     }
 

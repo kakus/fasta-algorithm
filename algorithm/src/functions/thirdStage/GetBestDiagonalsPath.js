@@ -11,6 +11,11 @@ var fasta;
         return bestPathsBySequences;
     }
 
+    /**
+     * Returns one path with best score
+     * @param paths
+     * @returns {*|T}
+     */
     function getBestDiagonalsPath(paths) {
         var copy = paths.slice();
         copy.sort(compareByScore);

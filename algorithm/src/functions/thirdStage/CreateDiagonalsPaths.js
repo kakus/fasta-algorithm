@@ -11,8 +11,17 @@ var fasta;
         return paths;
     }
 
+    /**
+     * Creates all possible diagonal paths from given list of diagonals.
+     * At first, some initial start points (diagonals) are found - the ones that cannot be joined with first diagonal.
+     * Next, from this starting points, all possible combinations of diagonals linking are generated.
+     * It is similar to finding all possible paths in a tree.
+     *
+     * @param diagonals
+     * @returns {Array} of all possible paths for given diagonals
+     */
     function createDiagonalsPaths(diagonals) {
-        var sortedDiagonals = diagonals.slice().sort(compareDiagonalsByStart),
+        var sortedDiagonals = diagonals.slice().sort(compareDiagonalsByStartPoint),
             startingDiagonals = getStartingDiagonals(sortedDiagonals),
             partialPaths,
             resultPaths = [];
@@ -24,7 +33,7 @@ var fasta;
         return resultPaths;
     }
 
-    function compareDiagonalsByStart(first, second) {
+    function compareDiagonalsByStartPoint(first, second) {
         return first.startPoint[1] - second.startPoint[1] || first.startPoint[0] - second.startPoint[0];
     }
 
@@ -51,9 +60,6 @@ var fasta;
             return result;
         }
         nextDiagonal = rest[0];
-
-        //TODO: mo¿na dodaæ warunek, ¿eby nie dodawaæ kolejnego diagonala, jak zbyt ma³a ocena?
-        //jedynie w celu optymalizacji, bo i tak one bêd¹ odrzucone na dalszych etapach
 
         if (nextCanBeJoinedWithCurrent(current, nextDiagonal)) {
             //go deeper with next diagonal joined current

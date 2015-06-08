@@ -8,8 +8,6 @@ describe("scoreDiagonals", function() {
             D: {A:-1, B:-1, C:-1, D:1}
         };
 
-    //TODO: check score matrix if contains all elements from sequences, check for null
-
     it("should return empty array for no diagonals", function() {
         var diagonals = [],
             scoredDiagonals;

@@ -1,14 +1,15 @@
 var fasta;
 (function (fasta) {
 
-// Calcucalte difference of indexes in same tuples in query and example.
-//
-// @param example the IndexingArray of sequence from database
-// @param query the IndexingArray of query sequence
-// @return object with hotspots
+    /** Calculate hotSpots -  difference of indexes in same tuples in query and example.
+     *
+     * @param base the IndexingArray of sequence from database
+     * @param query the IndexingArray of query sequence
+     * @return object containing fasta.HotSpots for each k-tuple
+     */
     function findHotspots(query, base) {
-        checkNotNull(query);
-        checkNotNull(base);
+        fasta.utils.checkNotNull(query);
+        fasta.utils.checkNotNull(base);
         var hotspots = {};
 
         for (var tuple in query) {
@@ -33,6 +34,12 @@ var fasta;
         return hotspots;
     }
 
+    /** Calculate hotSpots, for each base sequence
+     *
+     * @param base the IndexingArray of sequence from database
+     * @param query the IndexingArray of query sequence
+     * @return object containing hotspots for each base sequence
+     */
     function findHotspotsForMultipleSequences(query, baseArrays) {
         var hotspots = {};
 

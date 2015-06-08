@@ -89,7 +89,7 @@ describe("getDiagonalsForBestSequences", function() {
                 ],
                 'AAD': [
                     new fasta.Diagonal([0,0], [1,1], 3),
-                    new fasta.Diagonal([0,0], [1,1], 6)
+                    new fasta.Diagonal([0,0], [1,1], 5)
                 ]
             }
         );

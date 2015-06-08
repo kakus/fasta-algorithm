@@ -2,13 +2,15 @@ var fasta;
 (function (fasta) {
 
     /**
-     * Scores given array of diagonals. Returns same array as input, but with scored diagonals.
+     * Scores given array of diagonals. Returns same array as input, but with score assigned to diagonals.
+     *
+     * Scoring is done with use of given scoreMatrix, each pair of symbols are given some value.
      *
      * @param diagonals
      * @param scoreMatrix
      * @param baseSequence
      * @param querySequence
-     * @returns {*}
+     * @returns {Array} of fasta.Diagonal objects with score property
      */
     function scoreDiagonals(diagonals, scoreMatrix, baseSequence, querySequence) {
         var diagonal,
@@ -22,7 +24,6 @@ var fasta;
             baseSubsequence = baseSequence.substring(diagonal.startPoint[0], diagonal.endPoint[0] + 1);
             querySubsequence = querySequence.substring(diagonal.startPoint[1], diagonal.endPoint[1] + 1);
 
-            //TODO: move to diagonal object?
             for (var j = 0; j < baseSubsequence.length; j++) {
                 score += scoreMatrix[baseSubsequence[j]][querySubsequence[j]];
             }

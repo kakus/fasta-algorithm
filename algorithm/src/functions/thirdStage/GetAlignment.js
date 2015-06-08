@@ -12,6 +12,14 @@ var fasta;
         return pathsWithAlignmentsBySequences;
     }
 
+    /**
+     * Returns alignments as string for both sequences and given path.
+     * Allows only insertion (in place of gaps between diagonals on path) on any sequence, doesn't support matches/mismatches.
+     * @param path
+     * @param baseSequence
+     * @param querySequence
+     * @returns {*|Alignment} fasta.Alignment object for given path
+     */
     function getAlignment(path, baseSequence, querySequence) {
         var diagonals = path.diagonals,
             previous = diagonals[0],
@@ -29,7 +37,7 @@ var fasta;
     }
 
     function createBaseAlignment(current, previous, baseSequence) {
-        var baseAlignment = Array((current.startPoint[1] - previous.endPoint[1])).join('-'),
+        var baseAlignment = new Array((current.startPoint[1] - previous.endPoint[1])).join('-'),
             additionalBase = 0;
 
         if (current.startPoint[0] === previous.endPoint[0]) {
@@ -52,7 +60,7 @@ var fasta;
             queryAlignment += '-';
             additionalQuery = 1;
         }
-        queryAlignment += Array((current.startPoint[0] - previous.endPoint[0])).join('-');
+        queryAlignment += new Array((current.startPoint[0] - previous.endPoint[0])).join('-');
         queryAlignment += querySequence.substring(current.startPoint[1] + additionalQuery, current.endPoint[1] + 1);
 
         return queryAlignment;

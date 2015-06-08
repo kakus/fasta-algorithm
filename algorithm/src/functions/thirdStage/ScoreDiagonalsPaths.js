@@ -11,6 +11,14 @@ var fasta;
         return scoredPathsBySequences;
     }
 
+    /**
+     * Calculates score for path, as a sum of diagonals score and penalty for distance between them.
+     * Distance is calculated as a single difference on both coordinates between endPoint of one diagonal and startPoint of the other,
+     * multiplied by given gapPenalty.
+     * @param paths
+     * @param gapPenalty
+     * @returns {Array}
+     */
     function scoreDiagonalsPaths(paths, gapPenalty) {
         var scoredPaths = [],
             path;

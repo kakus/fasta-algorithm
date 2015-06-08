@@ -11,6 +11,17 @@ var fasta;
         return diagonals;
     }
 
+    /**
+     * Find all possible diagonals for given hotSpots. Close hotspots are joined together to generate diagonal.
+     * If given hotspot doesn't have close other hotspot, it becomes new diagonal.
+     * Resulting array doesn't contain duplicates.
+     *
+     * @param hotspots
+     * @param ktup
+     * @param maxGapLength - determines max distance between hotspots, that can be joined to create diagonal
+     * @returns {Array} containing all generated fasta.Diagonal objects.
+     *          All Diagonal object will contain startPoint and endPoint, where as first value are coordinates of base sequence
+     */
     function findDiagonals(hotspots, ktup, maxGapLength) {
         var diagonals = [],
             diagonalsOnLine,
@@ -20,7 +31,7 @@ var fasta;
         for (var line in diagonalsOnLines) {
             diagonalsOnLine = diagonalsOnLines[line];
 
-            partialDiagonals = generateJoinedDiagonals(diagonalsOnLine.sort(compareDiagonals), maxGapLength);
+            partialDiagonals = generateDiagonals(diagonalsOnLine.sort(compareDiagonals), maxGapLength);
 
             diagonals = diagonals.concat(partialDiagonals);
         }
@@ -31,13 +42,14 @@ var fasta;
     function splitDiagonalsByLines(hotspots, ktup) {
         var diagonalsOnLines = {},
             hotspotsForSequence,
-            diagonal;
+            diagonal, hotspot;
         for (var sequence in hotspots) {
             hotspotsForSequence = hotspots[sequence];
             for (var i = 0; i < hotspotsForSequence.length; i++) {
-                var hotspot = hotspotsForSequence[i];
+                hotspot = hotspotsForSequence[i];
                 diagonal = new fasta.Diagonal([hotspot.startIndices.base, hotspot.startIndices.query],
                     [hotspot.startIndices.base + (ktup - 1), hotspot.startIndices.query + (ktup - 1)]);
+
                 if (!diagonalsOnLines[hotspot.difference]) {
                     diagonalsOnLines[hotspot.difference] = [];
                 }
@@ -47,7 +59,7 @@ var fasta;
         return diagonalsOnLines;
     }
 
-    function generateJoinedDiagonals(diagonals, maxGapLength) {
+    function generateDiagonals(diagonals, maxGapLength) {
 
         return generate(diagonals[0], diagonals.slice(1), []);
 
@@ -56,17 +68,17 @@ var fasta;
             if (active.length === 0 && rest.length === 0)
                 return;
             if (rest.length === 0) {
-                if (notIsDuplicate(result, active)) {
+                if (isNotDuplicate(result, active)) {
                     result.push(active);
                 }
             } else {
                 nextDiagonal = rest[0];
-                if (shouldBeJoinedWithGap(active.endPoint[0], nextDiagonal.startPoint[0])) {
+                if (shouldBeJoinedWithPossibleGap(active.endPoint[0], nextDiagonal.startPoint[0])) {
                     //create new diagonal with gap and generate next ones from it
                     var diagonal = new fasta.Diagonal(active.startPoint, nextDiagonal.endPoint);
                     generate(diagonal, rest.slice(1), result);
                 }
-                if (areDiagonalsNotOverlapping(active.endPoint[0], nextDiagonal.startPoint[0])) {
+                if (diagonalsAreNotOverlapping(active.endPoint[0], nextDiagonal.startPoint[0])) {
                     generate(active, [], result);   //add current diagonal (just to avoid check in 2 places)
 
                     //continue without current diagonal - diagonals are sorted by start points,
@@ -77,11 +89,11 @@ var fasta;
             return result;
         }
 
-        function shouldBeJoinedWithGap(endPoint, nextStartPoint) {
+        function shouldBeJoinedWithPossibleGap(endPoint, nextStartPoint) {
             return endPoint + (maxGapLength + 1) >= nextStartPoint;
         }
 
-        function areDiagonalsNotOverlapping(endPoint, nextStartPoint) {
+        function diagonalsAreNotOverlapping(endPoint, nextStartPoint) {
             return endPoint < nextStartPoint;
         }
     }
@@ -94,7 +106,7 @@ var fasta;
         return 0;
     }
 
-    function notIsDuplicate(array, element) {
+    function isNotDuplicate(array, element) {
         for (var i = 0; i < array.length; i++) {
             if (array[i].startPoint === element.startPoint && array[i].endPoint === element.endPoint) {
                 return false;
