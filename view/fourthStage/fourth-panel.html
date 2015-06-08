@@ -7,7 +7,7 @@
             <div class="col-md-12">
                 <div class="well" ng-show="stepData.currentStep > 0">
                     <div ng-show="stepData.currentStep === 1">
-                        <p><b>Krok 1: {{stepData.stepByStepConfig[1].description}}</b></p>
+                        <p><b>Krok 1: {{::stepData.stepByStepConfig[1].description}}</b></p>
 
                         <p>
                             W tym dla każdej pzekazanej sekwencji tworzona jest pełna macierz dla algorytmu
@@ -21,7 +21,7 @@
                         </p>
                     </div>
                     <div ng-show="stepData.currentStep === 2">
-                        <p><b>Krok 2: {{stepData.stepByStepConfig[2].description}}</b></p>
+                        <p><b>Krok 2: {{::stepData.stepByStepConfig[2].description}}</b></p>
 
                         <p>
                             W tym kroku kontynuowany jest algorytm Smitha-Watermana. Zaznaczone zostały najlepsze
@@ -29,7 +29,7 @@
                         </p>
                     </div>
                     <div ng-show="stepData.currentStep === 3">
-                        <p><b>Krok 3: {{stepData.stepByStepConfig[3].description}}</b></p>
+                        <p><b>Krok 3: {{::stepData.stepByStepConfig[3].description}}</b></p>
 
                         <p>
                             W tym kroku wszystkie zaznaczone dopasowania zostały zaprezentowane w innej, tekstowej
@@ -41,7 +41,7 @@
                         </p>
                     </div>
                     <div ng-show="stepData.currentStep === 4">
-                        <p><b>Krok 4: {{stepData.stepByStepConfig[4].description}}</b></p>
+                        <p><b>Krok 4: {{::stepData.stepByStepConfig[4].description}}</b></p>
 
                         <p>
                             W tym kroku, który jest ostatnim krokiem algorytmu, wybrana została najlepiej dopasowana
@@ -61,12 +61,12 @@
                     <small>(Więcej szczegółów poniżej, w odpowiedniej sekcji dla tej sekwencji)</small>
                 </h3>
             </div>
-            <h2 class="text-center  list-group-item list-group-item-success">{{stepData.bestSequence}}</h2>
+            <h2 class="text-center  list-group-item list-group-item-success">{{::stepData.bestSequence}}</h2>
         </div>
 
         <div ng-show="stepData.smithWatermanMatrices">
 
-            <div fasta-sequences-tabs sequences="stepData.baseSequences" change-sequence="changeSequence(index)"></div>
+            <div fasta-sequences-tabs sequences="::stepData.baseSequences" change-sequence="changeSequence(index)"></div>
 
             <h4 class="text-center overflow-auto"><b>Sekwencja Szukana: </b><span
                     id="querySequence-p"> {{::stepData.querySequence}} </span></h4>
@@ -87,13 +87,13 @@
                         <tr>
                             <td ng-repeat="(symbolIndex, symbol) in alignment.baseAlignment track by $index"
                                 ng-class="{'alignment-highlight' : isPartOfAlignment(alignmentIndex, symbolIndex)}">
-                                {{symbol}}
+                                {{::symbol}}
                             </td>
                         </tr>
                         <tr>
                             <td ng-repeat="(symbolIndex, symbol)  in alignment.queryAlignment track by $index"
                                 ng-class="{'alignment-highlight' : isPartOfAlignment(alignmentIndex, symbolIndex)}">
-                                {{symbol}}
+                                {{::symbol}}
                             </td>
                         </tr>
                         </tbody>
@@ -111,4 +111,4 @@
 </div>
 
 <div fasta-navigation-footer previous-url="/third_stage"
-     save-step="saveLastStep(lastStep)" config="stepData.stepByStepConfig" current-step="stepData.currentStep"></div>
+     save-step="saveLastStep(lastStep)" config="::stepData.stepByStepConfig" current-step="stepData.currentStep"></div>

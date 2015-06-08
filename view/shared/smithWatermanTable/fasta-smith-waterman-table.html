@@ -2,7 +2,7 @@
     <thead>
     <tr class="success">
         <th> #</th>
-        <th ng-repeat="value in ('-' + stepData.querySequence) track by $index">{{value}}</th>
+        <th ng-repeat="value in ('-' + stepData.querySequence) track by $index">{{::value}}</th>
     </tr>
     </thead>
     <tbody>

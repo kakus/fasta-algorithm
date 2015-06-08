@@ -26,6 +26,7 @@
 
             $scope.configData.emptyNewSequence = false;
             $scope.configData.formError = false;
+            $scope.configData.errors = [];
 
             $scope.configData.started = ConfigurationService.started;
         }
@@ -38,12 +39,11 @@
         }
 
         function saveAndContinue(){
-            if (anyFieldEmpty()) {
-                $scope.configData.formError = true;
+            $scope.configData.errors = validateFields();
+
+            if ($scope.configData.errors.length > 0) {
                 return;
             }
-
-            $scope.configData.formError = false;
 
             ConfigurationService.baseSequences = $scope.configData.baseSequences;
             ConfigurationService.querySequence = $scope.configData.querySequence;
@@ -56,25 +56,6 @@
             ConfigurationService.started = true;
 
             $location.path("/first_stage");
-        }
-
-        function anyFieldEmpty() {
-            return anyMatrixCellEmpty() || $scope.configData.baseSequences.length === 0 ||
-                !$scope.configData.querySequence || !$scope.configData.kTup ||
-                !$scope.configData.gapPenalty || $scope.configData.maxDistance === null;
-        }
-
-        function anyMatrixCellEmpty() {
-            for (var rowKey in $scope.configData.scoreMatrix) {
-                var row = $scope.configData.scoreMatrix[rowKey];
-
-                for (var cellKey in row) {
-                    if (row[cellKey] === null || row[cellKey] === undefined) {
-                        return true;
-                    }
-                }
-            }
-            return false;
         }
 
         function removeBaseSequence(index) {
@@ -94,6 +75,48 @@
 
         function restart() {
             $window.location.reload();
+        }
+
+        function validateFields() {
+            var errors = [];
+
+            if ($scope.configData.baseSequences.length === 0) {
+                errors.push('Baza danych sekwencji nie może być pusta');
+            }
+            if (!$scope.configData.querySequence) {
+                errors.push('Szukana sekwencja nie może być pusta');
+            }
+            if (isUndefinedOrNull($scope.configData.kTup) || isNaN($scope.configData.kTup) || ($scope.configData.kTup < 2 && $scope.configData.kTup > 6)) {
+                errors.push('Parametr ktup musi mieć wartość pomiędzy 2 i 6');
+            }
+            if (isUndefinedOrNull($scope.configData.gapPenalty) || isNaN($scope.configData.gapPenalty) || $scope.configData.gapPenalty > 0) {
+                errors.push('Kara za przerwę musi być liczbą mniejszą od 0');
+            }
+            if (isUndefinedOrNull($scope.configData.maxDistance) || isNaN($scope.configData.maxDistance) || $scope.configData.maxDistance < 0) {
+                errors.push('Maksymalna odległość połączenia musi być liczbą większą od 0');
+            }
+            if (anyMatrixCellNotValid()) {
+                errors.push('Macierz substytucji musi być całkowicie wypełniona liczbami');
+            }
+
+            return errors;
+        }
+
+        function anyMatrixCellNotValid() {
+            for (var rowKey in $scope.configData.scoreMatrix) {
+                var row = $scope.configData.scoreMatrix[rowKey];
+
+                for (var cellKey in row) {
+                    if (isUndefinedOrNull(row[cellKey]) || isNaN(row[cellKey])) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        function isUndefinedOrNull(val) {
+            return val === undefined || val === null;
         }
     }
 })();

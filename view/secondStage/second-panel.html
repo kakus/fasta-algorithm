@@ -9,7 +9,7 @@
             <div class="col-md-12">
                 <div class="well" ng-show="stepData.currentStep > 0">
                     <div ng-show="stepData.currentStep === 1">
-                        <p><b>Krok 1: {{stepData.stepByStepConfig[1].description}}</b></p>
+                        <p><b>Krok 1: {{::stepData.stepByStepConfig[1].description}}</b></p>
 
                         <p>W tym kroku utworzone zostały ciągi diagonalne dla każdej z sekwencji, któa została przekazana do tego etapu.
                             Tworzenie ciągów diagonalnych polega na łączeniu blisko położonych gorących miejsc (które w tym przypadku otrzymano z poprzedniego etapu).
@@ -23,7 +23,7 @@
                         </p>
                     </div>
                     <div ng-show="stepData.currentStep === 2">
-                        <p><b>Krok 2: {{stepData.stepByStepConfig[2].description}}</b></p>
+                        <p><b>Krok 2: {{::stepData.stepByStepConfig[2].description}}</b></p>
 
                         <p>
                             W tym kroku przedstawione wcześniej ciagi diagonalne zostały ocenione, zgodnie ze zdefiniowaną na etapie konfiguracji, macierzą substytucji.
@@ -34,14 +34,14 @@
                         </p>
                     </div>
                     <div ng-show="stepData.currentStep === 3">
-                        <p><b>Krok 3: {{stepData.stepByStepConfig[3].description}}</b></p>
+                        <p><b>Krok 3: {{::stepData.stepByStepConfig[3].description}}</b></p>
 
                         <p>W tym kroku wybrane zostało 10 najlepszych ciągów, wybranych na podstawie wyliczonych w poprzednim kroku ocen.
                             Dla każdej sekwencji, lista ciągów została ograniczona jedynie do tych 10 najlepszych.
                         </p>
                     </div>
                     <div ng-show="stepData.currentStep === 4">
-                        <p><b>Krok 4: {{stepData.stepByStepConfig[4].description}}</b></p>
+                        <p><b>Krok 4: {{::stepData.stepByStepConfig[4].description}}</b></p>
 
                         <p>W tym kroku wybierana jest połowa sekwencji, które zostaną przetworzone na kolejnym etapie.
                             Polega to na wybraniu najlepszego ciągu dla każdej sekwencji i wyborze tych sekwencji,
@@ -58,7 +58,7 @@
         <div fasta-selected-sequences best-sequences="stepData.bestSequences"></div>
 
         <div ng-show="stepData.currentDiagonals">
-            <div fasta-sequences-tabs sequences="stepData.baseSequences" change-sequence="changeSequence(index)"></div>
+            <div fasta-sequences-tabs sequences="::stepData.baseSequences" change-sequence="changeSequence(index)"></div>
 
             <div>
                 <div class="page-header">
@@ -95,12 +95,12 @@
                             {paragraphId: 'querySequence-p', content: stepData.querySequence, startIndex: diagonal.startPoint[1], length: (diagonal.endPoint[1] - diagonal.startPoint[1]) + 1}]"
                         ng-click="highlightOnDiagonalsTable(diagonal)"
                         ng-class="{'info' : (stepData.selectedDiagonal == diagonal)}">
-                        <td>{{$index + 1}}</td>
+                        <td>{{::$index + 1}}</td>
                         <td>[{{::diagonal.startPoint[0]}}, {{::diagonal.endPoint[0]}}]</td>
-                        <td>{{::stepData.currentBaseSequence | limitTo : (diagonal.endPoint[0] - diagonal.startPoint[0])
-                            + 1 : diagonal.startPoint[0]}}</td>
+                        <td>{{::stepData.currentBaseSequence | limitTo : ((diagonal.endPoint[0] - diagonal.startPoint[0]) + 1) :
+                            diagonal.startPoint[0]}}</td>
                         <td>[{{::diagonal.startPoint[1]}}, {{::diagonal.endPoint[1]}}]</td>
-                        <td>{{::stepData.querySequence | limitTo : (diagonal.endPoint[1] - diagonal.startPoint[1]) + 1 :
+                        <td>{{::stepData.querySequence | limitTo : ((diagonal.endPoint[1] - diagonal.startPoint[1]) + 1) :
                             diagonal.startPoint[1]}}</td>
                         <td >{{diagonal.score}}</td>
                     </tr>
@@ -122,4 +122,4 @@
 </div>
 
 <div fasta-navigation-footer previous-url="/first_stage" next-url="/third_stage"
-     save-step="saveLastStep(lastStep)" config="stepData.stepByStepConfig" current-step="stepData.currentStep" next-stage-number="3"></div>
+     save-step="saveLastStep(lastStep)" config="::stepData.stepByStepConfig" current-step="stepData.currentStep" next-stage-number="3"></div>

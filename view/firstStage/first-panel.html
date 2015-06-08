@@ -7,7 +7,7 @@
             <div class="col-md-12">
                 <div class="well" ng-show="stepData.currentStep > 0">
                     <div ng-show="stepData.currentStep === 1">
-                        <p><b>Krok 1: {{stepData.stepByStepConfig[1].description}}</b></p>
+                        <p><b>Krok 1: {{::stepData.stepByStepConfig[1].description}}</b></p>
 
                         <p>W tym kroku na stronie pojawiła się tablica indeksująca dla poszukiwanej sekwencji.
                             Tablica ta jest wyliczana poprzez znalezienie wszystkich k-krotek
@@ -15,7 +15,7 @@
                             w których się one znajdują w danej sekwencji.</p>
                     </div>
                     <div ng-show="stepData.currentStep === 2">
-                        <p><b>Krok 2: {{stepData.stepByStepConfig[2].description}}</b></p>
+                        <p><b>Krok 2: {{::stepData.stepByStepConfig[2].description}}</b></p>
 
                         <p>W tym kroku na stronie pojawiły się tablice indeksujące dla każdej sekwencji z bazy danych,
                             wyliczonych analogicznie jak w poprzednim kroku.
@@ -24,7 +24,7 @@
                             znajdującej się nad nowo pokazaną tablicą indeksującą.</p>
                     </div>
                     <div ng-show="stepData.currentStep === 3">
-                        <p><b>Krok 3: {{stepData.stepByStepConfig[3].description}}</b></p>
+                        <p><b>Krok 3: {{::stepData.stepByStepConfig[3].description}}</b></p>
 
                         <p>W tym kroku na stronie pojawiły się tabele zawierające listę gorących miejsc z bazy danych.
                             Gorące miejsca są wyliczane poprzez odejmowanie indeksów dla k-krotek dla sekwencji szukanej
@@ -32,7 +32,7 @@
                         </p>
                     </div>
                     <div ng-show="stepData.currentStep === 4">
-                        <p><b>Krok 4: {{stepData.stepByStepConfig[4].description}}</b></p>
+                        <p><b>Krok 4: {{::stepData.stepByStepConfig[4].description}}</b></p>
 
                         <p>W tym kroku wybierana jest połowa sekwencji, które zostaną przetworzone na kolejnym etapie.
                             Polega to na znalezieniu najlepszych przekątnych dla każdej sekwencji -
@@ -74,7 +74,7 @@
                                fasta-highlight highlight-paragraphs-list="[{paragraphId: 'querySequence-p',
                                     content: stepData.querySequence, startIndex: element, length: stepData.kTup}]"
                                ng-repeat="element in value">
-                                {{element}}
+                                {{::element}}
                             </p>
                         </td>
                     </tr>
@@ -86,7 +86,7 @@
 
         <!-- BASE SEQUENCE -->
         <div ng-if="stepData.baseSequencesIndices">
-            <div fasta-sequences-tabs sequences="stepData.baseSequences"
+            <div fasta-sequences-tabs sequences="::stepData.baseSequences"
                  change-sequence="changeSequence(index)"></div>
 
             <div class="page-header">
@@ -153,5 +153,5 @@
     </div>
 </div>
 <div fasta-navigation-footer previous-url="/config" next-url="/second_stage"
-     save-step="saveLastStep(lastStep)" config="stepData.stepByStepConfig" current-step="stepData.currentStep"
+     save-step="saveLastStep(lastStep)" config="::stepData.stepByStepConfig" current-step="stepData.currentStep"
      next-stage-number="2"></div>

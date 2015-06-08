@@ -33,6 +33,10 @@
 
                 element.bind('mouseover', highlightPartOfParagraphs);
                 element.bind('mouseleave', highlightOff);
+
+                element.on('$destroy', function() {
+                    element.off('mouseover mouseleave');
+                })
             }
 
             function initializeScopeFunctions() {

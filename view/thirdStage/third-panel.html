@@ -7,7 +7,7 @@
             <div class="col-md-12">
                 <div class="well" ng-show="stepData.currentStep > 0">
                     <div ng-show="stepData.currentStep === 1">
-                        <p><b>Krok 1: {{stepData.stepByStepConfig[1].description}}</b></p>
+                        <p><b>Krok 1: {{::stepData.stepByStepConfig[1].description}}</b></p>
 
                         <p>
                             W tym kroku znalezione w poprzednim etapie najlepsze ciągi diagonalne zostały wykorzystane do utworzenia ścieżek diagonalnych, dla każdej z sekwencji.
@@ -26,7 +26,7 @@
                         </p>
                     </div>
                     <div ng-show="stepData.currentStep === 2">
-                        <p><b>Krok 2: {{stepData.stepByStepConfig[2].description}}</b></p>
+                        <p><b>Krok 2: {{::stepData.stepByStepConfig[2].description}}</b></p>
 
                         <p>
                             W tym kroku przedstawione wcześniej ścieżki zostały ocenione,
@@ -41,7 +41,7 @@
                         </p>
                     </div>
                     <div ng-show="stepData.currentStep === 3">
-                        <p><b>Krok 3: {{stepData.stepByStepConfig[3].description}}</b></p>
+                        <p><b>Krok 3: {{::stepData.stepByStepConfig[3].description}}</b></p>
 
                         <p>W tym kroku dla każdej sekwencji została wybrana jedna ścieżka, która oznacza najlepsze dopasowanie.
                             Polega to na wyborze ścieżki z najwyższą oceną, policzoną w poprzednim kroku.
@@ -51,7 +51,7 @@
                         </p>
                     </div>
                     <div ng-show="stepData.currentStep === 4">
-                        <p><b>Krok 4: {{stepData.stepByStepConfig[4].description}}</b></p>
+                        <p><b>Krok 4: {{::stepData.stepByStepConfig[4].description}}</b></p>
 
                         <p>
                             W tym kroku zaprezentowane zostało dopasowanie każdych par sekwencji, wynikających ze znalezionych najlepszych ścieżek.
@@ -62,7 +62,7 @@
                         </p>
                     </div>
                     <div ng-show="stepData.currentStep === 5">
-                        <p><b>Krok 5: {{stepData.stepByStepConfig[5].description}}</b></p>
+                        <p><b>Krok 5: {{::stepData.stepByStepConfig[5].description}}</b></p>
 
                         <p>W tym kroku wybierana jest połowa sekwencji, które zostaną przetworzone na kolejnym etapie.
                             Polega to na wybraniu tych sekwencji, dla których oceny znalezionych ścieżek są najwyższe.
@@ -78,7 +78,7 @@
         <div fasta-selected-sequences best-sequences="stepData.bestSequences"></div>
 
         <div ng-show="stepData.currentDiagonalsPaths">
-            <div fasta-sequences-tabs sequences="stepData.baseSequences" change-sequence="changeSequence(index)"></div>
+            <div fasta-sequences-tabs sequences="::stepData.baseSequences" change-sequence="changeSequence(index)"></div>
 
             <div>
                 <div class="page-header">
@@ -117,7 +117,7 @@
                         ng-click="drawPath(path)"
                         ng-class="{'info' : (stepData.selectedPath == path)}">
 
-                        <td>{{$index + 1}}</td>
+                        <td>{{::$index + 1}}</td>
                         <td>[{{::path.diagonals[0].startPoint[0]}},
                             {{::path.diagonals[path.diagonals.length-1].endPoint[0]}}]
                         </td>
@@ -150,13 +150,13 @@
                             <tr>
                                 <td ng-repeat="char in stepData.alignments[stepData.currentBaseSequence].baseAlignment track by $index"
                                     ng-class="{'alignment-highlight' : isPartOfAlignment($index)}">
-                                    {{char}}
+                                    {{::char}}
                                 </td>
                             </tr>
                             <tr>
                                 <td ng-repeat="char in stepData.alignments[stepData.currentBaseSequence].queryAlignment track by $index"
                                     ng-class="{'alignment-highlight' : isPartOfAlignment($index)}">
-                                    {{char}}
+                                    {{::char}}
                                 </td>
                             </tr>
                             </tbody>
@@ -178,4 +178,4 @@
     </div>
 
     <div fasta-navigation-footer previous-url="/second_stage" next-url="/fourth_stage"
-         save-step="saveLastStep(lastStep)" config="stepData.stepByStepConfig" current-step="stepData.currentStep" next-stage-number="4"></div>
+         save-step="saveLastStep(lastStep)" config="::stepData.stepByStepConfig" current-step="stepData.currentStep" next-stage-number="4"></div>

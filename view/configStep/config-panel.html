@@ -3,8 +3,11 @@
         <b>Konfiguracja parametrów algorytmu</b>
     </div>
     <form class="panel-body form-horizontal">
-        <div class="alert alert-danger text-center" ng-show="configData.formError" role="alert">
-            <b>Niepoprawne wartości, żaden parametr nie może być pusty!</b>
+        <div class="alert alert-danger" ng-show="configData.errors.length > 0" role="alert">
+            <b>Wystąpiły następujące błędy w polach parametrów:</b>
+            <ul>
+                <li ng-repeat="error in configData.errors">{{::error}}</li>
+            </ul>
         </div>
         <div class="row">
             <div class="col-md-6">
@@ -30,7 +33,7 @@
                                 </a>
                             </span>
                             <input type="text" class="form-control config-sequence-list" disabled
-                                   ng-model="baseSequence"
+                                   ng-model="::baseSequence"
                                    name="baseSequence-input-{{$index}}"
                                    fasta-sequence-validator/>
                         </div>
@@ -61,8 +64,7 @@
 
                     <div class="col-md-8">
                         <input type="number" class="form-control" ng-model="configData.kTup" min="2" max="6"
-                               name="ktup-input" ng-disabled="configData.started" fasta-number-input-validator
-                               allow-minus="false"/>
+                               name="ktup-input" ng-disabled="configData.started"/>
                     </div>
                 </div>
 
@@ -71,8 +73,7 @@
 
                     <div class="col-md-8">
                         <input type="number" class="form-control" ng-model="configData.gapPenalty"
-                               name="gapPenalty-input" ng-disabled="configData.started" fasta-number-input-validator
-                               allow-minus="true"/>
+                               name="gapPenalty-input" ng-disabled="configData.started" />
                     </div>
                 </div>
 
@@ -81,8 +82,7 @@
 
                     <div class="col-md-8">
                         <input type="number" class="form-control" ng-model="configData.maxDistance"
-                               name="maxDistance-input" ng-disabled="configData.started" fasta-number-input-validator
-                               allow-minus="false"/>
+                               name="maxDistance-input" ng-disabled="configData.started" />
                     </div>
                 </div>
 
@@ -94,19 +94,18 @@
                             <thead>
                             <tr class="success">
                                 <th></th>
-                                <th ng-repeat="(symbol, values) in configData.scoreMatrix track by $index">{{symbol}}
+                                <th ng-repeat="(symbol, values) in configData.scoreMatrix track by $index">{{::symbol}}
                                 </th>
                             </tr>
                             </thead>
                             <tbody>
                             <tr ng-repeat="(symbol, values) in configData.scoreMatrix track by $index">
-                                <td class="col-md-1"><label>{{symbol}}</label></td>
+                                <td class="col-md-1"><label>{{::symbol}}</label></td>
                                 <td class="" ng-repeat="(key, scoreValue) in values track by $index"
                                     data-container="body">
                                     <input type="number" class="form-control text-center"
                                            ng-model="configData.scoreMatrix[symbol][key]"
-                                           ng-disabled="configData.started"
-                                           fasta-number-input-validator allow-minus="true">
+                                           ng-disabled="configData.started">
                                 </td>
                             </tr>
                             </tbody>
