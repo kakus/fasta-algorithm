@@ -3,10 +3,14 @@
         module('fastaView').
         directive('fastaMenu', ['$location', 'CurrentStageService', menu]);
 
+    /**
+     * Directive for top menu.
+     */
     function menu($location, CurrentStageService) {
         return {
             restrict: 'A',
             link: link,
+            scope: {},
             templateUrl: 'view/shared/menu/fasta-menu.html'
         };
 

@@ -3,15 +3,26 @@
         .module('fastaView')
         .directive('fastaHighlight', ['$document', '$compile', fastaHighlight]);
 
+    /**
+     * Directive for highlighting part of sequences paragraphs on mouseover.
+     * Used on almost all pages, i.e. to show which parts of sequences are contained in diagonal.
+     *
+     * To use it one has to pass highlightParagraphsList array as tag attribute.
+     * It has to be an array of objects like below:
+     *      {
+     *          startIndex: start index where to start highlight in paragraph,
+     *          length: length of highlight from start,
+     *          content: original content of paragraph,
+     *          paragraphId: ID of paragraph from HTML
+     *      }
+     */
     function fastaHighlight($document) {
         return {
             restrict: 'A',
             scope: {
                 highlightParagraphsList: '='
             },
-            //transclude: true,
             link: link
-            //template: '<tr ng-mouseover="highlightPartOfParagraphs()" ng-mouseleave="highlightOff()"><ng-transclude></ng-transclude></tr>'
         };
 
         function link(scope, element) {

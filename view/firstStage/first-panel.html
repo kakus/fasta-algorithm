@@ -35,8 +35,10 @@
                         <p><b>Krok 4: {{stepData.stepByStepConfig[4].description}}</b></p>
 
                         <p>W tym kroku wybierana jest połowa sekwencji, które zostaną przetworzone na kolejnym etapie.
-                            Polega to na policzeniu sumy liczby gorących miejsc dla każdej sekwencji i wyborze tych sekwencji, dla których suma ta jest największa.
+                            Polega to na znalezieniu najlepszych przekątnych dla każdej sekwencji -
+                            zawierających największą liczbę gorących miejsc - i wybranie tych sekwencji, dla których liczba ta jest największa.
                         </p>
+
                         <p>
                             Celem tego jest redukcja liczby sekwencji koniecznych do przetworzenia na kolejnych etapach.
                         </p>
@@ -55,7 +57,7 @@
                 </h3>
             </div>
 
-            <h4 class="text-center"><b>Sekwencja Szukana: </b><span
+            <h4 class="text-center overflow-auto"><b>Sekwencja Szukana: </b><span
                     id="querySequence-p"> {{::stepData.querySequence}} </span></h4>
 
             <div class="scroll-table">
@@ -93,7 +95,7 @@
                 </h4>
             </div>
 
-            <h4 class="text-center"><b>Aktualna sekwencja:</b> <span ng-bind=stepData.currentBaseSequence
+            <h4 class="text-center overflow-auto"><b>Aktualna sekwencja:</b> <span ng-bind=stepData.currentBaseSequence
                                                                      id="baseSequence-p"></span></h4>
 
             <div class="scroll-table">
@@ -149,8 +151,7 @@
         </div>
         <!-- HOT SPOTS -->
     </div>
-
-    <div fasta-navigation-footer previous-url="/config" next-url="/second_stage" last-step="stepData.lastStep"
-         save-step="saveLastStep(lastStep)" config="stepData.stepByStepConfig" current-step="stepData.currentStep"
-         next-stage-number="2"></div>
 </div>
+<div fasta-navigation-footer previous-url="/config" next-url="/second_stage"
+     save-step="saveLastStep(lastStep)" config="stepData.stepByStepConfig" current-step="stepData.currentStep"
+     next-stage-number="2"></div>

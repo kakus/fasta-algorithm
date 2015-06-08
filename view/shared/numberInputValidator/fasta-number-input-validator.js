@@ -3,6 +3,9 @@
         module('fastaView').
         directive('fastaNumberInputValidator', [numberInputValidator]);
 
+    /**
+     * Directive for validating that only numbers are entered in "number" input.
+     */
     function numberInputValidator() {
         return {
             restrict: 'A',
@@ -20,11 +23,6 @@
             function initialize() {
                 element.on('keypress', function(event) {
                     var pressed = String.fromCharCode(event.which);
-                    console.log(pressed);
-                    console.log(scope.allowMinus);
-                    console.log(ngModel.$modelValue);
-
-
                     if (isNaN(parseInt(pressed))) {
                         if(pressed === '-' ) {
                             if (!scope.allowMinus || ngModel.$modelValue !== null) {
@@ -33,7 +31,6 @@
                         } else {
                             event.preventDefault();
                         }
-
                     }
                 });
             }

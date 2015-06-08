@@ -1,6 +1,6 @@
 <div class="panel panel-default">
     <div class="panel-heading text-center">
-        <b>Konfiguracja</b>
+        <b>Konfiguracja parametrów algorytmu</b>
     </div>
     <form class="panel-body form-horizontal">
         <div class="alert alert-danger text-center" ng-show="configData.formError" role="alert">
@@ -23,12 +23,14 @@
 
                     <div class="col-md-8">
                         <div class="input-group" ng-repeat="baseSequence in configData.baseSequences">
-                    <span class="input-group-btn">
-                      <a class="btn btn-danger" ng-click="removeBaseSequence($index)" ng-disabled="configData.started">
-                          <span class="glyphicon glyphicon-trash"></span>
-                      </a>
-                  </span>
-                            <input type="text" class="form-control config-sequence-list" disabled ng-model="baseSequence"
+                            <span class="input-group-btn">
+                                <a class="btn btn-danger" ng-click="removeBaseSequence($index)"
+                                 ng-disabled="configData.started">
+                                    <span class="glyphicon glyphicon-trash"></span>
+                                </a>
+                            </span>
+                            <input type="text" class="form-control config-sequence-list" disabled
+                                   ng-model="baseSequence"
                                    name="baseSequence-input-{{$index}}"
                                    fasta-sequence-validator/>
                         </div>
@@ -40,11 +42,11 @@
 
                     <div class="col-md-8">
                         <div class="input-group">
-                    <span class="input-group-btn">
-                      <a class="btn btn-success" ng-click="addBaseSequence()" ng-disabled="configData.started">
-                          <span class="glyphicon glyphicon-ok"></span>
-                      </a>
-                  </span>
+                            <span class="input-group-btn">
+                                <a class="btn btn-success" ng-click="addBaseSequence()" ng-disabled="configData.started">
+                                    <span class="glyphicon glyphicon-ok"></span>
+                                </a>
+                            </span>
                             <input type="text" class="form-control" ng-model="configData.newSequence"
                                    name="newSequence-input" ng-disabled="configData.started"
                                    fasta-sequence-validator/>
@@ -59,7 +61,8 @@
 
                     <div class="col-md-8">
                         <input type="number" class="form-control" ng-model="configData.kTup" min="2" max="6"
-                               name="ktup-input" ng-disabled="configData.started" fasta-number-input-validator allow-minus="false"/>
+                               name="ktup-input" ng-disabled="configData.started" fasta-number-input-validator
+                               allow-minus="false"/>
                     </div>
                 </div>
 
@@ -68,7 +71,8 @@
 
                     <div class="col-md-8">
                         <input type="number" class="form-control" ng-model="configData.gapPenalty"
-                               name="gapPenalty-input" ng-disabled="configData.started" fasta-number-input-validator allow-minus="true"/>
+                               name="gapPenalty-input" ng-disabled="configData.started" fasta-number-input-validator
+                               allow-minus="true"/>
                     </div>
                 </div>
 
@@ -77,7 +81,8 @@
 
                     <div class="col-md-8">
                         <input type="number" class="form-control" ng-model="configData.maxDistance"
-                               name="maxDistance-input" ng-disabled="configData.started" fasta-number-input-validator allow-minus="false"/>
+                               name="maxDistance-input" ng-disabled="configData.started" fasta-number-input-validator
+                               allow-minus="false"/>
                     </div>
                 </div>
 
@@ -99,7 +104,8 @@
                                 <td class="" ng-repeat="(key, scoreValue) in values track by $index"
                                     data-container="body">
                                     <input type="number" class="form-control text-center"
-                                           ng-model="configData.scoreMatrix[symbol][key]" ng-disabled="configData.started"
+                                           ng-model="configData.scoreMatrix[symbol][key]"
+                                           ng-disabled="configData.started"
                                            fasta-number-input-validator allow-minus="true">
                                 </td>
                             </tr>
@@ -109,9 +115,14 @@
                 </div>
 
                 <div class="well">
-                    <p>Na etapie konfiguracji niezbędne jest uzupełnienie wszystkich parametrów algorytmu, które zostaną wykorzystane w kolejnych etapach.</p>
-                    <p>Początkowo wstawione zostały przykładowe wartości, które można zmieniać w zależności od potrzeb.</p>
-                    <p>Aby zmieniać wartości po uruchomieniu algorytmu, konieczne jest jego zrestartowanie, co usunie wszystkie postępy.</p>
+                    <p>Na etapie konfiguracji niezbędne jest uzupełnienie wszystkich parametrów algorytmu, które zostaną
+                        wykorzystane w kolejnych etapach.</p>
+
+                    <p>Początkowo wstawione zostały przykładowe wartości, które można zmieniać w zależności od
+                        potrzeb.</p>
+
+                    <p>Aby zmieniać wartości po uruchomieniu algorytmu, konieczne jest jego zrestartowanie, co usunie
+                        wszystkie postępy.</p>
                 </div>
             </div>
         </div>
@@ -121,8 +132,9 @@
 <div class="panel panel-default">
     <div class="panel-body">
         <div class="text-center">
-            <a ng-if="!configData.started" ng-click="saveAndContinue()" class="btn btn-primary">Rozpocznij demonstrację</a>
-            <a ng-if="configData.started" ng-click="restart()" class="btn btn-primary" >Zrestartuj algorytm</a>
+            <a ng-if="!configData.started" ng-click="saveAndContinue()" class="btn btn-primary">Rozpocznij
+                demonstrację</a>
+            <a ng-if="configData.started" ng-click="restart()" class="btn btn-primary">Zrestartuj algorytm</a>
         </div>
     </div>
 </div>

@@ -49,9 +49,9 @@
             });
 
         function createCheckStageFunction(stageNumber) {
-            return ['$q', '$location', 'CurrentStageService', check];
+            return ['$q', '$location', 'CurrentStageService', checkIfStageCanBeLoaded];
 
-            function check($q, $location, CurrentStageService) {
+            function checkIfStageCanBeLoaded($q, $location, CurrentStageService) {
                 if (CurrentStageService.currentStage < stageNumber) {
                     if (lastRoute !== undefined) {
                         $location.path(lastRoute).replace();

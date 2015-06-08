@@ -3,6 +3,13 @@
         .module('fastaView')
         .directive('fastaDiagonalsTable', [diagonalsTable]);
 
+    /**
+     * Directive to insert diagonals table.
+     * It doesn't have isolated scope, so to be able to use it,
+     * parent scope (controller) has to contain some necessary data (see HTML file for names).
+     *
+     * It was necessary to do i t like this to be able to easily call methods provided by this directive in controller.
+     */
     function diagonalsTable() {
         return {
             scope: false,
@@ -19,6 +26,8 @@
 
             function initialize() {
                 initializeScopeFunctions();
+
+                element.on('$destroy', clearDiagonalsTable);
             }
 
             function initializeScopeFunctions() {
@@ -64,7 +73,7 @@
             }
 
             function clearDiagonalsTable() {
-                var cells =  element.find('[class*="diagonal-"]');
+                var cells = element.find('[class*="diagonal-"]');
                 for (var i = 0; i < cells.length; i++) {
                     var cell = angular.element(cells[i]);
                     cell.empty();
@@ -101,7 +110,9 @@
 
             function makeRemoveClassHandler(regex) {
                 return function (index, classes) {
-                    return classes.split(/\s+/).filter(function (el) {return regex.test(el);}).join(' ');
+                    return classes.split(/\s+/).filter(function (el) {
+                        return regex.test(el);
+                    }).join(' ');
                 }
             }
 

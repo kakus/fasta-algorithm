@@ -59,17 +59,17 @@
         }
 
         function anyFieldEmpty() {
-            return anyMatrixCellEmpty() || !$scope.configData.baseSequences.length ||
+            return anyMatrixCellEmpty() || $scope.configData.baseSequences.length === 0 ||
                 !$scope.configData.querySequence || !$scope.configData.kTup ||
-                !$scope.configData.gapPenalty || !$scope.configData.maxDistance;
+                !$scope.configData.gapPenalty || $scope.configData.maxDistance === null;
         }
 
         function anyMatrixCellEmpty() {
-            for (var i in $scope.configData.scoreMatrix) {
-                var row = $scope.configData.scoreMatrix[i];
+            for (var rowKey in $scope.configData.scoreMatrix) {
+                var row = $scope.configData.scoreMatrix[rowKey];
 
-                for (var j in row) {
-                    if (row[j] === null || row[j] === undefined) {
+                for (var cellKey in row) {
+                    if (row[cellKey] === null || row[cellKey] === undefined) {
                         return true;
                     }
                 }

@@ -10,9 +10,12 @@
                         <p><b>Krok 1: {{stepData.stepByStepConfig[1].description}}</b></p>
 
                         <p>
-                            W tym dla każdej pzekazanej sekwencji tworzona jest pełna macierz dla algorytmu Smitha-Watermana, zgodnie ze standardowym podejściem do wykonywania tego algorytmu.
-                            Do tworzenia wykorzystane zostały zdefiniowane na etapie konfiguracji: macierz substytucji oraz kara za przerwę.
+                            W tym dla każdej pzekazanej sekwencji tworzona jest pełna macierz dla algorytmu
+                            Smitha-Watermana, zgodnie ze standardowym podejściem do wykonywania tego algorytmu.
+                            Do tworzenia wykorzystane zostały zdefiniowane na etapie konfiguracji: macierz substytucji
+                            oraz kara za przerwę.
                         </p>
+
                         <p>
                             Macierz ta została zaprezentowana na stronie w formie tabeli, poniżej na stronie.
                         </p>
@@ -21,55 +24,61 @@
                         <p><b>Krok 2: {{stepData.stepByStepConfig[2].description}}</b></p>
 
                         <p>
-                            W tym kroku kontynuowany jest algorytm Smitha-Watermana. Zaznaczone zostały najlepsze ścieżki (dopasowania) na macierzy.
+                            W tym kroku kontynuowany jest algorytm Smitha-Watermana. Zaznaczone zostały najlepsze
+                            ścieżki (dopasowania) na macierzy.
                         </p>
                     </div>
                     <div ng-show="stepData.currentStep === 3">
                         <p><b>Krok 3: {{stepData.stepByStepConfig[3].description}}</b></p>
 
                         <p>
-                            W tym kroku wszystkie zaznaczone dopasowania zostały zaprezentowane w innej, tekstowej formie, uwzględniając wstawienia oraz usunięcia.
+                            W tym kroku wszystkie zaznaczone dopasowania zostały zaprezentowane w innej, tekstowej
+                            formie, uwzględniając wstawienia oraz usunięcia.
                         </p>
+
                         <p>
-                           Lista tych dopasowań znajduje się nad omawianą wcześniej macierzą.
+                            Lista tych dopasowań znajduje się nad omawianą wcześniej macierzą.
                         </p>
                     </div>
                     <div ng-show="stepData.currentStep === 4">
                         <p><b>Krok 4: {{stepData.stepByStepConfig[4].description}}</b></p>
 
                         <p>
-                            W tym kroku, który jest ostatnim krokiem algorytmu, wybrana została najlepiej dopasowana sekwencja.
-                            Wybór został oparty o ocenę wynikającą z macierzy Smitha-Watermana. Wybrana zostałą sekwencja z najwyższą oceną.
+                            W tym kroku, który jest ostatnim krokiem algorytmu, wybrana została najlepiej dopasowana
+                            sekwencja.
+                            Wybór został oparty o ocenę wynikającą z macierzy Smitha-Watermana. Wybrana zostałą
+                            sekwencja z najwyższą oceną.
                         </p>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div ng-show="stepData.bestSequence">
+        <div ng-show="stepData.bestSequence" class="overflow-auto">
             <div class="page-header">
                 <h3>
                     Sekwencja z najlepszym znalezionym dopasowaniem:
                     <small>(Więcej szczegółów poniżej, w odpowiedniej sekcji dla tej sekwencji)</small>
                 </h3>
             </div>
-             <h2 class="text-center list-group-item list-group-item-success">{{stepData.bestSequence}}</h2>
+            <h2 class="text-center  list-group-item list-group-item-success">{{stepData.bestSequence}}</h2>
         </div>
 
         <div ng-show="stepData.smithWatermanMatrices">
 
             <div fasta-sequences-tabs sequences="stepData.baseSequences" change-sequence="changeSequence(index)"></div>
 
-            <h4 class="text-center"><b>Sekwencja Szukana: </b><span
+            <h4 class="text-center overflow-auto"><b>Sekwencja Szukana: </b><span
                     id="querySequence-p"> {{::stepData.querySequence}} </span></h4>
-            <h4 class="text-center"><b>Aktualna Sekwencja </b>
+            <h4 class="text-center overflow-auto"><b>Aktualna Sekwencja </b>
                 <span ng-bind=stepData.currentBaseSequence id="baseSequence-p"></span>
             </h4>
 
-            <div ng-show="stepData.alignments">
+            <div ng-show="stepData.alignments" class="overflow-auto">
                 <div class="page-header">
                     <h3>
-                        Znalezione Dopasowania:<small> (pierwsza - sekwencja z bazy danych, druga - sekwencja szukana)</small>
+                        Znalezione Dopasowania:
+                        <small> (pierwsza - sekwencja z bazy danych, druga - sekwencja szukana)</small>
                     </h3>
                 </div>
                 <div ng-repeat="(alignmentIndex, alignment) in stepData.alignments[stepData.currentBaseSequence]">
@@ -96,10 +105,10 @@
                     Macierz dla Algorytmu Smitha-Watermana:
                 </h3>
             </div>
-            <div fasta-smith-waterman-table></div>
+            <div class="overflow-auto" fasta-smith-waterman-table></div>
         </div>
     </div>
 </div>
 
-<div fasta-navigation-footer previous-url="/third_stage" last-step="stepData.lastStep"
+<div fasta-navigation-footer previous-url="/third_stage"
      save-step="saveLastStep(lastStep)" config="stepData.stepByStepConfig" current-step="stepData.currentStep"></div>

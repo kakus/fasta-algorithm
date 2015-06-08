@@ -3,6 +3,9 @@
         module('fastaView').
         directive('fastaSequenceValidator', [sequenceValidator]);
 
+    /**
+     * Directive for validating that only proper symbols are entered for inputs containing DNA sequences
+     */
     function sequenceValidator() {
         return {
             restrict: 'A',

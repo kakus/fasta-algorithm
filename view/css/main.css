@@ -8,14 +8,39 @@ body {
     margin: 10px;
 }
 
-.container-overflow{
-    overflow: auto;
+.panel-title {
+    font-weight: bold;
+}
+
+.overflow-auto {
+    overflow-y: auto;
 }
 
 .steps-footer {
     background-color: #e7e7e7;
     border-top: solid 1px #ccc;
     padding: 5px;
+}
+
+.page-header {
+    border-top: 1px solid #eee;
+    margin-top: 10px;
+    text-align: center;
+}
+
+a.disabled {
+    pointer-events: none;
+    cursor: default;
+}
+
+.fasta-list-table > tbody > tr > td, .fasta-list-table > thead > tr > th{
+    padding: 2px !important;
+    cursor: pointer;
+}
+
+.found-alignments {
+    font-family: monospace;
+    font-size: xx-large;
 }
 
 /* TABLE */
@@ -48,15 +73,22 @@ td, th{
 
 .highlight-on-click{
     background-color: #bca7d2;
-    /*#bca7d2*/
-    /*#219161*/
 }
 
 .highlight-on-click-text{
     font-weight: bold;
-    /*#bca7d2*/
-    /*#219161*/
 }
+
+.highlight-sw {
+    background-color: #bca7d2;
+}
+
+.alignment-highlight {
+    color: red;
+    font-weight: bold;
+}
+
+/* DIAGONALS */
 
 .diagonal-link  {
     color: inherit;
@@ -68,26 +100,15 @@ td, th{
     text-decoration: none;
 }
 
+/* CONFIG */
+
 .config-sequence-list[disabled] {
     box-shadow: none !important;
     background-color: white !important;
     cursor: default !important;
 }
 
-.highlight-sw {
-    background-color: #bca7d2;
-}
-
-a.disabled {
-    pointer-events: none;
-    cursor: default;
-}
-
-.sequences-collapse {
-    cursor: pointer;
-    color: inherit;
-    text-decoration: none !important;
-}
+/* CHOSEN SEQUENCES */
 
 .chosen-sequences-group {
     margin-bottom: 0 !important;
@@ -99,30 +120,7 @@ a.disabled {
     text-align: center;
 }
 
-.page-header {
-    border-top: 1px solid #eee;
-    margin-top: 10px;
-    text-align: center;
-}
-
-.fasta-list-table > tbody > tr > td, .fasta-list-table > thead > tr > th{
-    padding: 2px !important;
-    cursor: pointer;
-}
-
-.found-alignments {
-    font-family: monospace;
-    font-size: xx-large;
-}
-
-.alignment-highlight {
-    color: red;
-    font-weight: bold;
-}
-
-.panel-title {
-    font-weight: bold;
-}
+/* SEQUENCES TABS */
 
 .sequences-tabs {
     overflow: auto;

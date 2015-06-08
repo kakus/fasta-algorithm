@@ -20,20 +20,48 @@
 
             $scope.stepData.currentBaseSequence = $scope.stepData.baseSequences[0];
 
+            restoreState();
+            refreshSWMatrix();
+            initializeStepsConfig();
+        }
+
+        function initializeScopeFunction() {
+            $scope.changeSequence = changeSequence;
+            $scope.isPartOfAlignment = isPartOfAlignment;
+            $scope.saveLastStep = saveLastStep;
+        }
+
+        function changeSequence(index) {
+            var newSequence = $scope.stepData.baseSequences[index];
+            if (newSequence !== $scope.stepData.currentBaseSequence) {
+                $scope.stepData.currentBaseSequence = newSequence;
+                refreshSWMatrix();
+            }
+        }
+
+        function isPartOfAlignment(alignmentIndex, charIndex) {
+            return $scope.stepData.alignments && (charIndex >= $scope.stepData.alignments[$scope.stepData.currentBaseSequence][alignmentIndex].baseHighlight[0] &&
+                charIndex <= $scope.stepData.alignments[$scope.stepData.currentBaseSequence][alignmentIndex].baseHighlight[1]);
+        }
+
+        function saveLastStep(lastStep) {
+            FourthDataService.lastStep = lastStep;
+        }
+
+        function restoreState() {
             $scope.stepData.smithWatermanMatrices = FourthDataService.matrices;
             $scope.stepData.smithWatermanSolutions = FourthDataService.solutions;
             $scope.stepData.alignments = FourthDataService.alignments;
             $scope.stepData.bestSequence = FourthDataService.bestSequence;
 
-            $scope.stepData.lastStep = FourthDataService.lastStep || 0;
-            $scope.stepData.currentStep = $scope.stepData.lastStep;
+            $scope.stepData.currentStep = FourthDataService.lastStep || 0;
+        }
 
-            refreshTable();
-
+        function initializeStepsConfig() {
             $scope.stepData.stepByStepConfig = [
                 {
                     description: 'Etap 4 - początek',
-                    reverse: clearStage
+                    reverse: clearStageData
                 },
                 {
                     description: "Algorytm Smitha-Watermana dla najlepszych sekwencji",
@@ -58,30 +86,6 @@
             ];
         }
 
-
-        function initializeScopeFunction() {
-            $scope.changeSequence = changeSequence;
-            $scope.isPartOfAlignment = isPartOfAlignment;
-            $scope.saveLastStep = saveLastStep;
-        }
-
-        function changeSequence(index) {
-            var newSequence = $scope.stepData.baseSequences[index];
-            if (newSequence !== $scope.stepData.currentBaseSequence) {
-                $scope.stepData.currentBaseSequence = newSequence;
-                refreshTable();
-            }
-        }
-
-        function isPartOfAlignment(alignmentIndex, charIndex) {
-            return $scope.stepData.alignments && (charIndex >= $scope.stepData.alignments[$scope.stepData.currentBaseSequence][alignmentIndex].baseHighlight[0] &&
-                charIndex <= $scope.stepData.alignments[$scope.stepData.currentBaseSequence][alignmentIndex].baseHighlight[1]);
-        }
-
-        function saveLastStep(lastStep) {
-            FourthDataService.lastStep = lastStep;
-        }
-
         function smithWaterman() {
             return FourthDataService.smithWatermanForEachSequence($scope.stepData.baseSequences, $scope.stepData.querySequence,
                 ConfigurationService.scoreMatrix, ConfigurationService.gapPenalty).then(function (matrices) {
@@ -94,7 +98,7 @@
             return FourthDataService.findSolutionsForEachSequence($scope.stepData.smithWatermanMatrices).then(function (solutions) {
                 $scope.stepData.smithWatermanSolutions = solutions;
                 FourthDataService.solutions = solutions;
-                refreshTable();
+                refreshSWMatrix();
             });
         }
 
@@ -113,7 +117,7 @@
             });
         }
 
-        function clearStage() {
+        function clearStageData() {
             FourthDataService.matrices = undefined;
             FourthDataService.solutions = undefined;
             FourthDataService.alignments = undefined;
@@ -141,7 +145,7 @@
             FourthDataService.bestSequence = undefined;
         }
 
-        function refreshTable() {
+        function refreshSWMatrix() {
             if ($scope.stepData.smithWatermanSolutions) {
                 $timeout(function() {
                     $scope.clearHighlight();

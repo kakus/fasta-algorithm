@@ -3,13 +3,33 @@
         module('fastaView').
         directive('fastaNavigationFooter', ['$location', 'CurrentStageService', navigationFooter]);
 
+    /**
+     * Directive for footer fixed navigation. Allows to unify actions taken on each stage for making next/previous steps/stages.
+     *
+     * Allows to "Finish Stage" by doing all steps at once.
+     * When going to previous stage, function callback from controller is called that should clear stage data
+     *
+     * Many attributes are necessary to provide:
+     *      - previousUrl - url to go when previous stage button is clicked
+     *      - nextUrl (optional) - url to go when next stage button is clicked
+     *      - saveStep - callback function to remember last performed step - necessary to restore state on controller
+     *      - nextStageNumber (optional) - number of next stage, necessary to set globally current stage
+     *      - currentStep - currently performed step - necessary to properly restore state after manually switching stage
+     *      - config - array containing object for steps definition.
+     *          First element should be "initial" step with description property and reverse function as property to clear data after doing "Previous Stage" action
+     *          Rest should be as follows:
+     *          {
+     *              description: short description of step,
+     *              action: function callback to be called when "next step" is done,
+     *              reverse: function callback to be called when "previous step" is done
+     *          }
+     */
     function navigationFooter($location, CurrentStageService) {
         return {
             restrict: 'A',
             scope: {
                 previousUrl: '@',
                 nextUrl: '@',
-                lastStep: '=',
                 saveStep: '&',
                 config: '=',
                 nextStageNumber: '=',
@@ -39,7 +59,6 @@
                 scope.isLastStep = isLastStep;
                 scope.isFirstStep = isFirstStep;
                 scope.isLastStage = isLastStage;
-
                 scope.nextStage = nextStage;
                 scope.previousStage = previousStage;
             }
@@ -52,7 +71,7 @@
 
                 scope.description = scope.config[scope.currentStep].description;
                 promise = scope.config[scope.currentStep].action();
-                return promise.then(function() {
+                return promise.then(function () {
                     scope.saveStep({lastStep: scope.currentStep});
                     scope.disabledStepButton = false;
                 });
@@ -87,7 +106,7 @@
 
             function finishStage() {
                 if (!isLastStep()) {
-                    nextStep().then(function() {
+                    nextStep().then(function () {
                         finishStage();
                     });
                 }

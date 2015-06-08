@@ -3,6 +3,11 @@
         module('fastaView').
         directive('fastaSequencesTabs', [sequencesTabs]);
 
+    /**
+     * Directive to be used as common for displaying sequences available at current stage
+     *
+     * changeSequence - callback to change sequence on controller
+     */
     function sequencesTabs() {
         return {
             restrict: 'A',

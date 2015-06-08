@@ -44,7 +44,8 @@
                         <p><b>Krok 4: {{stepData.stepByStepConfig[4].description}}</b></p>
 
                         <p>W tym kroku wybierana jest połowa sekwencji, które zostaną przetworzone na kolejnym etapie.
-                            Polega to na policzeniu sumy ocen najlepszych 10 ciągów diagonalnych dla każdej sekwencji i wyborze tych sekwencji, dla których suma ta jest największa.
+                            Polega to na wybraniu najlepszego ciągu dla każdej sekwencji i wyborze tych sekwencji,
+                            dla których te wybrane wartości są największe, w porównaniu do innych sekwencji.
                         </p>
                         <p>
                             Celem tego jest redukcja liczby sekwencji koniecznych do przetworzenia na kolejnych etapach.
@@ -69,9 +70,9 @@
                     </h4>
                 </div>
 
-                <h4 class="text-center"><b>Sekwencja Szukana: </b><span
+                <h4 class="text-center overflow-auto"><b>Sekwencja Szukana: </b><span
                         id="querySequence-p"> {{::stepData.querySequence}} </span></h4>
-                <h4 class="text-center"><b>Aktualna Sekwencja </b>
+                <h4 class="text-center overflow-auto"><b>Aktualna Sekwencja </b>
                     <span ng-bind=stepData.currentBaseSequence id="baseSequence-p"></span>
                 </h4>
 
@@ -113,12 +114,12 @@
                     Tabela ciągów diagonalnych:
                 </h4>
             </div>
-            <div>
+            <div class="overflow-auto">
                 <div fasta-diagonals-table></div>
             </div>
         </div>
     </div>
 </div>
 
-<div fasta-navigation-footer previous-url="/first_stage" next-url="/third_stage" last-step="stepData.lastStep"
+<div fasta-navigation-footer previous-url="/first_stage" next-url="/third_stage"
      save-step="saveLastStep(lastStep)" config="stepData.stepByStepConfig" current-step="stepData.currentStep" next-stage-number="3"></div>

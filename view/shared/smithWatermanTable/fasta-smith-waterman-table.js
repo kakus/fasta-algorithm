@@ -3,6 +3,13 @@
         .module('fastaView')
         .directive('fastaSmithWatermanTable', [smithWatermanTable]);
 
+    /**
+     * Directive to insert Smith-Waterman Matrix.
+     * It doesn't have isolated scope, so to be able to use it,
+     * parent scope (controller) has to contain some necessary data (see HTML file for names).
+     *
+     * It was necessary to do it like this to be able to easily call methods provided by this directive in controller.
+     */
     function smithWatermanTable() {
         return {
             scope: false,

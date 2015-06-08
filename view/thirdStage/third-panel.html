@@ -90,9 +90,9 @@
                     </h4>
                 </div>
 
-                <h4 class="text-center"><b>Sekwencja Szukana: </b><span
+                <h4 class="text-center overflow-auto"><b>Sekwencja Szukana: </b><span
                         id="querySequence-p"> {{::stepData.querySequence}} </span></h4>
-                <h4 class="text-center"><b>Aktualna Sekwencja </b>
+                <h4 class="text-center overflow-auto"><b>Aktualna Sekwencja </b>
                     <span ng-bind=stepData.currentBaseSequence id="baseSequence-p"></span>
                 </h4>
 
@@ -144,7 +144,7 @@
                         <h3>Znalezione Dopasowanie:</h3>
 
                     </div>
-                    <div class="">
+                    <div class="overflow-auto">
                         <table class="found-alignments" align="center">
                             <tbody>
                             <tr>
@@ -170,12 +170,12 @@
                         Tabela ciągów diagonalnych:
                     </h4>
                 </div>
-                <div class="container-overflow">
+                <div class="overflow-auto">
                     <div fasta-diagonals-table></div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div fasta-navigation-footer previous-url="/second_stage" next-url="/fourth_stage" last-step="stepData.lastStep"
+    <div fasta-navigation-footer previous-url="/second_stage" next-url="/fourth_stage"
          save-step="saveLastStep(lastStep)" config="stepData.stepByStepConfig" current-step="stepData.currentStep" next-stage-number="4"></div>

@@ -18,44 +18,13 @@
             $scope.stepData.baseSequences = ConfigurationService.secondStage.baseSequences;
             $scope.stepData.querySequence = ConfigurationService.querySequence;
             $scope.stepData.maxDistance = ConfigurationService.maxDistance;
-
-            $scope.stepData.lastStep = SecondDataService.lastStep || 0;
-            $scope.stepData.currentStep = $scope.stepData.lastStep;
-            $scope.stepData.currentDiagonals = SecondDataService.bestDiagonals || SecondDataService.scoredDiagonals || SecondDataService.diagonals;
-            $scope.stepData.bestSequences = ConfigurationService.thirdStage.baseSequences;
-            $scope.stepData.currentBaseSequence = $scope.stepData.baseSequences[0];
-            if ($scope.stepData.currentDiagonals) {
-                redrawDiagonalsTable();
-            }
-
             $scope.stepData.scoreMatrix = ConfigurationService.scoreMatrix;
 
-            $scope.stepData.stepByStepConfig = [
-                {
-                    description: 'Etap 2 - początek',
-                    reverse: clearStage
-                },
-                {
-                    description: "Znalezienie wszystkich Ciągów Diagonalnych dla każdej z par sekwencji poprzez łączenie bliskich Gorących Miejsc",  //and show
-                    action: findDiagonals,
-                    reverse: reverseFindDiagonals
-                },
-                {
-                    description: 'Ocena Ciągów za pomocą ustalonej macierzy substytucji',
-                    action: score,
-                    reverse: reverseScore
-                },
-                {
-                    description: 'Wybranie 10 najlepszych ciągów diagonalnych dla każdej z par sekwencji bazowa - szukana',
-                    action: getBestDiagonals,
-                    reverse: reverseGetBestDiagonals
-                },
-                {
-                    description: "Wybranie najlepszych sekwencji do następnego etapu",
-                    action: bestBaseSequences,
-                    reverse: reverseBestBaseSequences
-                }
-            ];
+            $scope.stepData.currentBaseSequence = $scope.stepData.baseSequences[0];
+
+            restoreState();
+            redrawDiagonalsTable();
+            initializeStepsConfig();
         }
 
         function initializeScopeFunctions() {
@@ -66,10 +35,7 @@
 
         function changeSequence(index) {
             $scope.stepData.currentBaseSequence = $scope.stepData.baseSequences[index];
-            if ($scope.stepData.currentDiagonals) {
-                redrawDiagonalsTable();
-                $scope.clearHighlight();
-            }
+            redrawDiagonalsTable();
         }
 
         function saveLastStep(lastStep) {
@@ -81,8 +47,42 @@
             $scope.highlightDiagonal(diagonal);
         }
 
+        function restoreState() {
+            $scope.stepData.currentStep = SecondDataService.lastStep || 0;
+            $scope.stepData.currentDiagonals = SecondDataService.bestDiagonals || SecondDataService.scoredDiagonals || SecondDataService.diagonals;
+            $scope.stepData.bestSequences = ConfigurationService.thirdStage.baseSequences;
+        }
+
+        function initializeStepsConfig() {
+            $scope.stepData.stepByStepConfig = [
+                {
+                    description: 'Etap 2 - początek',
+                    reverse: clearStageData
+                },
+                {
+                    description: "Znalezienie wszystkich ciągów diagonalnych dla każdej z par sekwencji",  //and show
+                    action: findDiagonals,
+                    reverse: reverseFindDiagonals
+                },
+                {
+                    description: 'Ocena ciągów za pomocą ustalonej macierzy substytucji',
+                    action: score,
+                    reverse: reverseScore
+                },
+                {
+                    description: 'Wybranie 10 najlepszych ciągów diagonalnych dla każdej z par sekwencji',
+                    action: getBestDiagonals,
+                    reverse: reverseGetBestDiagonals
+                },
+                {
+                    description: "Wybranie najlepszych sekwencji do następnego etapu",
+                    action: bestBaseSequences,
+                    reverse: reverseBestBaseSequences
+                }
+            ];
+        }
+
         function findDiagonals() {
-            //TODO: param for max gap
             return SecondDataService.getDiagonalsForEachBaseSequence(ConfigurationService.secondStage.hotSpots,
                 $scope.stepData.kTup, $scope.stepData.maxDistance).then(function (diagonals) {
                     SecondDataService.diagonals = angular.copy(diagonals);
@@ -111,14 +111,15 @@
         }
 
         function bestBaseSequences() {
-            return SecondDataService.getDiagonalsForBestSequences($scope.stepData.currentDiagonals).then(function (diagonalsForBestSequences) {
-                ConfigurationService.thirdStage.bestDiagonals = diagonalsForBestSequences;
-                ConfigurationService.thirdStage.baseSequences = Object.keys(diagonalsForBestSequences);
-                $scope.stepData.bestSequences = Object.keys(diagonalsForBestSequences);
-            })
+            return SecondDataService.getDiagonalsForBestSequences($scope.stepData.currentDiagonals)
+                .then(function (diagonalsForBestSequences) {
+                    ConfigurationService.thirdStage.bestDiagonals = diagonalsForBestSequences;
+                    ConfigurationService.thirdStage.baseSequences = Object.keys(diagonalsForBestSequences);
+                    $scope.stepData.bestSequences = Object.keys(diagonalsForBestSequences);
+                })
         }
 
-        function clearStage() {
+        function clearStageData() {
             SecondDataService.bestDiagonals = undefined;
             SecondDataService.scoredDiagonals = undefined;
             SecondDataService.diagonals = undefined;
@@ -150,11 +151,14 @@
         }
 
         function redrawDiagonalsTable() {
-            $timeout(function () {
-                $scope.clearDiagonalsTable();
-                $scope.drawDiagonalsTable($scope.stepData.currentDiagonals[$scope.stepData.currentBaseSequence]);
-            });
-
+            if ($scope.stepData.currentDiagonals) {
+                $timeout(function () {
+                    $scope.clearDiagonalsTable();
+                    $scope.drawDiagonalsTable($scope.stepData.currentDiagonals[$scope.stepData.currentBaseSequence]);
+                    $scope.stepData.selectedDiagonal = undefined;
+                    $scope.clearHighlight();
+                });
+            }
         }
     }
 })();

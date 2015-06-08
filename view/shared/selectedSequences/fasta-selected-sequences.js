@@ -3,6 +3,9 @@
         module('fastaView').
         directive('fastaSelectedSequences', [selectedSequences]);
 
+    /**
+     * Directive to be used as common for displaying sequences selected for next stage
+     */
     function selectedSequences() {
         return {
             restrict: 'A',
